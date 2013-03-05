@@ -19,31 +19,36 @@ var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
         var _this = this;
         var textFont = {fontSize: 14};
         this.add(Ti.UI.createLabel({
-            top: 10,
-            left: 10,
+            top: AD.UI.padding,
+            left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: textFont,
             text: $.formatString('feedbackText', AD.Defaults.application, AD.Defaults.version, AD.Platform.osName, Ti.Platform.version)
         }));
         this.add(Ti.UI.createLabel({
-            top: 10,
-            left: 10,
+            top: AD.UI.padding,
+            left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: textFont,
             color: 'red',
             textid: 'feedbackWarning'
         }));
+        
+        // Create the suggestions and bug report buttons
+        var buttonPadding = AD.UI.padding * 2;
+        var buttonWidth = AD.UI.screenWidth / 2 - buttonPadding - AD.UI.padding;
         var $buttonView = this.add($.View.create(Ti.UI.createView({
-            top: 20,
-            width: AD.UI.useableScreenWidth,
+            top: AD.UI.padding * 2,
+            left: buttonPadding,
+            right: buttonPadding,
             height: AD.UI.buttonHeight
         })));
         var suggestionsButton = $buttonView.add(Ti.UI.createButton({
             top: 0,
-            left: 20,
-            width: 120,
+            left: 0,
+            width: buttonWidth,
             height: AD.UI.buttonHeight,
             titleid: 'suggestion'
         }));
@@ -55,8 +60,8 @@ var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
         });
         var bugReportButton = $buttonView.add(Ti.UI.createButton({
             top: 0,
-            right: 20,
-            width: 120,
+            right: 0,
+            width: buttonWidth,
             height: AD.UI.buttonHeight,
             titleid: 'bugReport'
         }));
@@ -70,17 +75,17 @@ var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
     },
     
     // Display an email dialog to allow the user to give feedback
-    feedback: function(templateData, macroValues) {
-        // Localize the title and template
-        var title = L(templateData.titleId);
-        var template = L(templateData.templateId);
+    feedback: function(templateData) {
+        // Localize the title
+        var title = AD.Localize(templateData.titleId);
+        var formatValues = [AD.Defaults.application];
         if (templateData.formatValues) {
-            template = $.formatString.apply($, [template, AD.Defaults.application].concat(templateData.formatValues)); 
+            formatValues = formatValues.concat(templateData.formatValues);
         }
         var emailDialog = Ti.UI.createEmailDialog({
             toRecipients: [AD.Defaults.feedbackAddress],
             subject: $.formatString('feedbackSubject', AD.Defaults.application, title.toLowerCase()), 
-            messageBody: $.formatString.apply($, [template, AD.Defaults.application].concat(macroValues))
+            messageBody: $.formatString.apply($, [templateData.templateId].concat(formatValues))
         });
         emailDialog.open();
     }
@@ -109,8 +114,8 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {}, {
             showVerticalScrollIndicator: true
         })));
         $contentView.add(Ti.UI.createLabel({
-            top: 15,
-            left: 10,
+            top: AD.UI.padding * 3,
+            left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.Fonts.header,
@@ -118,8 +123,8 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {}, {
             text: AD.Defaults.application
         }));
         $contentView.add(Ti.UI.createLabel({
-            top: 5,
-            left: 10,
+            top: AD.UI.padding,
+            left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.Fonts.small,
@@ -139,11 +144,11 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {}, {
         });
         $contentView.add(Ti.UI.createLabel({
             top: 20,
-            left: 10,
+            left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
-            font: AD.UI.Fonts.mediumSmall,
-            text: $.formatString('aboutLicense', AD.Defaults.application)
+            font: AD.Platform.isAndroid ? AD.UI.Fonts.small : AD.UI.Fonts.mediumSmall,
+            text: $.formatString('aboutLicense', AD.Defaults.application).replace(/\n\n/g, '\n').trim()
         }));
     }
 });

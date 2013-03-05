@@ -1,11 +1,10 @@
+var AD = require('AppDev');
 var $ = require('jquery');
 
 var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
     actions: [{
         title: 'done',
-        callback: function() {
-            this.dfd.resolve(this.selectedDate);
-        },
+        callback: 'done',
         rightNavButton: true,
         backButton: true
     }, {
@@ -17,6 +16,13 @@ var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
     defaults: {
         minDate: null,
         maxDate: null
+    },
+    
+    // Quick function to display the date picker window in a single function call
+    // Return a deferred that will resolve to the chosen date
+    datePicker: function(options) {
+        var $winDatePicker = new DatePickerWindow(options);
+        return $winDatePicker.getDeferred();
     }
 }, {
     init: function(options) {
@@ -34,23 +40,30 @@ var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
     
     // Create the datepicker view
     create: function() {
-        var datePicker = Ti.UI.createPicker({
+        var datePicker = this.add(Ti.UI.createPicker({
             type: Ti.UI.PICKER_TYPE_DATE,
             minDate: this.options.minDate,
             maxDate: this.options.maxDate,
             value: this.selectedDate,
             selectionIndicator: true
-        });
+        }));
         datePicker.addEventListener('change', this.proxy(function(event) {
             this.selectedDate = event.value;
         }));
-        this.add(datePicker);
+        if (AD.Platform.isAndroid) {
+            // Create a done button on Android
+            var doneButton = this.add(Ti.UI.createButton({
+                bottom: AD.UI.padding * 2,
+                center: { x: AD.UI.screenWidth / 2 },
+                width: 120,
+                height: AD.UI.buttonHeight,
+                titleid: 'done'
+            }));
+            doneButton.addEventListener('click', this.proxy('done'));
+        }
+    },
+    
+    done: function() {
+        this.dfd.resolve(this.selectedDate);
     }
 });
-
-// Quick function to display the date picker window in a single function call
-// Return a deferred that will resolve to the chosen date
-DatePickerWindow.datePicker = function(options) {
-    var $winDatePicker = new DatePickerWindow(options);
-    return $winDatePicker.getDeferred();
-};

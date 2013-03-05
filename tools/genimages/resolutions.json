@@ -1,0 +1,77 @@
+[{
+    "width": 57,
+    "height": 57,
+    "path": "iphone/appicon.png"
+}, {
+    "width": 114,
+    "height": 114,
+    "path": "iphone/appicon@2x.png"
+}, {
+    "width": 72,
+    "height": 72,
+    "path": "android/images/high/ApplicationIcon.png"
+}, {
+    "width": 57,
+    "height": 57,
+    "path": "android/images/medium/ApplicationIcon.png"
+}, {
+    "width": 48,
+    "height": 48,
+    "path": "android/images/low/ApplicationIcon.png"
+}, {
+    "width": 768,
+    "height": 1024,
+    "path": "iphone/Default-Portrait.png"
+}, {
+    "width": 768,
+    "height": 1024,
+    "path": "iphone/Default-Landscape.png"
+}, {
+    "width": 320,
+    "height": 480,
+    "path": "iphone/Default.png"
+}, {
+    "width": 640,
+    "height": 960,
+    "path": "iphone/Default@2x.png"
+}, {
+    "width": 480,
+    "height": 800,
+    "path": "android/images/res-long-port-hdpi/default.png"
+}, {
+    "width": 800,
+    "height": 400,
+    "path": "android/images/res-long-land-hdpi/default.png"
+}, {
+    "width": 480,
+    "height": 800,
+    "path": "android/images/res-notlong-port-hdpi/default.png"
+}, {
+    "width": 800,
+    "height": 480,
+    "path": "android/images/res-notlong-land-hdpi/default.png"
+}, {
+    "width": 320,
+    "height": 480,
+    "path": "android/images/res-notlong-port-mdpi/default.png"
+}, {
+    "width": 480,
+    "height": 320,
+    "path": "android/images/res-notlong-land-mdpi/default.png"
+}, {
+    "width": 240,
+    "height": 400,
+    "path": "android/images/res-long-port-ldpi/default.png"
+}, {
+    "width": 400,
+    "height": 240,
+    "path": "android/images/res-long-land-ldpi/default.png"
+}, {
+    "width": 240,
+    "height": 320,
+    "path": "android/images/res-notlong-port-ldpi/default.png"
+}, {
+    "width": 320,
+    "height": 240,
+    "path": "android/images/res-notlong-land-ldpi/default.png"
+}]

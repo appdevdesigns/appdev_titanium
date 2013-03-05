@@ -19,7 +19,13 @@
         labelKey:'viewer_userID',
         _isMultilingual:false,
         //connectionType:'server', // optional field
-        cache:false
+        cache:false,
+        
+        attributes: {
+            viewer_id: 'integer',
+            viewer_isActive: 'bool',
+            viewer_lastLogin: 'date'
+        }
     };
     
     if (extendedDefinition) {

@@ -1,1 +1,1 @@
-module.exports = require('jquery/jquery');
+module.exports = require('appdev/jquery/jquery');

@@ -8,7 +8,7 @@ module.exports = $.Window('AD.UI.ErrorWindow', {}, {
             createParams: {
                 layout: 'vertical'
             },
-            title: L('startupErrorTitle')
+            title: 'startupErrorTitle'
         });
         this.setError(this.options.error);
     },
@@ -16,16 +16,16 @@ module.exports = $.Window('AD.UI.ErrorWindow', {}, {
     // Create child views
     create: function() {
         this.add('description', Ti.UI.createLabel({
-            top: 10,
-            left: 10,
+            top: AD.UI.padding,
+            left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.Fonts.header,
             textAlign: 'center'
         }));
         this.add('info', Ti.UI.createLabel({
-            top: 20,
-            left: 10,
+            top: AD.UI.padding * 2,
+            left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.mediumSmall
@@ -35,10 +35,8 @@ module.exports = $.Window('AD.UI.ErrorWindow', {}, {
         if (retryCallback) {
             // If a retry callback is specified, create a retry button that will call retryCallback when pressed 
             var retryButton = this.add('retry', Ti.UI.createButton({
-                top: 40,
-                center: {
-                    x: AD.UI.screenWidth / 2
-                },
+                top: AD.UI.padding * 4,
+                center: { x: AD.UI.screenWidth / 2 }, // horizontally centered
                 width: 120,
                 height: AD.UI.buttonHeight,
                 titleid: 'retry'

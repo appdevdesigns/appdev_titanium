@@ -11,8 +11,10 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         rightNavButton: true
     }, {
         callback: function() {
-            // "Select" the currently selected option
-            this.onSelect(this.selected);
+            if (this.dfd.state() === 'pending') {
+                // "Select" the currently selected option only if the window was not closing in response to the selection of an option
+                this.onSelect(this.selected);
+            }
         },
         menuItem: false,
         onClose: true
@@ -34,11 +36,9 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     }
 }, {
     init: function(options) {
-        this.selected = this.options.initial;
-        
         // Initialize the base $.Window object
         this._super({
-            title: $.formatString('chooseOptionTitle', L(this.options.groupName).toLowerCase()),
+            title: $.formatString('chooseOptionTitle', AD.Localize(this.options.groupName).toLowerCase()),
             tab: this.options.tab,
             autoOpen: true
         });
@@ -46,14 +46,16 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     
     // Create the options table view
     create: function() {
-        var optionsTable = Ti.UI.createTableView();
-        var tableData = [];
-        this.options.options.forEach(function(option) {
-            tableData.push(this.createRow(option));
+        // Create rows for each of the options
+        var tableData = this.options.options.map(function(option) {
+            return this.createRow(option);
         }, this);
         
+        // Create the options table
         var _this = this;
-        optionsTable.setData(tableData);
+        var optionsTable = Ti.UI.createTableView({
+            data: tableData
+        });
         optionsTable.addEventListener('click', function(event) {
             // An option row was clicked
             _this.onSelect(event.index);
@@ -63,8 +65,8 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         if (this.options.editable) {
             optionsTable.editable = true;
             optionsTable.addEventListener('delete', this.proxy(function(event) {
-                var deletedId = event.rowData.id;
-                if (this.selected === deletedId) {
+                var deletedIndex = event.rowData.index;
+                if (this.selected === deletedIndex) {
                     // The selected option was deleted
                     this.selected = -1;
                 }
@@ -72,18 +74,22 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                 var section = optionsTable.data[0];
                 if (section) {
                     // Decrement the row index of rows after the deleted row to maintain the integrity of their indices
-                    section.rows.slice(deletedId).forEach(function(row) {
-                        --row.id;
+                    section.rows.slice(deletedIndex).forEach(function(row) {
+                        --row.index;
                     });
                 }
                 --this.rowCount;
                 
                 // Remove the option to the options array and notify the caller of the removal
-                this.options.options.splice(deletedId, 1);
+                this.options.options.splice(deletedIndex, 1);
                 this.onOptionsUpdate();
             }));
         }
     },
+    
+    // The index of the selected row, or -1 if no row is selected
+    // Will be set initially when creating a row through createRow whose id matches the specified initial row
+    selected: -1,
     
     // Called when a row is selected
     onSelect: function(index) {
@@ -93,10 +99,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         }
         else {
             var row = this.getChild('optionsTable').data[0].rows[index];
-            var itemData = $.extend({
-                index: index
-            }, row.item);
-            this.dfd.resolve(itemData);
+            this.dfd.resolve(row.item);
         }
     },
     
@@ -118,7 +121,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             } catch(e) {}
             
             // Select the new option and add it to the table
-            this.selected = newRow.id;
+            this.selected = newRow.index;
             newRow.hasCheck = true;
             optionsTable.appendRow(newRow);
             
@@ -139,23 +142,27 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     // Return a row data structure representing the option
     createRow: function(option) {
         var row = {};
-        if (typeof option === "string") {
+        if (typeof option === 'string') {
             row = {
                 title: option,
-                item: {label: option},
+                item: {label: option, value: option},
                 id: this.rowCount
             };
-            ++this.rowCount;
         }
-        else if (typeof option === "object") {
+        else if (typeof option === 'object') {
             row = {
                 title: option.label+": "+option.value,
                 item: option,
                 id: option.id
             };
         }
-        row.hasCheck = (row.id === this.options.initial);
-        return row;
+        row.index = row.item.index = this.rowCount++;
+        if (row.id === this.options.initial) {
+            // This is the initially selected row
+            this.selected = row.index;
+            row.hasCheck = true;
+        }
+        return Ti.UI.createTableViewRow(row);
     }
 });
 
@@ -164,7 +171,7 @@ var AddOptionWindow = $.Window('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
-            title: $.formatString('addOptionTitle', L(this.options.groupName)),
+            title: $.formatString('addOptionTitle', AD.Localize(this.options.groupName)),
             tab: this.options.tab,
             autoOpen: true,
             focusedChild: 'optionName',
@@ -177,19 +184,19 @@ var AddOptionWindow = $.Window('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {
     // Create the option name text field
     create: function() {
         this.add('optionLabel', Ti.UI.createLabel({
-            top: 10,
-            left: 10,
+            top: AD.UI.padding,
+            left: AD.UI.padding,
             width: 240,
-            text: $.formatString('newOptionTitle', L(this.options.groupName).toLowerCase()),
+            text: $.formatString('newOptionTitle', AD.Localize(this.options.groupName).toLowerCase()),
             font: AD.UI.Fonts.header
         }));
         var optionName = this.add('optionName', Ti.UI.createTextField({
-            top: 10,
-            left: 10,
+            top: AD.UI.padding,
+            left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: AD.UI.textFieldHeight,
-            returnKeyType: Titanium.UI.RETURNKEY_DONE,
-            borderStyle: Titanium.UI.INPUT_BORDERSTYLE_ROUNDED
+            returnKeyType: Ti.UI.RETURNKEY_DONE,
+            borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
         }));
         var _this = this;
         optionName.addEventListener('return', function() {

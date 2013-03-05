@@ -1,4 +1,5 @@
 var $ = require('jquery');
+var AD = require('AppDev');
 
 module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
     actions: [{
@@ -35,7 +36,8 @@ module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
         }).map(function(contact) {
             return {
                 title: contact.fullName,
-                sortKey: contact.lastName || '',
+                // Android does not allow access to the lastName property, so assume that it is the word of the full name 
+                sortKey: contact.lastName || contact.fullName.split(' ').pop() || '',
                 hasCheck: typeof chosenContacts[contact.recordId] !== 'undefined',
                 recordId: contact.recordId || contact.id
             };
@@ -69,7 +71,7 @@ module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
         var _this = this;
         contactTable.addEventListener('click', function(event) {
             // Toggle the check mark
-            _this.rows[event.rowData.index].hasCheck = event.rowData.hasCheck = !event.rowData.hasCheck;
+            _this.rows[event.row.index].hasCheck = event.row.hasCheck = !event.row.hasCheck;
         });
     }
 });

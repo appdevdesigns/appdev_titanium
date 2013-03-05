@@ -1,150 +1,114 @@
 var AD = require('AppDev');
 var $ = require('jquery');
 
-function LoginWindow() {
-    var _this = this;
-    var loginWindow = null;
-    var onLogin = null;
-    var open = false;
-    
-    // Create the login window and all its components
-    var create = function() {
-        var onSubmit = function() {
-            // Gather the login data
-            var loginData = {
-                userID: userID.value,
-                pWord: Ti.Utils.md5HexDigest(pWord.value) // MD5 hash the user's password
-            };
-            
-            // Send login request to the server
-            Ti.API.log('Attempting to login as {'+loginData.userID+', '+loginData.pWord+'}');
-            AD.ServiceJSON.post({
-                params: loginData,
-                url: '/service/site/login/authenticate',
-                success: function(data) {
-                    Ti.API.log('Login succeeded!');
-                    
-                    // Close the loginWindow
-                    _this.close();
-                    
-                    // Call the onLogin callback if it was provided to the "open" call
-                    if ($.isFunction(onLogin)) {
-                        onLogin();
-                    }
-                },
-                failure: function(data) {
-                    Ti.API.log('error failed!');
-                    Ti.API.log(error);
-                }
-            });
-        };
-        
-        loginWindow = Ti.UI.createWindow({
-            titleid: 'login',
-            backgroundColor: '#fff'
+var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
+    init: function(options) {
+        // Initialize the base $.Window object
+        this._super({
+            title: 'login',
+            modal: true,
+            focusedChild: 'user'
         });
+    },
+
+    // Create the child views
+    create: function() {
+        var _this = this;
         
         // Create the user ID label and text field
-        var userIDLabel = Ti.UI.createLabel({
-            textid: 'userID',
-            top: 20,
-            left: 20,
-            width: 80,
-            height: 40
-        });
-        loginWindow.add(userIDLabel);
-        var userID = Ti.UI.createTextField({
-            top: 20,
+        this.add(Ti.UI.createLabel({
+            left: AD.UI.padding,
+            top: AD.UI.padding,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
+            textid: 'userId'
+        }));
+        this.add('user', Ti.UI.createTextField({
             left: 110,
+            top: AD.UI.padding,
             width: 180,
             height: AD.UI.textFieldHeight,
-            hintText: L('userID'),
+            hintText: AD.Localize('userId'),
             autocorrect: false,
-            autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE,
-            borderStyle: Titanium.UI.INPUT_BORDERSTYLE_ROUNDED,
-            clear: true // Custom property
-        });
-        loginWindow.add(userID);
+            autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
+            borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
+        }));
         
         // Create the password label and text field
-        var pWordLabel = Ti.UI.createLabel({
-            textid: 'pWord',
+        this.add(Ti.UI.createLabel({
+            left: AD.UI.padding,
             top: 70,
-            left: 20,
-            width: 80,
-            height: 40
-        });
-        loginWindow.add(pWordLabel);
-        var pWord = Ti.UI.createTextField({
-            top: 70,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
+            textid: 'password'
+        }));
+        var passwordField = this.add('password', Ti.UI.createTextField({
             left: 110,
+            top: 70,
             width: 180,
             height: AD.UI.textFieldHeight,
             passwordMask: true,
-            hintText: L('pWord'),
-            borderStyle: Titanium.UI.INPUT_BORDERSTYLE_ROUNDED,
-            clear: true // Custom property
-        });
-        pWord.addEventListener('return', onSubmit);
-        loginWindow.add(pWord);
+            hintText: AD.Localize('password'),
+            borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
+        }));
+        passwordField.addEventListener('return', this.proxy('onSubmit'));
         
-        // Create the submit button
-        var submit = Ti.UI.createButton({
-            titleid: 'submit',
+        // Create the submit and cancel buttons
+        var buttonWidth = AD.UI.useableScreenWidth * 0.4;
+        var submit = this.add(Ti.UI.createButton({
+            left: AD.UI.padding,
             top: 120,
-            left: 20,
-            width: 100,
-            height: 40
-        });
-        submit.addEventListener('click', onSubmit);
-        loginWindow.add(submit);
-        
-        // Create the cancel button
-        var cancel = Ti.UI.createButton({
-            titleid: 'cancel',
+            width: buttonWidth,
+            height: AD.UI.buttonHeight,
+            titleid: 'submit'
+        }));
+        submit.addEventListener('click', this.proxy('onSubmit'));
+        var cancel = this.add(Ti.UI.createButton({
+            right: AD.UI.padding,
             top: 120,
-            left: 140,
-            width: 100,
-            height: 40
-        });
-        cancel.addEventListener('click', function() {
-            // Close the loginWindow
-            _this.close();
-        });
-        loginWindow.add(cancel);
-        
-        // When the window opens, focus the user ID text field
-        loginWindow.addEventListener('open', function() {
-            userID.focus();
-        });
-    };
+            width: buttonWidth,
+            height: AD.UI.buttonHeight,
+            titleid: 'cancel'
+        }));
+        cancel.addEventListener('click', this.proxy('close'));
+    },
     
-    // Open the login window and call onLoginCallback after a successful login
-    this.open = function(onLoginCallback) {
-        onLogin = onLoginCallback;
+    // Called when the user submits their login credentials
+    onSubmit: function() {
+        // Gather the login data
+        var loginData = {
+            userID: this.getChild('user').value,
+            pWord: Ti.Utils.md5HexDigest(this.getChild('password').value) // MD5 hash the user's password
+        };
         
-        // Clear the values of all the elements created with the custom "clear" property
-        loginWindow.children.forEach(function(child) {
-            if (child.clear) {
-                child.value = "";
+        // Send login request to the server
+        Ti.API.log('Attempting to login as {'+loginData.userID+', '+loginData.pWord+'}');
+        AD.ServiceJSON.post({
+            params: loginData,
+            url: '/service/site/login/authenticate',
+            success: this.proxy(function(data) {
+                Ti.API.log('Login succeeded!');
+                
+                this.close();
+                
+                // Call the onLogin callback if it was provided to the "open" call
+                if ($.isFunction(this.onLogin)) {
+                    this.onLogin();
+                }
+            }),
+            failure: function(data) {
+                Ti.API.log('Login failed!');
             }
         });
+    },
+    
+    // Override the default window open function
+    open: function(onLogin) {
+        this.onLogin = onLogin;
         
-        loginWindow.open({modal: true});
-        open = true;
-    };
-    
-    // Close the login window
-    this.close = function() {
-        loginWindow.close();
-        open = false;
-    };
-    
-    // Return a boolean indicating whether the login window is open
-    this.isOpen = function() {
-        return open;
-    };
-    
-    create();
-}
-module.exports = LoginWindow;
+        // Clear out the input fields
+        this.getChild('user').value = '';
+        this.getChild('password').value = '';
+        return this._super.apply(this, arguments);
+    }
+});

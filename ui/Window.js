@@ -21,7 +21,7 @@ $.View('jQuery.Window', {
         
         // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
         $.extend(true, this.options, options);
-        this.options.createParams.title = L(this.options.title); // can be either a string or a key in the locale file
+        this.options.createParams.title = AD.Localize(this.options.title); // can be either a string or a key in the locale file
         
         this.tab = this.tab || this.options.tab;
         
@@ -29,7 +29,7 @@ $.View('jQuery.Window', {
         var window = this.window = Ti.UI.createWindow(this.options.createParams);
         
         // The window is the view's view
-        this._super({view: this.window});
+        this._super({ view: this.window });
         
         var leftNavButtons = [];
         var rightNavButtons = [];
@@ -43,7 +43,7 @@ $.View('jQuery.Window', {
                 validPlatform = action.platform.split('/').reduce(function(validPlatform, platform) {
                     return validPlatform || AD.Platform.is(platform);
                 }, false);
-            } 
+            }
             var enabled = true;
             if (typeof action.enabled !== 'undefined') {
                 // The enabled property can be a function or a boolean value
@@ -60,17 +60,22 @@ $.View('jQuery.Window', {
             }
             
             // Ensure that inside the callback, 'this' will still refer to the window instance
-            var callback = this.proxy(action.callback); 
+            var callback = this.proxy(action.callback);
             
-            if (AD.Platform.isiOS && action.iOS !== false) {
+            if (AD.Platform.isiOS) {
+                var button = {
+                    title: action.title,
+                    systemButton: action.systemButton,
+                    callback: callback
+                };
                 if (action.leftNavButton === true || ($.isFunction(action.leftNavButton) && action.leftNavButton.call(this))) {
-                    leftNavButtons.push({title: action.title, systemButton: action.systemButton, callback: callback});
+                    leftNavButtons.push(button);
                 }
                 if (action.rightNavButton === true || ($.isFunction(action.rightNavButton) && action.rightNavButton.call(this))) {
-                    rightNavButtons.push({title: action.title, systemButton: action.systemButton, callback: callback});
+                    rightNavButtons.push(button);
                 }
             }
-            else if (AD.Platform.isAndroid && action.Android !== false) {
+            else if (AD.Platform.isAndroid) {
                 if (action.backButton) {
                     window.addEventListener('android:back', callback);
                 }
@@ -95,12 +100,12 @@ $.View('jQuery.Window', {
         
         if (AD.Platform.isAndroid) {
             window.activity.onCreateOptionsMenu = function(event) {
-                // When a menu needs to be created in response to a press of the 'menu' button, create a menu item for each action 
+                // When a menu needs to be created in response to a press of the 'menu' button, create a menu item for each action
                 var menu = event.menu;
                 actions.forEach(function(action) {
                     // The menuItem property, if not specified, defaults to true
                     if (action.menuItem !== false) {
-                        var menuItem = menu.add({title: L(action.title)});
+                        var menuItem = menu.add({ title: AD.Localize(action.title) });
                         menuItem.addEventListener('click', _this.proxy(action.callback));
                     }
                 });
@@ -118,21 +123,19 @@ $.View('jQuery.Window', {
         // Notify the view that the window is being destroyed
         window.addEventListener('close', this.proxy('destroy'));
         
-        window.addEventListener('open', this.proxy(function() {
-            if (this.options.focusedChild) {
+        if (this.options.focusedChild) {
+            window.addEventListener('open', this.proxy(function() {
                 // Focus the child specified by the focusedChild option
-                this.children[this.options.focusedChild].focus();
-            }
-        }));
+                this.getChild(this.options.focusedChild).focus();
+            }));
+        }
         
         if (this.options.autoOpen) {
             this.open();
         }
         
         // Close the window after the task is completed or canceled
-        this.dfd.always(this.proxy(function() {
-            this.close();
-        }));
+        this.dfd.always(this.proxy('close'));
     },
     
     // Add buttons to the nav bar on the specied side
@@ -142,35 +145,35 @@ $.View('jQuery.Window', {
             return;
         }
         else if (navButtons.length === 1) {
-            // Create a button as the nav bar view 
+            // Create a button as the nav bar view
             
             var navButton = navButtons[0];
             // Guess what system button this button represents based on its title
             var systemButton = this.constructor.systemButtons[navButton.title];
             var button = navBarView = Ti.UI.createButton({
-                title: L(navButton.title),
-                systemButton: navButton.systemButton || systemButton // will be undefined in some cases 
+                title: AD.Localize(navButton.title),
+                systemButton: navButton.systemButton || systemButton // will be undefined in some cases
             });
             button.addEventListener('click', navButton.callback);
         }
         else {
             // Create multiple buttons and add them to a button bar as the nav bar view
-            var labels = navButtons.map(function(button) { return L(button.title) })
+            var labels = navButtons.map(function(button) { return AD.Localize(button.title); });
             var buttonBar = navBarView = Ti.UI.createButtonBar({
                 labels: labels,
-                style: Titanium.UI.iPhone.SystemButtonStyle.BAR
+                style: Ti.UI.iPhone.SystemButtonStyle.BAR
             });
             buttonBar.addEventListener('click', function(event) {
                 var button = navButtons[event.index];
                 if (button) {
-                    // button will be undefined if event.index is null
-                    // because the user clicked the button bar, but not a button
+                    // If the user clicked the button bar, but not a button,
+                    // then event.index is null and button will be undefined
                     button.callback();
                 }
             });
         }
         
-        this.window[$.formatString('set{0}NavButton', side)](navBarView);
+        this.window['set'+side+'NavButton'](navBarView);
     },
     
     isOpen: false,
@@ -179,7 +182,7 @@ $.View('jQuery.Window', {
     open: function() {
         this.isOpen = true;
         if (this.options.modal) {
-            this.window.open({modal: true});
+            this.window.open({ modal: true });
         }
         else if (this.tab) {
             this.tab.open(this.window);
@@ -190,18 +193,15 @@ $.View('jQuery.Window', {
     },
     close: function() {
         this.isOpen = false;
-        if (this.options.modal) {
-            this.window.close();
-        }
-        else if (this.tab) {
-            this.tab.close(this.window);
+        if (this.tab && !AD.Platform.isAndroid) {
+            this.tab.close(this.window, { animated: true });
         }
         else {
             this.window.close();
         }
     },
     
-    isWindow: true, // is a member of the window class
+    isWindow: true, // is a member of the $.Window class
     
     // Return the deferred object representing the window's operation
     getDeferred: function() {

@@ -1,7 +1,7 @@
 var AD = require('AppDev');
 var $ = require('jquery');
 
-var defaultSize = 30;
+var defaultSize = AD.UI.buttonHeight;
 
 // This class extends $.View and represents a custom checkbox control.
 module.exports = $.View('AppDev.UI.Checkbox', {

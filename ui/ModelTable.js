@@ -57,7 +57,7 @@ $.View('jQuery.ModelTable', {
             model.destroy();
         }));
         
-        // Keep track of the table's rows manually becase there appear to be timing issues when accessing
+        // Keep track of the table's rows manually because there appear to be timing issues when accessing
         // this.table.data[0].rows when deleting a row and adding it back again in the correct position
         this.rows = [];
         
@@ -138,7 +138,7 @@ $.View('jQuery.ModelTable', {
             tableRow.modelId = modelId; // custom property
             tableRow.hasChild = this.options.selectable;
             tableRow.className = this.rowClassName || this.constructor.fullName; // unique row class name that defaults to the name of the derived class
-        
+            
             // Now save it
             this.modelRows[modelId] = tableRow;
         }
@@ -202,7 +202,7 @@ $.View('jQuery.ModelTable', {
             this.table.deleteRow(index);
         }
     },
-    // Update the index propety of each row to match its position in the list
+    // Update the index property of each row to match its position in the list
     updateIndices: function() {
         this.rows.forEach(function(child, index) {
             // The index of each row should be set to its index in the array

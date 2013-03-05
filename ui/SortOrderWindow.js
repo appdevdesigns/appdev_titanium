@@ -40,7 +40,7 @@ module.exports = $.Window('AppDev.UI.SortOrderWindow', {
         this.order.forEach(function(fieldName) {
             var fieldTitle = this.fields[fieldName].label;
             tableData.push({
-                title: L(fieldTitle),
+                title: AD.Localize(fieldTitle),
                 field: fieldName
             });
         }, this);

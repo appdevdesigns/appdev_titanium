@@ -46,22 +46,12 @@ $.Class('jQuery.View', {
         
         // If specified, wait until createDfd or initializeDfd resolves before
         // calling this.create or this.initialize, otherwise execute immediately
-        if (this.options.createDfd) {
-            this.options.createDfd.done(function() {
-                _this.create();
-            });
-        }
-        else {
-            this.create();
-        }
-        if (this.options.initializeDfd) {
-            this.options.initializeDfd.done(function() {
-                _this.initialize();
-            });
-        }
-        else {
-            this.initialize();
-        }
+        $.when(this.options.createDfd).done(function() {
+            _this.create();
+        });
+        $.when(this.options.initializeDfd).done(function() {
+            _this.initialize();
+        });
     },
     
     // Cleanup, similar to a destructor
@@ -150,7 +140,7 @@ $.Class('jQuery.View', {
         this.enabled = enabled;
         
         // Set the enabled property of buttons, and manually adjust the transparency for other views
-        if (this.view.toString() === '[object TiUIButton]') {
+        if (this.view.toString() === '[object TiUIButton]' || this.view.toString() === '[object Button]') {
             this.view.enabled = enabled;
         }
         else {
@@ -163,7 +153,7 @@ $.Class('jQuery.View', {
         this.view.addEventListener(name, function() {
             if (_this.enabled) {
                 // Only call the callback if the view is enabled
-                callback.apply(_this, arguments);
+                return callback.apply(_this, arguments);
             }
         });
     },
