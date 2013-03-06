@@ -1,6 +1,6 @@
 var syncEnabled = Ti.App.Properties.getBool('sync_enabled_preference');
 var syncServerURL = Ti.App.Properties.getString('server_url_preference');
-console.log(syncEnabled ? 'Syncing to ['+syncServerURL+']' : 'Sync enabled');
+console.log(syncEnabled ? 'Syncing to ['+syncServerURL+']' : 'Sync disabled');
 var defaults = {
     application: Ti.App.name,
     dbName: Ti.App.name,
