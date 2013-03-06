@@ -211,7 +211,12 @@ AD.Deferreds.login.done(function() {
         defaultData: []
     });
     var requests = requestStore.getData();
-    requests.forEach(ServiceJSON.addRetryingRequest, ServiceJSON);
+    requests.forEach(function(request) {
+        // Set the retrying property to false because this the request is new and has not been retried yet.
+        // Otherwise, the request will be rejected as a duplicate by ServiceJSON.addRetryingRequest.
+        request.retrying = false;
+        ServiceJSON.addRetryingRequest(request);
+    });
     requestStore.setData(ServiceJSON.retryingRequests);
     
     // Start retrying failed requests
