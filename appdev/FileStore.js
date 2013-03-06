@@ -14,7 +14,7 @@ module.exports = $.Class('AD.FileStore', {}, {
         this.data = newData;
     },
     
-    flush: function(data) {
+    flush: function() {
         this.file.write(AD.sjcl.encrypt(AD.EncryptionKey.get(), JSON.stringify(this.data)));
     }
 });
