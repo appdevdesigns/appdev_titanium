@@ -36,9 +36,9 @@ module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
         }).map(function(contact) {
             return {
                 title: contact.fullName,
-                // Android does not allow access to the lastName property, so assume that it is the word of the full name 
-                sortKey: contact.lastName || contact.fullName.split(' ').pop() || '',
-                hasCheck: typeof chosenContacts[contact.recordId] !== 'undefined',
+                // Android does not allow access to the lastName property, so assume that it is the last word of the full name 
+                sortKey: (contact.lastName || contact.fullName.split(' ').pop() || '').toUpperCase(),
+                hasCheck: typeof chosenContacts[contact.recordId || contact.id] !== 'undefined',
                 recordId: contact.recordId || contact.id
             };
         }).sort(function(contact1, contact2) {
@@ -61,7 +61,7 @@ module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
         // Group the contacts by last name
         var sections = AD.UI.rowsToSections(this.rows, function(row) {
             // The section heading is the uppercased first letter of the contact's last name
-            return row.sortKey ? row.sortKey[0].toUpperCase() : '';
+            return row.sortKey[0] || '';
         });
         
         // Create the contacts table
