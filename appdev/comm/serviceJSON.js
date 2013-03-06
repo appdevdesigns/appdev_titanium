@@ -2,7 +2,7 @@
 //
 // serviceJSON.js
 //
-// our Service JSON objects provide a mechanism for determinining if a
+// our Service JSON objects provide a mechanism for determining if a
 // viewer's login authentication has expired and then requiring them to
 // re-authenticate before continuing on with the request.
 //
@@ -16,11 +16,7 @@ var ServiceJSON = {
     waitingRequests: [],
     addWaitingRequest: function(request) {
         // Do not add the request to the pending requests list if it is set to retry automatically on failure
-        if (request.retry || request.retrying) {
-            request.failure(null);
-            request.complete();
-        }
-        else {
+        if (!request.retry) {
             ServiceJSON.waitingRequests.push(request);
         }
     },
@@ -30,6 +26,11 @@ var ServiceJSON = {
     retryingRequests: [],
     retryingRequestsStore: null, // initialized after login
     addRetryingRequest: function(requestOptions) {
+        if (requestOptions.retrying) {
+            // This request is already retrying, so do not add it again
+            return;
+        }
+        
         var failed = false;
         var request = $.extend({}, requestOptions);
         request.retrying = true;
@@ -44,9 +45,11 @@ var ServiceJSON = {
             // Retry the next request (or this one if it failed)
             console.log('Completed delayed request to ['+request.url+']!');
             if (failed) {
+                // Wait before retrying this request
                 setTimeout(ServiceJSON.retryRequests, ServiceJSON.retryDelay);
             }
             else {
+                // Retry the next request immediately
                 ServiceJSON.retryRequests();
             }
         };
@@ -107,13 +110,6 @@ var ServiceJSON = {
             options.url = AD.Defaults.serverBaseURL+options.url;
         }
         
-        // Automatically fail if the login window is open and the request is not a login request
-        if (AD.winLogin && AD.winLogin.isOpen && options.url !== AD.Defaults.serverBaseURL+'/service/site/login/authenticate') {
-            // Delay this request until the authentication completes
-            ServiceJSON.addWaitingRequest(options);
-            return;
-        }
-        
         var onload = function(response) {
             // Called when the request returns successfully
             
@@ -133,6 +129,17 @@ var ServiceJSON = {
             }
             // FAILED
             else {
+                // Execute the optional failure callback
+                if ($.isFunction(options.failure)) {
+                    options.failure(data);
+                }
+                
+                if (options.retry) {
+                    // Retry the request until the it succeeds
+                    console.log('Request to ['+options.url+'] failed!  Retrying later.');
+                    ServiceJSON.addRetryingRequest(options);
+                }
+                
                 // Authentication failure (i.e. session timeout)
                 if (data && data.errorID == 55) {
                     ServiceJSON.addWaitingRequest(options);
@@ -146,22 +153,6 @@ var ServiceJSON = {
                         });
                         ServiceJSON.waitingRequests = [];
                     });
-                    
-                    // Exit immediately WITHOUT calling options.complete
-                    return true;
-                }
-                // Some other error
-                else {
-                    // Execute the optional failure callback
-                    if ($.isFunction(options.failure)) {
-                        options.failure(data);
-                    }
-                    
-                    if (options.retry && !options.retrying) {
-                        // Retry the request until the it succeeds
-                        console.log('Request to ['+options.url+'] failed!  Retrying later.');
-                        ServiceJSON.addRetryingRequest(options);
-                    }
                 }
             } // failed
             
@@ -173,6 +164,19 @@ var ServiceJSON = {
             
             return success;
         };
+        
+        // Automatically fail if the login window is open and the request is not a login request
+        if (AD.winLogin && AD.winLogin.isOpen && options.url !== AD.Defaults.serverBaseURL+'/service/site/login/authenticate') {
+            if (options.retry) {
+                // Treat this request as a failure because it will retry it later
+                onload(null);
+            }
+            else {
+                // Delay this request until the authentication completes
+                ServiceJSON.addWaitingRequest(options);
+            }
+            return;
+        }
         
         var xhr = Ti.Network.createHTTPClient();
         xhr.onload = function() {
