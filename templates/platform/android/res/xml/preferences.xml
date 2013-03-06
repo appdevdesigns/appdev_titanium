@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Preferences">
+	<PreferenceScreen
+        android:title="Sync"
+        android:summary="Sync data with server">
+		<CheckBoxPreference
+		    android:title="Enable"
+            android:defaultValue="false"
+            android:summary="Enable sync"
+            android:key="sync_enabled_preference" />
+		<EditTextPreference
+		    android:title="Server URL"
+            android:defaultValue=""
+            android:summary="URL of the server to sync with"
+            android:key="server_url_preference" />
+	</PreferenceScreen>
+</PreferenceScreen>

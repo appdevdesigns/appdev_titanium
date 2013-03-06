@@ -91,7 +91,16 @@ var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
     }
 });
 
-module.exports = $.Window('AppDev.UI.AppInfoWindow', {}, {
+module.exports = $.Window('AppDev.UI.AppInfoWindow', {
+    actions: [{
+        title: 'preferences',
+        callback: function() {
+            // Open the Android preferences window
+            Ti.UI.Android.openPreferences();
+        },
+        platform: 'Android'
+    }]
+}, {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({

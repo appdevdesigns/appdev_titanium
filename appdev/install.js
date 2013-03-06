@@ -104,7 +104,7 @@ var installDatabases = function(dbVersion) {
            )");
     query("CREATE TABLE IF NOT EXISTS nextsteps_year_trans (\
                trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-               year_id INTEGER NOT NULL DEFAULT 0,\
+               year_id INTEGER NOT NULL DEFAULT 1,\
                language_code TEXT NOT NULL DEFAULT '',\
                year_label text NOT NULL\
            )");
