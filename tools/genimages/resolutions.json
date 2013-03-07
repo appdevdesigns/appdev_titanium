@@ -19,6 +19,10 @@
     "height": 48,
     "path": "android/images/low/ApplicationIcon.png"
 }, {
+    "width": 1024,
+    "height": 1024,
+    "path": "iphone/LargeAppIcon.png"
+}, {
     "width": 768,
     "height": 1024,
     "path": "iphone/Default-Portrait.png"
@@ -34,6 +38,10 @@
     "width": 640,
     "height": 960,
     "path": "iphone/Default@2x.png"
+}, {
+    "width": 640,
+    "height": 1136,
+    "path": "iphone/Default-568h@2x.png"
 }, {
     "width": 480,
     "height": 800,
