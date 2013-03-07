@@ -37,7 +37,6 @@ var originalDimensions = {
 console.log('originalDimensions: %dx%d', originalDimensions.width, originalDimensions.height);
 
 var util = require('util');
-//var child_process = require('child_process');
 var im = require('imagemagick');
 var wrench = require('wrench');
 // Read in the resolutions from an external file, then create a PNG file for each resolution
@@ -73,7 +72,6 @@ JSON.parse(fs.readFileSync(path.join(__dirname, 'resolutions.json'), 'utf8')).fo
         if (err) throw err;
         // Render the SVG as a PNG file via ImageMagick
         im.convert([imagePathSVG, imagePathPNG], function(err){
-        //child_process.exec(util.format('rsvg-convert %s -o %s', imagePathSVG, imagePathPNG), function(err) {
             if (err) throw err;
             // Now delete the SVG file
             fs.unlink(imagePathSVG, function(err) {
