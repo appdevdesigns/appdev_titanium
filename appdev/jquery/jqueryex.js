@@ -108,7 +108,7 @@ jQuery.dumpObject = function(object, param /* name|depth */) {
     }
     jQuery.each(object, function(key, value) {
         console.log('.'+indentation+'|  '+key+': ['+typeof value+'] '+JSON.stringify(value));
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && value) {
             jQuery.dumpObject(value, depth + 1);
         }
     });
