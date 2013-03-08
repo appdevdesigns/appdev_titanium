@@ -18,7 +18,7 @@ console.log(verb, project);
 
 // Load required modules
 var path = require('path');
-var fs = require('fs');
+var fs = require('fs-extra');
 var async = require('async');
 
 // Calculate the paths of the AppDev, and Titanium, and project directories
@@ -40,7 +40,6 @@ var suppressErrors = function(errors, callback) {
 
 // Create the project
 var createProject = function(callback) {
-    var wrench = require('wrench');
     async.series([
         function(callback) {
             // Create the project root directory
@@ -49,7 +48,7 @@ var createProject = function(callback) {
         },
         function(callback) {
             // Copy the template files to the project
-            wrench.copyDirRecursive(path.join(appDevDir, 'templates'), projectDir, callback);
+            fs.copy(path.join(appDevDir, 'templates'), projectDir, callback);
         }
     ], callback);
 };
@@ -69,7 +68,7 @@ var updateLink = function(destination, callback) {
             if (operation === 'update' || operation === 'clean') {
                 // Remove the symbolic link
                 // It is OK if the file does not exist
-                fs.unlink(source, suppressErrors(['ENOENT'], callback));
+                fs.remove(source, suppressErrors(['ENOENT'], callback));
             }
             else {
                 callback(null);
