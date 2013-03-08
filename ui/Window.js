@@ -101,15 +101,20 @@ $.View('jQuery.Window', {
         if (AD.Platform.isAndroid) {
             window.activity.onCreateOptionsMenu = function(event) {
                 // When a menu needs to be created in response to a press of the 'menu' button, create a menu item for each action
-                var menu = event.menu;
                 actions.forEach(function(action) {
                     // The menuItem property, if not specified, defaults to true
                     if (action.menuItem !== false) {
-                        var menuItem = menu.add({ title: AD.Localize(action.title) });
+                        var menuItem = event.menu.add({ title: AD.Localize(action.title) });
                         menuItem.addEventListener('click', _this.proxy(action.callback));
                     }
                 });
             };
+            window.addEventListener('focus', function() {
+                // As of Titanium SDK 3.0.0, each window in a tab group shares a common activity.
+                // Thus, the Android menu will need to be recreated each time the window changes.
+                // See http://developer.appcelerator.com/blog/2012/12/breaking-changes-in-titanium-sdk-3-0.html
+                window.activity.invalidateOptionsMenu();
+            });
         }
         
         // This deferred object represents a possible pending task for the window and
