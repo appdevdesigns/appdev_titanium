@@ -62,7 +62,7 @@ var updateLink = function(destination, callback) {
     // Calculate the target, what the link will point to
     var target = path.join(appDevDir, destination);
 
-    console.log(source, '->', target);
+    console.log(path.relative(titaniumDir, source), '->', path.relative(titaniumDir, target));
 
     async.series([
         function(callback) {
