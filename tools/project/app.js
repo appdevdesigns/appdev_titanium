@@ -13,6 +13,9 @@ var operation = verb; // alias
 // Get the project argument
 var project = args[1];
 
+// Defaults to false, symbolically link resources
+var copyFiles = (args[2] === '-c' || args[2] === '--copy');
+
 // Print the currently executing command
 console.log(verb, project);
 
@@ -42,8 +45,7 @@ var suppressErrors = function(errors, callback) {
 var createProject = function(callback) {
     async.series([
         function(callback) {
-            // Create the project root directory
-            // It is OK if the directory already exists
+            // Create the project root directory, ignoring errors if it already exists
             fs.mkdir(projectDir, suppressErrors(['EEXIST'], callback));
         },
         function(callback) {
@@ -53,21 +55,19 @@ var createProject = function(callback) {
     ], callback);
 };
 
-// Create/update/remove a symbolic link to allow the project to reference AppDev resources
-var updateLink = function(destination, callback) {
-    // Calculate the source, where the link is located
+// Create/update/remove a reference to an AppDev resource
+var updateReference = function(destination, callback) {
+    // Calculate the source, where the resource is located
     var source = path.join(projectResourcesDir, destination);
-
-    // Calculate the target, what the link will point to
-    var target = path.join(appDevDir, destination);
-
-    console.log(path.relative(titaniumDir, source), '->', path.relative(titaniumDir, target));
+    var sourceRelative = path.relative(titaniumDir, source);
 
     async.series([
         function(callback) {
+            if (operation === 'clean') {
+                console.log('[remove] %s', sourceRelative);
+            }
             if (operation === 'update' || operation === 'clean') {
-                // Remove the symbolic link
-                // It is OK if the file does not exist
+                // Remove the resource, ignoring errors if it does not exist
                 fs.remove(source, suppressErrors(['ENOENT'], callback));
             }
             else {
@@ -76,8 +76,13 @@ var updateLink = function(destination, callback) {
         },
         function(callback) {
             if (operation === 'create' || operation === 'update') {
-                // (Re)create the symbolic link
-                fs.symlink(target, source, callback);
+                // Calculate the target, where the original resource is located
+                var target = path.join(appDevDir, destination);
+                var targetRelative = path.relative(titaniumDir, target);
+                
+                // (Re)create the resource
+                console.log('[%s] %s -> %s', copyFiles ? 'copy' : 'link', sourceRelative, targetRelative);
+                (copyFiles ? fs.copy : fs.symlink)(target, source, callback);
             }
             else {
                 callback(null);
@@ -88,13 +93,11 @@ var updateLink = function(destination, callback) {
     });
 };
 
-// Create/update/remove symbolic links to all files in
-// the directory (non-recursively) matching the pattern
-var updateLinks = function(directory, patternRegExp, callback) {
+// Create/update/remove resource references in the directory (non-recursively) matching the pattern
+var updateReferences = function(directory, patternRegExp, callback) {
     async.parallel({
         mkdir: function(callback) {
-            // Create the directory in the project
-            // It is OK if the directory already exists
+            // Create the directory in the project, ignoring errors if it already exists
             fs.mkdir(path.join(projectResourcesDir, directory), suppressErrors(['EEXIST'], callback));
         },
         files: function(callback) {
@@ -104,31 +107,29 @@ var updateLinks = function(directory, patternRegExp, callback) {
     }, function(err, results) {
         // Determine which files match the pattern
         // The pattern can be set to true to automatically match all files
-        var files = (patternRegExp === true ? results.files : results.files.filter(function(file) {
-            return patternRegExp.test(file);
-        })).map(function(file) {
+        var files = (patternRegExp === true ? results.files : results.files.filter(patternRegExp.test, patternRegExp)).map(function(file) {
             return path.join(directory, file);
         });
-        async.forEach(files, updateLink, callback);
+        async.forEach(files, updateReference, callback);
     });
 };
 
-// Update all of the project's symbolic links
-var updateProjectLinks = function(callback) {
+// Update all of the project's resource references
+var updateProjectReferences = function(callback) {
     async.parallel([
         function(callback) {
-            // Create symbolic links to these directories
-            async.forEach(['appdev'], updateLink, callback);
+            // Create references to these directories
+            async.forEach(['appdev'], updateReference, callback);
         },
         function(callback) {
-            // Create symbolic links to the files in these directories
+            // Create references to the files in these directories
             async.forEach([
-                { dir: '.', pattern: /^.+\.js$/ },
-                { dir: 'images', pattern: /^.+\.png$/ },
-                { dir: 'models', pattern: /^.+\.js$/ },
-                { dir: 'ui', pattern: /^.+\.js$/ }
+                { dir: '.', pattern: /\.js$/ },
+                { dir: 'images', pattern: /\.png$/ },
+                { dir: 'models', pattern: /\.js$/ },
+                { dir: 'ui', pattern: /\.js$/ }
             ], function(dirData, callback) {
-                updateLinks(dirData.dir, dirData.pattern || true, callback);
+                updateReferences(dirData.dir, dirData.pattern || true, callback);
             }, callback);
         }
     ], callback);
@@ -143,7 +144,7 @@ async.series([
             callback(null);
         }
     },
-    updateProjectLinks
+    updateProjectReferences
 ], function(err) {
     if (err) throw err;
     console.log('Finished!');
