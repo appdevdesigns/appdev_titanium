@@ -77,9 +77,7 @@ var updateLink = function(destination, callback) {
         function(callback) {
             if (operation === 'create' || operation === 'update') {
                 // (Re)create the symbolic link
-                fs.symlink(target, source, function(err) {
-                    callback(err);
-                });
+                fs.symlink(target, source, callback);
             }
             else {
                 callback(null);
@@ -101,9 +99,7 @@ var updateLinks = function(directory, patternRegExp, callback) {
         },
         files: function(callback) {
             // List the files in the directory
-            fs.readdir(path.join(appDevDir, directory), function(err, files) {
-                callback(err, files);
-            });
+            fs.readdir(path.join(appDevDir, directory), callback);
         }
     }, function(err, results) {
         // Determine which files match the pattern
