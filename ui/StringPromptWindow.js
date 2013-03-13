@@ -103,7 +103,7 @@ StringPromptWindow.extend('AppDev.UI.StringPromptWindow.LoginPassword', {
         title: 'stringPromptPasswordTitle',
         message: 'stringPromptPasswordMessage',
         validateCallback: function(input) {
-            if (input.length < 30) {
+            if (!AD.Defaults.development && input.length < 30) {
                 return { valid: false, reason: 'stringPromptPasswordLengthConstraint' };
             }
             else {
@@ -112,4 +112,3 @@ StringPromptWindow.extend('AppDev.UI.StringPromptWindow.LoginPassword', {
         }
     }
 }, {});
-
