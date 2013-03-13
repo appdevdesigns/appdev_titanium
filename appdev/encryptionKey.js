@@ -44,7 +44,7 @@ var EncryptionKey = module.exports = {
             EncryptionKey.passwordHash = passwordHash;
         }
         else {
-            throw 'Invalid password: "'+password+'""!';
+            throw 'Invalid password: "'+password+'"!';
         }
     },
     set: function(password) {
