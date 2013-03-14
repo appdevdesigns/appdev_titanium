@@ -5,8 +5,7 @@ module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
     actions: [{
         title: 'cancel',
         callback: 'cancel', // special pre-defined callback to reject the deferred
-        leftNavButton: true,
-        backButton: true
+        leftNavButton: true
     }, {
         title: 'done',
         callback: function() {
@@ -16,7 +15,8 @@ module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
             });
             this.dfd.resolve(chosenContacts);
         },
-        rightNavButton: true
+        rightNavButton: true,
+        backButton: true
     }]
 }, {
     init: function(options) {
