@@ -11,10 +11,10 @@ var UI = module.exports = {
     screenWidth: Ti.Platform.displayCaps.platformWidth,
     screenHeight: Ti.Platform.displayCaps.platformHeight,
     
-    buttonHeight: AD.Platform.isAndroid ? 30 : 40,
-    textFieldHeight: AD.Platform.isAndroid ? 30 : 40,
+    buttonHeight: 40,
+    textFieldHeight: 40,
     
-    padding: AD.Platform.isAndroid ? 5 : 10,
+    padding: 10,
     
     Fonts: {
         small: {fontSize: 12},
