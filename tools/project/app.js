@@ -129,6 +129,7 @@ var updateProjectLinks = function(callback) {
             // Create symbolic links to the files in these directories
             async.forEach([
                 { dir: '.', pattern: /^.+\.js$/ },
+                { dir: 'images', pattern: /^.+\.png$/ },
                 { dir: 'models', pattern: /^.+\.js$/ },
                 { dir: 'ui', pattern: /^.+\.js$/ }
             ], function(dirData, callback) {
