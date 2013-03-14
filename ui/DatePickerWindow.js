@@ -6,12 +6,12 @@ var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
         title: 'done',
         callback: 'done',
         rightNavButton: true,
-        backButton: true
+        backButton: true,
+        menuItem: false
     }, {
         title: 'cancel',
         callback: 'cancel', // special pre-defined callback to reject the deferred
-        leftNavButton: true,
-        backButton: true
+        leftNavButton: true
     }],
     defaults: {
         minDate: null,
@@ -47,20 +47,10 @@ var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
             value: this.selectedDate,
             selectionIndicator: true
         }));
-        datePicker.addEventListener('change', this.proxy(function(event) {
-            this.selectedDate = event.value;
-        }));
-        if (AD.Platform.isAndroid) {
-            // Create a done button on Android
-            var doneButton = this.add(Ti.UI.createButton({
-                bottom: AD.UI.padding * 2,
-                center: { x: AD.UI.screenWidth / 2 },
-                width: 120,
-                height: AD.UI.buttonHeight,
-                titleid: 'done'
-            }));
-            doneButton.addEventListener('click', this.proxy('done'));
-        }
+        var _this = this;
+        datePicker.addEventListener('change', function(event) {
+            _this.selectedDate = event.value;
+        });
     },
     
     done: function() {
