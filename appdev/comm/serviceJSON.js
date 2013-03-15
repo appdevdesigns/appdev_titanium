@@ -114,7 +114,14 @@ var ServiceJSON = {
             // Called when the request returns successfully
             
             // Convert the response text to a JSON object
-            var data = JSON.parse(response);
+            var data = null;
+            try {
+                data = JSON.parse(response);
+            }
+            catch(err) {
+                console.error('Could not parse response as JSON!');
+                console.log(response); 
+            }
             
             var success = false;
                         
