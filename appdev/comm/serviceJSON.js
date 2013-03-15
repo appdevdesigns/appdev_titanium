@@ -105,11 +105,6 @@ var ServiceJSON = {
      *    provided.
      */
     post: function(options) {
-        if (!/^\w*:\/\/.+:(?:\d*)/.test(options.url)) {
-            // Add the scheme, domain, and port to the relative URL
-            options.url = AD.Defaults.serverBaseURL+options.url;
-        }
-        
         var onload = function(response) {
             // Called when the request returns successfully
             
@@ -173,7 +168,7 @@ var ServiceJSON = {
         };
         
         // Automatically fail if the login window is open and the request is not a login request
-        if (AD.winLogin && AD.winLogin.isOpen && options.url !== AD.Defaults.serverBaseURL+'/service/site/login/authenticate') {
+        if (AD.winLogin && AD.winLogin.isOpen && options.url !== '/service/site/login/authenticate') {
             if (options.retry) {
                 // Treat this request as a failure because it will retry it later
                 onload(null);
@@ -183,6 +178,19 @@ var ServiceJSON = {
                 ServiceJSON.addWaitingRequest(options);
             }
             return;
+        }
+        
+        var url = options.url;
+        if (!/^https?:\/\//.test(options.url)) {
+            var serverBaseURL = AD.Defaults.serverBaseURL;
+            // Server URL is not specified yet, so ignore this request
+            if (!serverBaseURL) {
+                onload(null);
+                return;
+            }
+            
+            // Add the scheme, domain, and port to this relative URL
+            url = serverBaseURL+url;
         }
         
         var xhr = Ti.Network.createHTTPClient();
@@ -198,10 +206,10 @@ var ServiceJSON = {
             }
             
             // Called when the request returns an error (this should be very rare and signifies a major network error)
-            var errorMessage = 'JSON request to "'+options.url+'" failed.';
+            var errorMessage = 'JSON request to "'+url+'" failed.';
             Ti.API.error(errorMessage);
         };
-        xhr.open('POST', options.url);
+        xhr.open('POST', url);
         xhr.setRequestHeader('accept', 'application/json');
         xhr.setRequestHeader('content-type', 'application/json');
         xhr.send(JSON.stringify(options.params));

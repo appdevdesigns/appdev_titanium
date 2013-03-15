@@ -205,48 +205,47 @@ var initialize = function(options) {
     // Call checkInitDone five times every second
     var checkInitInterval = setInterval(checkInitDone, 200);
     
-    if (AD.Defaults.serverStorageEnabled) {
-        // Create the login window
-        require('ui/LoginWindow');
-        AD.winLogin = new AD.UI.LoginWindow();
-        Ti.API.log('Created LoginWindow');
-        
-        // Attempt to read the viewer out of the PropertyStore
-        var viewer = AD.PropertyStore.get('viewer');
-        if (viewer) {
-            // Found viewer information, so WhoAmI request is unnecessary
-            AD.setViewer(viewer);
-        }
-        else {
-            // Get the user's viewer data from the server, possibly causing an authentication request
-            Ti.API.log('Requesting viewer information...');
-            var getViewerDfd = $.Deferred();
-            addInitDfd(getViewerDfd);
-            AD.ServiceJSON.post({
-                url: '/api/site/viewer/whoAmI',
-                success: function(response) {
-                    Ti.API.log('Viewer information received');
-                    viewer = response.data;
-                    AD.PropertyStore.set('viewer', viewer);
-                    addInitDfd(AD.setViewer(viewer));
-                    getViewerDfd.resolve();
-                },
-                failure: function(error) {
-                    getViewerDfd.reject({
-                        description: 'Could not resolve viewer',
-                        technical: error,
-                        fix: AD.Defaults.development ?
-                            'Please verify the that "Server URL" application preference is set to the correct address and that the AppDev Node.js server is running.' :
-                            'Please verify the that "Server URL" application preference is set to the correct address and that the server is accessible.',
-                        actions: [{
-                            title: 'preferences',
-                            callback: 'preferences',
-                            platform: 'Android'
-                        }]
-                    });
-                }
-            });
-        }
+    
+    // Create the login window
+    require('ui/LoginWindow');
+    AD.winLogin = new AD.UI.LoginWindow();
+    Ti.API.log('Created LoginWindow');
+    
+    // Attempt to read the viewer out of the PropertyStore
+    var viewer = AD.PropertyStore.get('viewer');
+    if (viewer) {
+        // Found viewer information, so WhoAmI request is unnecessary
+        AD.setViewer(viewer);
+    }
+    else if (AD.Defaults.serverStorageEnabled) {
+        // Get the user's viewer data from the server, possibly causing an authentication request
+        Ti.API.log('Requesting viewer information...');
+        var getViewerDfd = $.Deferred();
+        addInitDfd(getViewerDfd);
+        AD.ServiceJSON.post({
+            url: '/api/site/viewer/whoAmI',
+            success: function(response) {
+                Ti.API.log('Viewer information received');
+                viewer = response.data;
+                AD.PropertyStore.set('viewer', viewer);
+                addInitDfd(AD.setViewer(viewer));
+                getViewerDfd.resolve();
+            },
+            failure: function(error) {
+                getViewerDfd.reject({
+                    description: 'Could not resolve viewer',
+                    technical: error,
+                    fix: AD.Defaults.development ?
+                        'Please verify the that "Server URL" application preference is set to the correct address and that the AppDev Node.js server is running.' :
+                        'Please verify the that "Server URL" application preference is set to the correct address and that the server is accessible.',
+                    actions: [{
+                        title: 'preferences',
+                        callback: 'preferences',
+                        platform: 'Android'
+                    }]
+                });
+            }
+        });
     }
     else {
         addInitDfd(AD.setViewer({viewer_id: 1})); // dummy viewer_id
