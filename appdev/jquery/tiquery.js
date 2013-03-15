@@ -194,6 +194,18 @@ var TiQuery = (function() {
 						continue;
 					}
 		
+                    var srcPropertyDescriptor = Object.getOwnPropertyDescriptor(target, name);
+                    if (srcPropertyDescriptor && (srcPropertyDescriptor.get || srcPropertyDescriptor.set)) {
+                        // Remove the defined property to allow it to be overwritten
+                        delete target[name];
+                    }
+                    var copyPropertyDescriptor = Object.getOwnPropertyDescriptor(options, name);
+                    if (copyPropertyDescriptor && (copyPropertyDescriptor.get || copyPropertyDescriptor.set)) {
+                        // Copy the defined property from options
+                        Object.defineProperty(target, name, copyPropertyDescriptor);
+                        continue;
+                    }
+		
 					// Recurse if we're merging object literal values or arrays
 					if ( deep && copy && ( TiQuery.isPlainObject(copy) || TiQuery.isArray(copy) ) ) {
 						var clone = src && ( TiQuery.isPlainObject(src) || TiQuery.isArray(src) ) ? src
