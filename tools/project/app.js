@@ -34,6 +34,9 @@ console.log('AppDev directory: '+appDevDir);
 console.log('Project directory: '+projectDir);
 console.log('\n');
 
+// An array that will contain all AppDev resources
+var resources = [];
+
 // Return a function to suppress errors of the types found in the errors array
 var suppressErrors = function(errors, callback) {
     return function(err) {
@@ -71,7 +74,9 @@ var updateReference = function(destination, callback) {
     // Calculate the source, where the resource is located
     var source = path.join(projectResourcesDir, destination);
     var sourceRelative = path.relative(titaniumDir, source);
-
+    
+    resources.push(path.relative(projectDir, source));
+    
     async.series([
         function(callback) {
             if (operation === 'clean') {
@@ -175,6 +180,35 @@ var updateProjectReferences = function(callback) {
     ], callback);
 };
 
+// Update the project's .gitignore file to ignore all AppDev resources
+var updateGitIgnore = function(callback) {
+    var gitIgnorePath = path.join(projectDir, '.gitignore');
+    console.log(gitIgnorePath);
+    async.waterfall([
+        function(callback) {
+            fs.readFile(gitIgnorePath, 'utf8', callback);
+        },
+        function(gitIgnoreContent, callback) {
+            var startTag = '# AppDev resources start';
+            var endTag = '# AppDev resources end';
+            
+            // Replace the existing resources block or append it to the end of the file
+            var regExpParts = ['(', startTag, '[\\s|\\S]*', endTag, ')', '|$']
+            var regExp = new RegExp(regExpParts.join(''));
+            
+            var ignoreLines = [].concat(startTag, resources, endTag);
+            var updatedGitIgnoreContent = gitIgnoreContent.replace(regExp, ignoreLines.join(require('os').EOL));
+            callback(null, updatedGitIgnoreContent);
+        },
+        function(gitIgnoreContent, callback) {
+            fs.writeFile(gitIgnorePath, gitIgnoreContent, callback);
+        }
+    ], callback)
+    fs.readFile(path.join(projectDir, '.gitignore'), 'utf8', function(gitIgnoreContent) {
+        console.log()
+    });
+};
+
 async.series([
     function(callback) {
         if (operation === 'create') {
@@ -185,7 +219,8 @@ async.series([
         }
     },
     updateProjectReferences,
-    pruneDeadLinks
+    pruneDeadLinks,
+    updateGitIgnore
 ], function(err) {
     if (err) throw err;
     console.log('Finished!');
