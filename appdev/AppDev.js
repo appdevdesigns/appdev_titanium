@@ -257,8 +257,8 @@ var initialize = function(options) {
                         description: 'Could not resolve viewer',
                         technical: error,
                         fix: AD.Defaults.development ?
-                            'Please verify the AppDev Node.js server is running and that the "Server URL" application preference is set to the correct address.' :
-                            'Please verify that you are connected to the VPN.'
+                            'Please verify the that "Server URL" application preference is set to the correct address and that the AppDev Node.js server is running.' :
+                            'Please verify the that "Server URL" application preference is set to the correct address and that the server is accessible.'
                     });
                 }
             });
@@ -339,8 +339,8 @@ var refreshCaches = function() {
             description: 'Could not load application data',
             technical: error,
             fix: AD.Defaults.development ?
-                'Please verify that the necessary AppDev module is enabled through the component manager interface.' :
-                'Please verify that you are connected to the VPN.'
+                'Please verify that the NextSteps AppDev module is enabled through the component manager interface.' :
+                'Please verify that the server is accessible.'
         });
     });
     return dfd.promise();
