@@ -24,7 +24,21 @@ var UI = module.exports = {
         header: {fontWeight: 'bold', fontSize: 24}
     },
     
-    systemBlueColor: '#516691'
+    systemBlueColor: '#516691',
+    
+    $winError: null,
+    displayError: function(options) {
+        console.log('Displaying error');
+        if (UI.$winError && UI.$winError.isOpen) {
+            // Close the existing error window
+            UI.$winError.close();
+        }
+        UI.$winError = new AD.UI.ErrorWindow(options);
+        UI.$winError.getDeferred().always(function() {
+            // Set $winError to null when the window is closed
+            UI.$winError = null;
+        });
+    }
 };
 
 if (AD.Platform.isAndroid) {

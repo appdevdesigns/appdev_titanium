@@ -21,42 +21,9 @@ AD.init = function(options) {
         // It if fails, retry the initialization
         var initDfd = $.Deferred();
         initialize(options).then(initDfd.resolve, initDfd.reject);
-        initDfd.done(appDevInitCompleteDfd.resolve).fail(failCallback);
+        initDfd.done(appDevInitCompleteDfd.resolve);
+        AD.handleError(initDfd, tryInit);
     };
-    
-    var $winError = null;
-    
-    // Called when an initialization attempt fails
-    var failCallback = function(error) {
-        // The AppDev initialization failed
-        Ti.API.error('Initialization failed!');
-        Ti.API.log(JSON.stringify(error));
-        
-        if (!$winError) {
-            // Create the error window the first time it is needed
-            require('ui/ErrorWindow');
-            $winError = new AD.UI.ErrorWindow({
-                error: error,
-                retry: function() {
-                    // Retry initialization
-                    Ti.API.log('Retrying initialization...');
-                    tryInit();
-                }
-            });
-            $winError.open();
-        }
-        else {
-            // Update the error message of the existing error window
-            $winError.setError(error);
-        }
-    };
-    
-    // After initialization, close the error window if it has been created
-    appDevInitCompleteDfd.done(function() {
-        if ($winError && $winError.isOpen) {
-            $winError.close();
-        }
-    });
     
     // Boot and install the application, then initialize it
     boot(options);
@@ -68,6 +35,16 @@ AD.init = function(options) {
     delete AD.init;
     
     return appDevInitCompleteDfd.promise();
+};
+
+// Attach a failure handler to this deferred that will display an error window with an optional retry callback
+AD.handleError = function(dfd, retry) {
+    dfd.fail(function(error) {
+        AD.UI.displayError({
+            error: error,
+            retry: retry
+        });
+    });
 };
 
 // Initialize all AppDev resources
@@ -115,6 +92,7 @@ var boot = function(options) {
     
     // Load the UI module
     AD.UI = $.extend(true, require('appdev/UIBase'), require('UI'));
+    require('ui/ErrorWindow');
     Ti.API.log('Loaded UI modules');
 };
 
