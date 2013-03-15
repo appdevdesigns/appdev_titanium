@@ -41,6 +41,17 @@ var suppressErrors = function(errors, callback) {
     };
 };
 
+// Ensure that callback is called only once
+var callOnce = function(callback) {
+    var called = false;
+    return function() {
+        if (!called) {
+            called = true;
+            callback.apply(this, arguments);
+        }
+    };
+};
+
 // Create the project
 var createProject = function(callback) {
     async.series([
@@ -114,6 +125,35 @@ var updateReferences = function(directory, patternRegExp, callback) {
     });
 };
 
+// Remove all dead symbolic links from the project
+var walker = require('walker');
+var pruneDeadLinks = function(callback) {
+    var callback = callOnce(callback);
+    walker(projectResourcesDir).on('symlink', function(file, stat) {
+        async.waterfall([
+            function(callback) {
+                fs.readlink(file, callback);
+            },
+            function(link, callback) {
+                fs.exists(link, function(exists) {
+                    if (exists) {
+                        callback(null);
+                    }
+                    else {
+                        // Prune the dead symbolic link
+                        console.log('[prune] %s', path.relative(titaniumDir, file));
+                        fs.remove(file, callback);
+                    }
+                });
+            }
+        ], function(err) {
+            if (err) {
+                callback(err);
+            };
+        });
+    }).on('error', callback).on('end', callback);
+};
+
 // Update all of the project's resource references
 var updateProjectReferences = function(callback) {
     async.parallel([
@@ -144,7 +184,8 @@ async.series([
             callback(null);
         }
     },
-    updateProjectReferences
+    updateProjectReferences,
+    pruneDeadLinks
 ], function(err) {
     if (err) throw err;
     console.log('Finished!');
