@@ -42,6 +42,7 @@ AD.handleError = function(dfd, retry) {
     dfd.fail(function(error) {
         AD.UI.displayError({
             error: error,
+            actions: error.actions,
             retry: retry
         });
     });
@@ -236,7 +237,12 @@ var initialize = function(options) {
                         technical: error,
                         fix: AD.Defaults.development ?
                             'Please verify the that "Server URL" application preference is set to the correct address and that the AppDev Node.js server is running.' :
-                            'Please verify the that "Server URL" application preference is set to the correct address and that the server is accessible.'
+                            'Please verify the that "Server URL" application preference is set to the correct address and that the server is accessible.',
+                        actions: [{
+                            title: 'preferences',
+                            callback: 'preferences',
+                            platform: 'Android'
+                        }]
                     });
                 }
             });
