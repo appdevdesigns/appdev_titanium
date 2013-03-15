@@ -94,10 +94,7 @@ var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
 module.exports = $.Window('AppDev.UI.AppInfoWindow', {
     actions: [{
         title: 'preferences',
-        callback: function() {
-            // Open the Android preferences window
-            Ti.UI.Android.openPreferences();
-        },
+        callback: 'preferences',
         platform: 'Android'
     }]
 }, {

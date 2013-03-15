@@ -8,6 +8,16 @@ $.View('jQuery.Window', {
             backgroundColor: 'white'
         }
     },
+    actionShortcuts: {
+        cancel: function() {
+            // Cancel the task and close the window by rejecting the window's deferred
+            this.dfd.reject();
+        },
+        preferences: function() {
+            // Open the Android preferences window
+            Ti.UI.Android.openPreferences();
+        }
+    },
     systemButtons: {
         edit: Ti.UI.iPhone.SystemButton.EDIT,
         cancel: Ti.UI.iPhone.SystemButton.CANCEL,
@@ -51,11 +61,10 @@ $.View('jQuery.Window', {
             return validPlatform && enabled;
         }, this);
         actions.forEach(function(action) {
-            if (action.callback === 'cancel') {
-                // Special shortcut to cancel the task and close the window by rejecting the window's deferred
-                action.callback = function() {
-                    this.dfd.reject();
-                };
+            // Expand the callback string to a shortcut function, if possible
+            var shortcutAction = this.constructor.actionShortcuts[action.callback];
+            if (shortcutAction && !this[action.callback]) {
+                action.callback = shortcutAction;
             }
             
             // Ensure that inside the callback, 'this' will still refer to the window instance
