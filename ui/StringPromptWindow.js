@@ -20,7 +20,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
             createParams: {
                 layout: 'vertical'
             },
-            title: AD.Localize(this.options.title),
+            title: this.options.title,
             focusedChild: 'string',
             autoOpen: true,
             modal: true
