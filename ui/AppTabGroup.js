@@ -1,5 +1,6 @@
 var $ = require('jquery');
-module.exports = $.View('AD.UI.AppTabGroup', {}, {
+
+module.exports = $.View('AppDev.UI.AppTabGroup', {}, {
     init: function(options) {
         // Create the tab group
         var tabGroup = Ti.UI.createTabGroup();
