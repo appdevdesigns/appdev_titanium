@@ -38,9 +38,12 @@ console.log('\n');
 var resources = [];
 
 // Return a function to suppress errors of the types found in the errors array
-var suppressErrors = function(errors, callback) {
+// args is an optional array of the parameters that will be
+// passed to the callback in the event of a suppressed error
+var suppressErrors = function(errors, callback, args) {
+    var params = [null].concat(args); // prepend null err argument
     return function(err) {
-        callback((err && errors.indexOf(err.code) === -1) ? err : null);
+        callback.apply(this, (err && errors.indexOf(err.code) === -1) ? arguments : params);
     };
 };
 
@@ -185,7 +188,8 @@ var updateGitIgnore = function(callback) {
     var gitIgnorePath = path.join(projectDir, '.gitignore');
     async.waterfall([
         function(callback) {
-            fs.readFile(gitIgnorePath, 'utf8', callback);
+            // File content defaults to an empty string in the case of a ENOENT error
+            fs.readFile(gitIgnorePath, 'utf8', suppressErrors(['ENOENT'], callback, ['']));
         },
         function(gitIgnoreContent, callback) {
             var startTag = '# AppDev resources start';
