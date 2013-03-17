@@ -183,7 +183,6 @@ var updateProjectReferences = function(callback) {
 // Update the project's .gitignore file to ignore all AppDev resources
 var updateGitIgnore = function(callback) {
     var gitIgnorePath = path.join(projectDir, '.gitignore');
-    console.log(gitIgnorePath);
     async.waterfall([
         function(callback) {
             fs.readFile(gitIgnorePath, 'utf8', callback);
@@ -203,10 +202,7 @@ var updateGitIgnore = function(callback) {
         function(gitIgnoreContent, callback) {
             fs.writeFile(gitIgnorePath, gitIgnoreContent, callback);
         }
-    ], callback)
-    fs.readFile(path.join(projectDir, '.gitignore'), 'utf8', function(gitIgnoreContent) {
-        console.log()
-    });
+    ], callback);
 };
 
 async.series([
