@@ -2,6 +2,13 @@ var AD = require('AppDev');
 var $ = require('jquery');
 
 var SyncedModel = module.exports = $.Model('AD.Model.SyncedModel', {
+    overrideMethod: function(object, name, method) {
+        object[name] = function() {
+            // Delegate to the original method, likely the LocalModel version, if sync is disabled
+            return (AD.Defaults.syncEnabled ? method : this._super).apply(this, arguments);
+        };
+    },
+    
     // Override the default extend function
     extend: function(fullName, klass, proto) {
         var LocalModel = klass.LocalModel; // one of AD.Model.ModelSQL, AD.Model.ModelSQLMultilingual
@@ -14,15 +21,15 @@ var SyncedModel = module.exports = $.Model('AD.Model.SyncedModel', {
         ['create', 'update', 'destroy'].forEach(function(operation) {
             // Override the operation with a proxy function that delegates the operation
             // to the model specified by the delegatedModel property on the SyncedModel class
-            staticProps[operation] = function() {
+            this.overrideMethod(staticProps, operation, function() {
                 // Delegate the operation to the specified model, should be LocalModel or ServerModel
                 return this.delegatedModel[operation].apply(this, arguments);
-            };
-       });
+            });
+       }, this);
         
         // Override the save and destroy model prototype functions 
         ['save', 'destroy'].forEach(function(operation) {
-            protoProps[operation] = function() {
+            this.overrideMethod(protoProps, operation, function() {
                 // When a model is saved (created/updated) or destroyed, save the model using first LocalModel, then
                 // using ServerModel. The 'delegatedModel' property determines which model should handle the operation.
                 var self = this;
@@ -40,17 +47,17 @@ var SyncedModel = module.exports = $.Model('AD.Model.SyncedModel', {
                     });
                     self.unfreeze();
                 });
-            };
-        });
+            });
+        }, this);
         
         ['created', 'updated', 'destroyed'].forEach(function(operation) {
-            protoProps[operation] = function() {
+            this.overrideMethod(protoProps, operation, function() {
                 // Ignore if this call is the result of a completed ServerModel operation
                 if (this.constructor.delegatedModel !== ServerModel) {
                     return this._super.apply(this, arguments);
                 }
-            };
-        });
+            });
+        }, this);
         
         // Support the ability to "freeze" a model before updating it on the server.
         // A frozen model retains the same value of isNew() as it was when it was frozen.
