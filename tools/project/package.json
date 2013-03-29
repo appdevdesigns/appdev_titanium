@@ -7,9 +7,11 @@
   "dependencies": {
     "async": "*",
     "fs-extra": "*",
-    "walker": "*"
+    "walker": "*",
+    "coa": "*",
+    "q": "*"
   },
   "bin": {
-    "project" : "app.js"
+    "project": "app.js"
   }
 }
