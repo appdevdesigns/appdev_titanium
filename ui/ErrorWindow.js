@@ -61,7 +61,8 @@ module.exports = $.Window('AppDev.UI.ErrorWindow', {
     
     // Initialize the child views
     initialize: function() {
+        var technical = this.error.technical;
         this.getChild('description').text = this.error.description;
-        this.getChild('info').text = this.error.technical + (this.error.fix ? '\n\n'+this.error.fix+'\n' : '');
+        this.getChild('info').text = (typeof technical === 'object' ? JSON.stringify(technical) : technical) + (this.error.fix ? '\n\n'+this.error.fix+'\n' : '');
     }
 });
