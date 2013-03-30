@@ -28,7 +28,8 @@ var UI = module.exports = {
     
     $winError: null,
     displayError: function(options) {
-        console.log('Displaying error');
+        console.log('Displaying error:');
+        console.log(JSON.stringify(options));
         if (UI.$winError && UI.$winError.isOpen) {
             // Close the existing error window
             UI.$winError.close();
