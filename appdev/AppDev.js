@@ -116,6 +116,7 @@ var boot = function(options) {
     // Load the UI module
     AD.UI = $.extend(true, require('appdev/UIBase'), require('UI'));
     require('ui/ErrorWindow');
+    require('ui/AppTabGroup');
     Ti.API.log('Loaded UI modules');
 };
 
@@ -277,7 +278,6 @@ var initialize = function(options) {
     if (options.windows) {
         initDfd.done(function() {
             // Initialize the top-level UI
-            require('ui/AppTabGroup');
             var $appTabGroup = new AD.UI.AppTabGroup({
                 windows: options.windows
             });
