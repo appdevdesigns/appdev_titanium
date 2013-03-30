@@ -48,6 +48,16 @@ AD.handleError = function(dfd, retry) {
     });
 };
 
+// Run the function operation until it succeeds
+AD.run = function(operation, context, args) {
+    var run = function() {
+        var dfd = operation.apply(context || this, args || []);
+        AD.handleError(dfd, run);
+        return dfd;
+    };
+    return run();
+};
+
 // Initialize all AppDev resources
 var boot = function(options) {
     // Return the primary key of this model instance
@@ -182,8 +192,11 @@ var initialize = function(options) {
     
     // Add a new task, represented by a deferred, that must be completed during initialization
     var addInitDfd = function(newInitDfd) {
-        newInitDfd.fail(initDfd.reject);
-        initDfds.push(newInitDfd);
+    	// Only add initialization steps if initialization has not yet completed
+        if (initDfd.state() === 'pending') {
+            newInitDfd.fail(initDfd.reject);
+            initDfds.push(newInitDfd);
+        }
     };
     
     // Resolve initDfd when all deferreds in initDfds have been resolved/rejected
@@ -211,45 +224,23 @@ var initialize = function(options) {
     AD.winLogin = new AD.UI.LoginWindow();
     Ti.API.log('Created LoginWindow');
     
-    // Attempt to read the viewer out of the PropertyStore
-    var viewer = AD.PropertyStore.get('viewer');
-    if (viewer) {
-        // Found viewer information, so WhoAmI request is unnecessary
-        AD.setViewer(viewer);
-    }
-    else if (AD.Defaults.serverStorageEnabled) {
-        // Get the user's viewer data from the server, possibly causing an authentication request
-        Ti.API.log('Requesting viewer information...');
-        var getViewerDfd = $.Deferred();
-        addInitDfd(getViewerDfd);
-        AD.ServiceJSON.post({
-            url: '/api/site/viewer/whoAmI',
-            success: function(response) {
-                Ti.API.log('Viewer information received');
-                viewer = response.data;
-                AD.PropertyStore.set('viewer', viewer);
-                addInitDfd(AD.setViewer(viewer));
-                getViewerDfd.resolve();
-            },
-            failure: function(error) {
-                getViewerDfd.reject({
-                    description: 'Could not resolve viewer',
-                    technical: error,
-                    fix: AD.Defaults.development ?
-                        'Please verify the that "Server URL" application preference is set to the correct address and that the AppDev Node.js server is running.' :
-                        'Please verify the that "Server URL" application preference is set to the correct address and that the server is accessible.',
-                    actions: [{
-                        title: 'preferences',
-                        callback: 'preferences',
-                        platform: 'Android'
-                    }]
-                });
-            }
-        });
-    }
-    else {
-        addInitDfd(AD.setViewer({viewer_id: 1})); // dummy viewer_id
-    }
+    var viewerDfd = getViewer().done(function() {
+        addInitDfd(refreshCaches());
+    });
+    addInitDfd(viewerDfd);
+    
+    var serverBaseURLOld = AD.Defaults.syncEnabled && AD.Defaults.serverBaseURL; // false if sync is disabled
+    setInterval(function() {
+        // Only retrieve the viewer if AppDev initialization has
+        // already completed and the sync server URL is changing
+        var serverBaseURL = AD.Defaults.syncEnabled && AD.Defaults.serverBaseURL; // false if sync is disabled
+        if (AD.Defaults.syncEnabled && serverBaseURL !== serverBaseURLOld && initDfd.state() === 'resolved') {
+            console.log('serverBaseURLOld: '+serverBaseURLOld+', serverBaseURL: '+serverBaseURL);
+            console.log('Updating viewer...');
+            serverBaseURLOld = serverBaseURL;
+            AD.run(getViewer);
+        }
+    }, 5000);
     
     Ti.API.log('Finished AppDev initialization');
     
@@ -267,14 +258,60 @@ var initialize = function(options) {
     return initDfd.promise();
 };
 
+var getViewer = function() {
+    // Attempt to read the viewer out of the PropertyStore
+    var serverBaseURL = AD.Defaults.serverBaseURL;
+    var viewerData = AD.PropertyStore.get('viewer_data');
+    if (viewerData && viewerData.server === serverBaseURL) {
+        // The viewer information is cached and the server is the same, so use the cached viewer
+        AD.setViewer(viewerData.viewer);
+    }
+    else if (AD.Defaults.serverStorageEnabled) {
+        // Get the user's viewer data from the server, possibly causing an authentication request
+        Ti.API.log('Requesting viewer information...');
+        var getViewerDfd = $.Deferred();
+        AD.ServiceJSON.post({
+            url: '/api/site/viewer/whoAmI',
+            success: function(response) {
+                Ti.API.log('Viewer information received');
+                viewer = response.data;
+                AD.PropertyStore.set('viewer_data', {
+                    viewer: viewer,
+                    server: AD.Defaults.serverBaseURL
+                });
+                AD.setViewer(viewer);
+                getViewerDfd.resolve();
+            },
+            failure: function(error) {
+                getViewerDfd.reject({
+                    description: 'Could not resolve viewer',
+                    technical: error,
+                    fix: AD.Defaults.development ?
+                        'Please verify the that "Server URL" application preference is set to the correct address and that the AppDev Node.js server is running.' :
+                        'Please verify the that "Server URL" application preference is set to the correct address and that the server is accessible.',
+                    actions: [{
+                        title: 'preferences',
+                        callback: 'preferences',
+                        platform: 'Android'
+                    }]
+                });
+            }
+        });
+        return getViewerDfd;
+    }
+    else {
+        // Use a dummy viewer
+        AD.setViewer({ viewer_id: 1 });
+    }
+    // Return a deferred that resolves immediately
+    return $.Deferred().resolve().promise();
+};
+
 AD.Viewer = null;
 
 // Set the AppDev viewer model instance
 AD.setViewer = function(viewerData) {
     AD.Viewer = AD.Models.Viewer.model(viewerData);
-    
-    // Reload the caches
-    return refreshCaches();
 };
 
 // Refresh each of the model caches

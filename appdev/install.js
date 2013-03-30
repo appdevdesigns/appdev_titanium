@@ -268,6 +268,9 @@ module.exports.install = function() {
                 installDatabases(currentVersion);
             }
             
+            // This property was removed after version 1.1
+            AD.PropertyStore.remove('viewer');
+            
             Ti.App.Properties.setString('version', AD.Defaults.version);
             // Set the campus list to an empty array if the property does not exist yet
             AD.PropertyStore.setDefault('campuses', []);
