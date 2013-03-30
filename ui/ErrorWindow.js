@@ -11,6 +11,7 @@ module.exports = $.Window('AppDev.UI.ErrorWindow', {
 }, {
     init: function(options) {
         this.error = this.options.error;
+        this.operation = options.operation || null;
         
         // Initialize the base $.Window object
         this._super({

@@ -20,9 +20,16 @@ AD.init = function(options) {
         // If the initialization succeeds, resolve the appDevInitCompleteDfd deferred that was returned from this function.
         // It if fails, retry the initialization
         var initDfd = $.Deferred();
-        initialize(options).then(initDfd.resolve, initDfd.reject);
+        initialize(options).then(initDfd.resolve, initDfd.reject).fail(function(data) {
+            var error = data.error;
+            AD.UI.displayError({
+                error: error,
+                actions: error.actions,
+                retry: tryInit,
+                operation: data.dfd
+            });
+        });
         initDfd.done(appDevInitCompleteDfd.resolve);
-        AD.handleError(initDfd, tryInit);
     };
     
     // Boot and install the application, then initialize it
@@ -43,19 +50,24 @@ AD.handleError = function(dfd, retry) {
         AD.UI.displayError({
             error: error,
             actions: error.actions,
-            retry: retry
+            retry: retry,
+            operation: dfd
         });
     });
 };
 
 // Run the function operation until it succeeds
 AD.run = function(operation, context, args) {
-    var run = function() {
-        var dfd = operation.apply(context || this, args || []);
-        AD.handleError(dfd, run);
-        return dfd;
+    var operationDfd = null;
+    var status = {
+        dfd: operationDfd // this deferred will be replaced as the operation is re-run
     };
-    return run();
+    var run = function() {
+        status.dfd = operationDfd = operation.apply(context || this, args || []);
+        AD.handleError(operationDfd, run);
+    };
+    run();
+    return status;
 };
 
 // Initialize all AppDev resources
@@ -118,7 +130,7 @@ var login = function(options) {
     AD.EncryptionKey.passwordHash = Ti.App.Properties.getString('passwordHash');
     if (!AD.EncryptionKey.passwordHash) {
         // The password hash has not been set yet, so login is impossible
-        // Either the application has not yet been installed or this is a pre-1.0.3 version that has yet to be upgraded
+        // Either the application has not yet been installed or this is a pre-1.1 version that has yet to be upgraded
         loginDfd.resolve(true);
     }
     else if (!AD.Defaults.localStorageEnabled) {
@@ -192,9 +204,14 @@ var initialize = function(options) {
     
     // Add a new task, represented by a deferred, that must be completed during initialization
     var addInitDfd = function(newInitDfd) {
-    	// Only add initialization steps if initialization has not yet completed
+        // Only add initialization steps if initialization has not yet completed
         if (initDfd.state() === 'pending') {
-            newInitDfd.fail(initDfd.reject);
+            newInitDfd.fail(function(error) {
+                initDfd.reject({
+                    error: error,
+                    dfd: newInitDfd
+                });
+            });
             initDfds.push(newInitDfd);
         }
     };
@@ -204,7 +221,6 @@ var initialize = function(options) {
     var checkInitDone = function() {
         if (initDfdsEmpty && initDfds.length === 0) {
             // The deferred array was empty during last iteration and is still empty, so initialization is done
-            clearInterval(checkInitInterval);
             initDfd.resolve();
             return;
         }
@@ -217,6 +233,9 @@ var initialize = function(options) {
     };
     // Call checkInitDone five times every second
     var checkInitInterval = setInterval(checkInitDone, 200);
+    initDfd.always(function() {
+        clearInterval(checkInitInterval);
+    });
     
     
     // Create the login window
@@ -229,18 +248,29 @@ var initialize = function(options) {
     });
     addInitDfd(viewerDfd);
     
+    // getViewerStatus holds status information regarding the getViewer call
+    var getViewerStatus = {
+        dfd: viewerDfd
+    };
     var serverBaseURLOld = AD.Defaults.syncEnabled && AD.Defaults.serverBaseURL; // false if sync is disabled
-    setInterval(function() {
-        // Only retrieve the viewer if AppDev initialization has
-        // already completed and the sync server URL is changing
+    var reloadViewerInterval = setInterval(function() {
         var serverBaseURL = AD.Defaults.syncEnabled && AD.Defaults.serverBaseURL; // false if sync is disabled
-        if (AD.Defaults.syncEnabled && serverBaseURL !== serverBaseURLOld && initDfd.state() === 'resolved') {
+        var syncChanged = AD.Defaults.syncEnabled && serverBaseURL !== serverBaseURLOld;
+        // True if the error window is open and the error was a result of this getViewer operation
+        var errorDisplayed = AD.UI.$winError && AD.UI.$winError.operation === getViewerStatus.dfd;
+        
+        // Only retrieve the viewer if the sync server URL is changing, the getViewer error
+        // window is not already open, and the AppDev initialization has already completed
+        if (syncChanged && !errorDisplayed && initDfd.state() === 'resolved') {
             console.log('serverBaseURLOld: '+serverBaseURLOld+', serverBaseURL: '+serverBaseURL);
             console.log('Updating viewer...');
             serverBaseURLOld = serverBaseURL;
-            AD.run(getViewer);
+            getViewerStatus = AD.run(getViewer);
         }
     }, 5000);
+    initDfd.always(function() {
+        clearInterval(reloadViewerInterval);
+    });
     
     Ti.API.log('Finished AppDev initialization');
     
