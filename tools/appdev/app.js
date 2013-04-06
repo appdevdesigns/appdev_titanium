@@ -41,8 +41,34 @@ fs.readdir(commandsDir, function(err, files) {
             path: path.join(commandDir, 'command.js')
         };
     });
+    
+    // Load each of the commands
     commands.forEach(function(command) {
-        cmd.cmd().name(command.name).apply(require(command.path).COA).end(); // load subcommand from module
+        // Load the command from the external module
+        var module = command.module = require(command.path);
+        
+        try {
+            // Initialize the command module
+            if (module.load) {
+                module.load();
+            }
+        
+            // Now add the command as a coa subcommand if it loaded successfully
+            cmd.cmd().name(command.name).apply(module.COA).end();
+        }
+        catch(e) {
+            if (e.code === 'MODULE_NOT_FOUND') {
+                // Ignore missing dependencies when installing
+                if (argv[0] === 'install') {
+                    return;
+                }
+                
+                // The command dependencies have probably not been installed properly
+                console.error('Failed to load module "%s"!', command.name);
+                console.error('Try running "appdev install" to install command dependencies');
+            }
+            throw e; // rethrow exception
+        }
     });
     cmd.end().run(argv.length ? argv : ['-h']);
 });

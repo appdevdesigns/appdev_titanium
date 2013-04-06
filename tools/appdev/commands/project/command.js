@@ -1,4 +1,4 @@
-var project = require('./project.js');
+var project = null;
 var Q = require('q');
 
 var extend = function(base) {
@@ -30,6 +30,10 @@ coa.Cmd.prototype.project = function() {
         .name('project').title('Project')
         .req() // argument is required
         .end(); // end argument definition
+};
+
+module.exports.load = function() {
+    project = require('./project.js');
 };
 
 module.exports.COA = function() {
