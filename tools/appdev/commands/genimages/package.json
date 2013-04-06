@@ -3,14 +3,10 @@
   "description": "Generate PNG splash screens from SVG image.",
   "version": "0.0.1",
   "private": true,
-  "main": "app.js",
   "dependencies": {
       "imagemagick": "*",
       "jquery": "*",
       "wrench": "*",
       "xmldom": "*"
-  },
-  "bin": {
-    "genimages" : "app.js"
   }
 }

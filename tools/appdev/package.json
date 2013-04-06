@@ -1,0 +1,14 @@
+{
+  "name": "appdev",
+  "description": "AppDev Titanium command line tool.",
+  "version": "0.0.1",
+  "main": "app.js",
+  "private": true,
+  "dependencies": {
+    "async": "*",
+    "coa": "*",
+    "q": "*"
+  },
+  "bin": "app.js",
+  "preferGlobal": true
+}
