@@ -7,9 +7,9 @@ var async = require('async');
 // args is an optional array of the parameters that will be
 // passed to the callback in the event of a suppressed error
 var suppressErrors = function(errors, callback, args) {
-    var params = [null].concat(args); // prepend null err argument
+    var params = [null].concat(args || []); // prepend null err argument
     return function(err) {
-        callback.apply(this, (err && errors.indexOf(err.code) === -1) ? arguments : params);
+        return callback.apply(this, (err && errors.indexOf(err.code) !== -1) ? params : arguments);
     };
 };
 
@@ -83,6 +83,10 @@ var updateReferences = function(params, directory, patternRegExp, callback) {
             fs.readdir(path.join(params.appDevDir, directory), callback);
         }
     }, function(err, results) {
+        if (err) {
+            callback(err);
+            return;
+        }
         // Determine which files match the pattern
         // The pattern can be set to true to automatically match all files
         var files = (patternRegExp === true ? results.files : results.files.filter(patternRegExp.test, patternRegExp)).map(function(file) {
