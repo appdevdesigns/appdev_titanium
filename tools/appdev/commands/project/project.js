@@ -187,7 +187,7 @@ var makeOperationStack = function(params, extras) {
 
 var setup = function(params, operation) {
     // Calculate the paths of the AppDev, and Titanium, and project directories
-    params.appDevDir = path.resolve(__dirname, '..', '..');
+    params.appDevDir = path.resolve(__dirname, '..', '..', '..', '..');
     params.titaniumDir = path.resolve(params.appDevDir, '..');
     params.projectDir = path.resolve(params.titaniumDir, params.project);
     params.projectResourcesDir = path.resolve(params.projectDir, 'Resources');

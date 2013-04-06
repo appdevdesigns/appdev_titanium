@@ -4,9 +4,9 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-      "imagemagick": "*",
-      "jquery": "*",
-      "wrench": "*",
-      "xmldom": "*"
+    "imagemagick": "*",
+    "jquery": "*",
+    "wrench": "*",
+    "xmldom": "*"
   }
 }

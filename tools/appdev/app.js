@@ -19,7 +19,7 @@ fs.readdir(commandsDir, function(err, files) {
         };
     });
     commands.forEach(function(command) {
-        cmd.cmd().name(command.name).end();
+        cmd.cmd().name(command.name).apply(require(command.path).COA).end(); // load subcommand from module
     });
     cmd.end().run(argv.length ? argv : ['-h']);
 });

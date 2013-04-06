@@ -1,5 +1,3 @@
-#! /usr/bin/env node
-
 var project = require('./project.js');
 var Q = require('q');
 
@@ -25,35 +23,36 @@ var makeAction = function(command) {
     };
 };
 
-var argv = process.argv.slice(2);
 var coa = require('coa');
-coa.Cmd.prototype.addProjectArg = function() {
+// Add a custom command function that is used by all subcommands
+coa.Cmd.prototype.project = function() {
     return this.arg()
         .name('project').title('Project')
         .req() // argument is required
         .end(); // end argument definition
 };
-coa.Cmd()
-    .name(process.argv[1]).title('AppDev Titanium project manager').helpful()
-    .cmd() // inplace subcommand definition
-        .name('create').title('Create project').helpful()
-        .act(makeAction('create'))
-        .addProjectArg()
-        .end() // end subcommand definition
 
-    .cmd() // inplace subcommand definition
-        .name('update').title('Update project').helpful()
-        .act(makeAction('update'))
-        .addProjectArg()
-        .opt()
-            .name('copy').title('Copy files')
-            .short('c').long('copy')
-            .flag() // option requires no value
-            .end()
-        .end() // end subcommand definition
-    .cmd() // inplace subcommand definition
-        .name('clean').title('Clean project').helpful()
-        .act(makeAction('clean'))
-        .addProjectArg()
-        .end() // end subcommand definition
-    .run(argv.length ? argv : ['-h']);
+module.exports.COA = function() {
+    this.title('Manage AppDev Titanium projects').helpful()
+        .cmd() // inplace subcommand definition
+            .name('create').title('Create project').helpful()
+            .act(makeAction('create'))
+            .project()
+            .end() // end subcommand definition
+        .cmd() // inplace subcommand definition
+            .name('update').title('Update project').helpful()
+            .act(makeAction('update'))
+            .project()
+            .opt()
+                .name('copy').title('Copy files')
+                .short('c').long('copy')
+                .flag() // option requires no value
+                .end()
+            .end() // end subcommand definition
+        .cmd() // inplace subcommand definition
+            .name('clean').title('Clean project').helpful()
+            .act(makeAction('clean'))
+            .project()
+            .end() // end subcommand definition
+        .end();
+};
