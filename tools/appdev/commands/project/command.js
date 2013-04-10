@@ -57,6 +57,5 @@ module.exports.COA = function() {
             .name('clean').title('Clean project').helpful()
             .act(makeAction('clean'))
             .project()
-            .end() // end subcommand definition
-        .end();
+            .end(); // end subcommand definition
 };

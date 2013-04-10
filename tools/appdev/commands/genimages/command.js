@@ -82,6 +82,5 @@ module.exports.COA = function() {
         .arg()
             .name('svg').title('SVG image')
             .req() // argument is required
-            .end() // end argument definition
-        .end(); // end subcommand definition
+            .end(); // end argument definition
 };
