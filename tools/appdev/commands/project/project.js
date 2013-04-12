@@ -24,6 +24,33 @@ var callOnce = function(callback) {
     };
 };
 
+// Fill the params "resources" array property with an entry for each AppDev resource file
+var enumResources = function(params, callback) {
+    var resources = params.resources = [];
+    
+    // These are all resource directories
+    resources.push('appdev');
+    
+    // These patterns match resource files in the specified directory
+    async.forEach([
+        { dir: '.', pattern: /\.js$/ },
+        { dir: 'images', pattern: /\.png$/ },
+        { dir: 'models', pattern: /\.js$/ },
+        { dir: 'ui', pattern: /\.js$/ }
+    ], function(dirData, callback) {
+        var directory = dirData.dir;
+        var patternRegExp = dirData.pattern;
+        fs.readdir(path.join(params.appDevDir, directory), function(err, files) {
+            // Determine which files match the pattern
+            // The pattern can be set to true to automatically match all files
+            (patternRegExp ? files.filter(patternRegExp.test, patternRegExp) : files).forEach(function(file) {
+                resources.push(path.join(directory, file));
+            });
+            callback(err);
+        });
+    }, callback);
+};
+
 // Create the project
 var createProject = function(params, callback) {
     async.series([
@@ -39,12 +66,10 @@ var createProject = function(params, callback) {
 };
 
 // Create/update/remove a reference to an AppDev resource
-var updateReference = function(params, destination, callback) {
+var updateReference = function(params, resource, callback) {
     // Calculate the source, where the resource is located
-    var source = path.join(params.projectResourcesDir, destination);
+    var source = path.join(params.projectResourcesDir, resource);
     var sourceRelative = path.relative(params.titaniumDir, source);
-    
-    params.resources.push(path.relative(params.projectDir, source));
     
     async.series([
         function(callback) {
@@ -57,7 +82,7 @@ var updateReference = function(params, destination, callback) {
         function(callback) {
             if (params.operation === 'create' || params.operation === 'update') {
                 // Calculate the target, where the original resource is located
-                var target = path.join(params.appDevDir, destination);
+                var target = path.join(params.appDevDir, resource);
                 var targetRelative = path.relative(params.titaniumDir, target);
                 
                 // (Re)create the resource
@@ -69,31 +94,6 @@ var updateReference = function(params, destination, callback) {
             }
         }
     ], callback);
-};
-
-// Create/update/remove resource references in the directory (non-recursively) matching the pattern
-var updateReferences = function(params, directory, patternRegExp, callback) {
-    async.parallel({
-        mkdir: function(callback) {
-            // Create the directory in the project, ignoring errors if it already exists
-            fs.mkdir(path.join(params.projectResourcesDir, directory), suppressErrors(['EEXIST'], callback));
-        },
-        files: function(callback) {
-            // List the files in the directory
-            fs.readdir(path.join(params.appDevDir, directory), callback);
-        }
-    }, function(err, results) {
-        if (err) {
-            callback(err);
-            return;
-        }
-        // Determine which files match the pattern
-        // The pattern can be set to true to automatically match all files
-        var files = (patternRegExp === true ? results.files : results.files.filter(patternRegExp.test, patternRegExp)).map(function(file) {
-            return path.join(directory, file);
-        });
-        async.forEach(files, async.apply(updateReference, params), callback);
-    });
 };
 
 // Remove all dead symbolic links from the project
@@ -127,23 +127,7 @@ var pruneDeadLinks = function(params, callback) {
 
 // Update all of the project's resource references
 var updateProjectReferences = function(params, callback) {
-    async.parallel([
-        function(callback) {
-            // Create references to these directories
-            async.forEach(['appdev'], async.apply(updateReference, params), callback);
-        },
-        function(callback) {
-            // Create references to the files in these directories
-            async.forEach([
-                { dir: '.', pattern: /\.js$/ },
-                { dir: 'images', pattern: /\.png$/ },
-                { dir: 'models', pattern: /\.js$/ },
-                { dir: 'ui', pattern: /\.js$/ }
-            ], function(dirData, callback) {
-                updateReferences(params, dirData.dir, dirData.pattern || true, callback);
-            }, callback);
-        }
-    ], callback);
+    async.each(params.resources, async.apply(updateReference, params), callback);
 };
 
 // Update the project's .gitignore file to ignore all AppDev resources
@@ -176,6 +160,7 @@ var updateGitIgnore = function(params, callback) {
 };
 
 var updateOperations = [
+    enumResources,
     updateProjectReferences,
     pruneDeadLinks,
     updateGitIgnore
@@ -198,7 +183,6 @@ var setup = function(params, operation) {
     params.titaniumDir = path.resolve(params.appDevDir, '..');
     params.projectDir = path.resolve(params.titaniumDir, params.project);
     params.projectResourcesDir = path.resolve(params.projectDir, 'Resources');
-    params.resources = []; // an array that will contain all AppDev resources
     params.operation = operation;
     console.log('Titanium directory: '+params.titaniumDir);
     console.log('AppDev directory: '+params.appDevDir);
