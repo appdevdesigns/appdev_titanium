@@ -162,8 +162,11 @@ var updateGitIgnore = function(params, callback) {
             var regExpParts = ['(', startTag, '[\\s|\\S]*', endTag, ')', '|$'];
             var regExp = new RegExp(regExpParts.join(''));
             
+            var EOL = require('os').EOL;
             var ignoreLines = [].concat(startTag, params.resources, endTag);
-            var updatedGitIgnoreContent = gitIgnoreContent.replace(regExp, ignoreLines.join(require('os').EOL));
+            var ignoreContent = params.operation === 'clean' ? '' : ignoreLines.join(EOL);
+            // Ensure exactly one newline at the end of the file
+            var updatedGitIgnoreContent = gitIgnoreContent.replace(regExp, ignoreContent).trim().concat(EOL);
             callback(null, updatedGitIgnoreContent);
         },
         function(gitIgnoreContent, callback) {
