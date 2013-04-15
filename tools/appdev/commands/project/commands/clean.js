@@ -63,12 +63,18 @@ var cleaniOSSimulatorApp = function(params, callback) {
     ], callback);
 };
 
+// Remove the "build" directory from the project
+var cleanBuildDir = function(params, callback) {
+    fs.remove(path.join(params.projectDir, 'build'), callback);
+};
+
 var project = require('../project.js');
 module.exports.operationStack = [
     project.clean,
     project.prune,
     project.gitIgnore,
-    cleaniOSSimulatorApp
+    cleaniOSSimulatorApp,
+    cleanBuildDir
 ];
 
 module.exports.COA = function() {
@@ -76,6 +82,11 @@ module.exports.COA = function() {
         .opt()
             .name('application').title('Clean iOS simulator application')
             .short('a').long('application')
+            .flag() // option requires no value
+            .end()
+        .opt()
+            .name('build').title('Clean build directory')
+            .short('b').long('build')
             .flag() // option requires no value
             .end();
 };
