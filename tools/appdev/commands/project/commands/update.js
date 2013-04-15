@@ -7,7 +7,6 @@ module.exports.operationStack = [
 
 module.exports.COA = function() {
     return this.name('update').title('Update project').helpful()
-        .project()
         .opt()
             .name('copy').title('Copy files')
             .short('c').long('copy')

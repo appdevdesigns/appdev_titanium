@@ -7,6 +7,5 @@ module.exports.operationStack = [
 ];
 
 module.exports.COA = function() {
-    return this.name('create').title('Create project').helpful()
-        .project();
+    return this.name('create').title('Create project').helpful();
 };
