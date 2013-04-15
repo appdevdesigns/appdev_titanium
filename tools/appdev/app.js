@@ -6,6 +6,8 @@ require('commands.js').rootCommand
     .name(process.argv[1])
     .title('AppDev Titanium command line tool')
     .helpful()
-    .loadCommands(__dirname)
+    .loadCommands({
+        rootDirectory: __dirname
+    })
     .end()
 .run(argv.length ? argv : ['-h']);
