@@ -1,7 +1,14 @@
 #! /usr/bin/env node
 
+var colors = require('colors');
+colors.setTheme({
+    error: 'red',
+    hint: 'cyan',
+    label: 'blue',
+    info: 'cyan'
+});
+
 var argv = process.argv.slice(2);
-var coa = require('coa');
 require('commands.js').rootCommand
     .name(process.argv[1])
     .title('AppDev Titanium command line tool')

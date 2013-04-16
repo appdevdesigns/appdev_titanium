@@ -36,7 +36,7 @@ var updateReference = function(params, resource, callback) {
             var targetRelative = path.relative(params.titaniumDir, target);
             
             // (Re)create the resource
-            console.log('[%s] %s -> %s', params.copy ? 'copy' : 'link', sourceRelative, targetRelative);
+            console.log((params.copy ? 'copy' : 'link').green, sourceRelative.info, '->', targetRelative.yellow);
             (params.copy ? fs.copy : fs.symlink)(target, source, callback);
         }
     ], callback);
@@ -48,7 +48,7 @@ var removeReference = function(params, resource, callback) {
     var source = resource.projectPath;
     var sourceRelative = path.relative(params.titaniumDir, source);
     
-    console.log('[remove] %s', sourceRelative);
+    console.log('remove'.red, sourceRelative.info);
     // Remove the resource, ignoring errors if it does not exist
     fs.remove(source, Callback.suppressErrors(['ENOENT'], callback));
 };
@@ -78,7 +78,7 @@ module.exports.prune = function(params, callback) {
                     }
                     else {
                         // Prune the dead symbolic link
-                        console.log('[prune] %s', path.relative(params.titaniumDir, file));
+                        console.log('prune'.red, path.relative(params.titaniumDir, file).info);
                         fs.remove(file, callback);
                     }
                 });
@@ -132,9 +132,9 @@ var setup = function(params, callback) {
     params.projectDir = path.resolve(params.titaniumDir, params.project);
     params.projectResourcesDir = path.resolve(params.projectDir, 'Resources');
     params.operation = params.command;
-    console.log('Titanium directory: '+params.titaniumDir);
-    console.log('AppDev directory: '+params.appDevDir);
-    console.log('Project directory: '+params.projectDir);
+    console.log('Titanium directory:'.label, params.titaniumDir);
+    console.log('AppDev directory:'.label, params.appDevDir);
+    console.log('Project directory:'.label, params.projectDir);
     console.log('\n');
     callback(null);
 };

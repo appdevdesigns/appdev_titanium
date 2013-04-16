@@ -26,14 +26,13 @@ var generateImages = function(params, callback) {
     
     // Calculate the output directory path
     var outputDir = path.join(path.dirname(svgPath), 'Resources');
-    console.log('outputDir:', outputDir);
+    console.log('Output directory:'.label, outputDir);
     
     // Calculate the original dimensions of the SVG image
     var originalDimensions = {
         width: $svg.attr('width'),
         height: $svg.attr('height')
     };
-    console.log('originalDimensions: %dx%d', originalDimensions.width, originalDimensions.height);
     
     var async = require('async');
     var Callback = require('callback.js');
@@ -67,7 +66,7 @@ var generateImages = function(params, callback) {
                 var imagePathPNG = path.resolve(outputDir, resolution.path);
                 var imagePathSVG = imagePathPNG.replace('png', 'svg');
                 var imageDirname = path.dirname(imagePathPNG);
-                console.log(imagePathPNG);
+                console.log('generate'.green, resolution.path.info);
                 
                 async.series([
                     function(callback) {
