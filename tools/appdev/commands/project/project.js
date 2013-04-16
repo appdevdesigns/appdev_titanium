@@ -2,34 +2,14 @@
 var path = require('path');
 var fs = require('fs-extra');
 var async = require('async');
-
-// Return a function to suppress errors of the types found in the errors array
-// args is an optional array of the parameters that will be
-// passed to the callback in the event of a suppressed error
-var suppressErrors = function(errors, callback, args) {
-    var params = [null].concat(args || []); // prepend null err argument
-    return function(err) {
-        return callback.apply(this, (err && errors.indexOf(err.code) !== -1) ? params : arguments);
-    };
-};
-
-// Ensure that callback is called only once
-var callOnce = function(callback) {
-    var called = false;
-    return function() {
-        if (!called) {
-            called = true;
-            callback.apply(this, arguments);
-        }
-    };
-};
+var Callback = require('callback.js');
 
 // Create the project
 module.exports.create = function(params, callback) {
     async.series([
         function(callback) {
             // Create the project root directory, ignoring errors if it already exists
-            fs.mkdir(params.projectDir, suppressErrors(['EEXIST'], callback));
+            fs.mkdir(params.projectDir, Callback.suppressErrors(['EEXIST'], callback));
         },
         function(callback) {
             // Copy the template files to the project
@@ -47,7 +27,7 @@ var updateReference = function(params, resource, callback) {
     async.series([
         function(callback) {
             // Remove the resource, ignoring errors if it does not exist
-            fs.remove(source, suppressErrors(['ENOENT'], callback));
+            fs.remove(source, Callback.suppressErrors(['ENOENT'], callback));
         },
         function(callback) {
             // Calculate the target, where the original resource is located
@@ -69,7 +49,7 @@ var removeReference = function(params, resource, callback) {
     
     console.log('[remove] %s', sourceRelative);
     // Remove the resource, ignoring errors if it does not exist
-    fs.remove(source, suppressErrors(['ENOENT'], callback));
+    fs.remove(source, Callback.suppressErrors(['ENOENT'], callback));
 };
 
 // Update all of the project's resource references
@@ -84,7 +64,7 @@ module.exports.clean = function(params, callback) {
 
 // Remove all dead symbolic links from the project
 module.exports.prune = function(params, callback) {
-    var callback = callOnce(callback);
+    var callback = Callback.callOnce(callback);
     require('walker')(params.projectResourcesDir).on('symlink', function(file, stat) {
         async.waterfall([
             function(callback) {
@@ -116,7 +96,7 @@ module.exports.gitIgnore = function(params, callback) {
     async.waterfall([
         function(callback) {
             // File content defaults to an empty string in the case of a ENOENT error
-            fs.readFile(gitIgnorePath, 'utf8', suppressErrors(['ENOENT'], callback, ['']));
+            fs.readFile(gitIgnorePath, 'utf8', Callback.suppressErrors(['ENOENT'], callback, ['']));
         },
         function(gitIgnoreContent, callback) {
             var startTag = '# AppDev resources start';

@@ -6,7 +6,6 @@
   "dependencies": {
     "imagemagick": "*",
     "jquery": "*",
-    "wrench": "*",
     "xmldom": "*"
   }
 }

@@ -1,9 +1,9 @@
-var generateImages = function(svgPath) {
+var generateImages = function(params, callback) {
     var path = require('path');
-    var svgPathAbsolute = path.resolve(process.cwd(), svgPath);
+    var svgPath = path.resolve(process.cwd(), params.svg);
     
     // Read in the SVG data files
-    var fs = require('fs');
+    var fs = require('fs-extra');
     var svgData = fs.readFileSync(svgPath, 'utf8');
     
     // Load XML manipulation resources
@@ -18,7 +18,7 @@ var generateImages = function(svgPath) {
     var $svg = $root.find('svg');
     
     // Calculate the output directory path
-    var outputDir = path.join(path.dirname(svgPathAbsolute), 'Resources');
+    var outputDir = path.join(path.dirname(svgPath), 'Resources');
     console.log('outputDir:', outputDir);
     
     // Calculate the original dimensions of the SVG image
@@ -28,57 +28,76 @@ var generateImages = function(svgPath) {
     };
     console.log('originalDimensions: %dx%d', originalDimensions.width, originalDimensions.height);
     
-    var util = require('util');
-    var im = require('imagemagick');
-    var wrench = require('wrench');
-    // Read in the resolutions from an external file, then create a PNG file for each resolution
-    JSON.parse(fs.readFileSync(path.join(__dirname, 'resolutions.json'), 'utf8')).forEach(function(resolution) {
-        var dimensions = {
-            width: resolution.width,
-            height: resolution.height
-        };
-    
-        // Calculate the transform for the foreground element
-        var scaleX = dimensions.width / originalDimensions.width;
-        var scaleY = dimensions.height / originalDimensions.height;
-        var scale = Math.min(scaleX, scaleY);
-        var translate = Math.abs(dimensions.width - dimensions.height) / 2;
-        var translateVector = { x: 0, y: 0 };
-        translateVector[scaleX > scaleY ? 'x' : 'y'] = translate;
-    
-        // Transform the elements as necessary
-        $svg.attr(dimensions);
-        $svg.find('g[id=background]').attr('transform', util.format('scale(%d,%d)', scaleX, scaleY));
-        $svg.find('g[id=foreground]').attr('transform', util.format('translate(%d,%d)scale(%d,%d)', translateVector.x, translateVector.y, scale, scale));
-    
-        // Calculate the paths
-        var imagePathPNG = path.resolve(outputDir, resolution.path);
-        var imageDirname = path.dirname(imagePathPNG);
-        console.log(imagePathPNG);
-        // Ensure that the directory exists
-        wrench.mkdirSyncRecursive(imageDirname);
-        // Write out the modified SVG data
-        var svgData = xmlSerializer.serializeToString($svg[0]);
-        var imagePathSVG = imagePathPNG.replace('png', 'svg');
-        fs.writeFile(imagePathSVG, svgData, function(err) {
-            if (err) throw err;
-            // Render the SVG as a PNG file via ImageMagick
-            im.convert([imagePathSVG, imagePathPNG], function(err){
-                if (err) throw err;
-                // Now delete the SVG file
-                fs.unlink(imagePathSVG, function(err) {
-                    if (err) throw err;
-                });
-            });
-        });
-    });
+    var async = require('async');
+    var Callback = require('callback.js');
+    async.waterfall([
+        function(callback) {
+            // Read in the resolutions from an external file
+            var resolutionsPath = path.join(__dirname, 'resolutions.json');
+            fs.readFile(resolutionsPath, 'utf8', callback);
+        },
+        function(resolutionsText, callback) {
+            // Convert the text to JSON
+            callback(null, JSON.parse(resolutionsText));
+        },
+        function(resolutions, callback) {
+            // Create a PNG file for each resolution
+            async.each(resolutions, function(resolution, callback) {
+                var dimensions = {
+                    width: resolution.width,
+                    height: resolution.height
+                };
+                
+                // Calculate the transform for the foreground element
+                var scaleX = dimensions.width / originalDimensions.width;
+                var scaleY = dimensions.height / originalDimensions.height;
+                var scale = Math.min(scaleX, scaleY);
+                var translate = Math.abs(dimensions.width - dimensions.height) / 2;
+                var translateVector = { x: 0, y: 0 };
+                translateVector[scaleX > scaleY ? 'x' : 'y'] = translate;
+                
+                // Calculate the paths
+                var imagePathPNG = path.resolve(outputDir, resolution.path);
+                var imagePathSVG = imagePathPNG.replace('png', 'svg');
+                var imageDirname = path.dirname(imagePathPNG);
+                console.log(imagePathPNG);
+                
+                async.series([
+                    function(callback) {
+                        // Ensure that the directory exists
+                        fs.mkdirs(imageDirname, Callback.suppressErrors(['EEXIST'], callback));
+                    },
+                    function(callback) {
+                        // Manipulate the elements as necessary
+                        var util = require('util');
+                        $svg.attr(dimensions);
+                        $svg.find('g[id=background]').attr('transform', util.format('scale(%d,%d)', scaleX, scaleY));
+                        $svg.find('g[id=foreground]').attr('transform', util.format('translate(%d,%d)scale(%d,%d)', translateVector.x, translateVector.y, scale, scale));
+                        
+                        // Write out the modified SVG data
+                        var svgData = xmlSerializer.serializeToString($svg[0]);
+                        fs.writeFile(imagePathSVG, svgData, callback);
+                    },
+                    function(callback) {
+                        // Render the SVG as a PNG file via ImageMagick
+                        require('imagemagick').convert([imagePathSVG, imagePathPNG], callback);
+                    },
+                    function(callback) {
+                        // Now delete the SVG file
+                        fs.unlink(imagePathSVG, callback);
+                    }
+                ], callback);
+            }, callback);
+        }
+    ], callback);
 };
+
+module.exports.operationStack = [
+    generateImages
+];
 
 module.exports.COA = function() {
     this.title('Generate PNG splash screens from SVG image').helpful()
-        .act(function(opts, args, res) {
-            generateImages(args.svg);
-        })
         .arg()
             .name('svg').title('SVG image')
             .req() // argument is required
