@@ -1,7 +1,8 @@
-// Load required modules
+// Load dependencies
 var path = require('path');
 var fs = require('fs-extra');
 var async = require('async');
+var walker = require('walker');
 var Callback = require('callback.js');
 
 // Create the project
@@ -65,7 +66,7 @@ module.exports.clean = function(params, callback) {
 // Remove all dead symbolic links from the project
 module.exports.prune = function(params, callback) {
     var callback = Callback.callOnce(callback);
-    require('walker')(params.projectResourcesDir).on('symlink', function(file, stat) {
+    walker(params.projectResourcesDir).on('symlink', function(file, stat) {
         async.waterfall([
             function(callback) {
                 fs.readlink(file, callback);

@@ -1,3 +1,12 @@
+var imagemagick = null, $ = null, xmldom = null;
+
+module.exports.load = function() {
+    // Load dependencies
+    imagemagick = require('imagemagick');
+    $ = require('jquery');
+    xmldom = require('xmldom');
+};
+
 var generateImages = function(params, callback) {
     var path = require('path');
     var svgPath = path.resolve(process.cwd(), params.svg);
@@ -6,9 +15,7 @@ var generateImages = function(params, callback) {
     var fs = require('fs-extra');
     var svgData = fs.readFileSync(svgPath, 'utf8');
     
-    // Load XML manipulation resources
-    var $ = require('jquery');
-    var xmldom = require('xmldom');
+    // Prepare for XML manipulation
     var domParser = new xmldom.DOMParser();
     var xmlSerializer = new xmldom.XMLSerializer();
     
@@ -80,7 +87,7 @@ var generateImages = function(params, callback) {
                     },
                     function(callback) {
                         // Render the SVG as a PNG file via ImageMagick
-                        require('imagemagick').convert([imagePathSVG, imagePathPNG], callback);
+                        imagemagick.convert([imagePathSVG, imagePathPNG], callback);
                     },
                     function(callback) {
                         // Now delete the SVG file
