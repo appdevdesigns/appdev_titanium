@@ -3,7 +3,7 @@ module.exports.operationStack = [
     project.create,
     project.update,
     project.prune,
-    project.gitIgnore
+    project.augmentGitIgnore
 ];
 
 module.exports.COA = function() {

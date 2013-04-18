@@ -72,7 +72,7 @@ var project = require('../project.js');
 module.exports.operationStack = [
     project.clean,
     project.prune,
-    project.gitIgnore,
+    project.cleanGitIgnore,
     cleaniOSSimulatorApp,
     cleanBuildDir
 ];

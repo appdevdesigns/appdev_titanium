@@ -91,8 +91,8 @@ module.exports.prune = function(params, callback) {
     }).on('error', callback).on('end', callback);
 };
 
-// Update the project's .gitignore file to ignore all AppDev resources
-module.exports.gitIgnore = function(params, callback) {
+// Modify the .gitignore file
+var updateGitIgnore = function(params, getIgnorePatterns, callback) {
     var gitIgnorePath = path.join(params.projectDir, '.gitignore');
     async.waterfall([
         function(callback) {
@@ -107,14 +107,13 @@ module.exports.gitIgnore = function(params, callback) {
             var regExpParts = ['(', startTag, '[\\s|\\S]*', endTag, ')', '|$'];
             var regExp = new RegExp(regExpParts.join(''));
             
-            // Calculate resource paths relative to the project directory
-            var resources = params.resources.map(function(resource) {
-                return path.relative(params.projectDir, resource.projectPath);
-            });
-            
             var EOL = require('os').EOL;
-            var ignoreLines = [].concat(startTag, resources, endTag);
-            var ignoreContent = params.operation === 'clean' ? '' : ignoreLines.join(EOL);
+            var ignoreLines = getIgnorePatterns();
+            // If ignoreLines is null or an empty array, the new ignore
+            // content block should be empty. Otherwise, the block will
+            // contain the lines to ignore, delimited by the start and end tags.
+            var ignoreContent = (ignoreLines && ignoreLines.length) ? [].concat(startTag, ignoreLines, endTag).join(EOL) : '';
+            
             // Ensure exactly one newline at the end of the file
             var updatedGitIgnoreContent = gitIgnoreContent.replace(regExp, ignoreContent).trim().concat(EOL);
             callback(null, updatedGitIgnoreContent);
@@ -125,13 +124,29 @@ module.exports.gitIgnore = function(params, callback) {
     ], callback);
 };
 
+// Update the project's .gitignore file to ignore all AppDev resources
+module.exports.augmentGitIgnore = function(params, callback) {
+    updateGitIgnore(params, function() {
+        // Calculate the resource paths relative to the project directory
+        return params.resources.map(function(resource) {
+            return path.relative(params.projectDir, resource.projectPath);
+        });
+    }, callback);
+};
+
+// Update the project's .gitignore file to stop ignoring all AppDev resources
+module.exports.cleanGitIgnore = function(params, callback) {
+    updateGitIgnore(params, function() {
+        return null;
+    }, callback);
+};
+
 var setup = function(params, callback) {
     // Calculate the paths of the AppDev, and Titanium, and project directories
     params.appDevDir = path.resolve(__dirname, '..', '..', '..', '..');
     params.titaniumDir = path.resolve(params.appDevDir, '..');
     params.projectDir = path.resolve(params.titaniumDir, params.project);
     params.projectResourcesDir = path.resolve(params.projectDir, 'Resources');
-    params.operation = params.command;
     console.log('Titanium directory:'.label, params.titaniumDir);
     console.log('AppDev directory:'.label, params.appDevDir);
     console.log('Project directory:'.label, params.projectDir);

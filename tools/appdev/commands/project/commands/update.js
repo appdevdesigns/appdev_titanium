@@ -2,7 +2,7 @@ var project = require('../project.js');
 module.exports.operationStack = [
     project.update,
     project.prune,
-    project.gitIgnore
+    project.augmentGitIgnore
 ];
 
 module.exports.COA = function() {
