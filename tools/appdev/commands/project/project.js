@@ -155,29 +155,45 @@ var setup = function(params, callback) {
 };
 
 // Fill the params "resources" array property with an entry for each AppDev resource file
-var enumResources = function(params, callback) {
-    // These are all resource directories
-    var resources = ['appdev'];
-    
+module.exports.enumResources = function(params, callback) {
+    // These are resource directories
+    var resourceDirs = ['appdev'];
     // These patterns match resource files in the specified directory
-    async.forEach([
+    var resourcePatterns = [
         { dir: '.', pattern: /\.js$/ },
         { dir: 'images', pattern: /\.png$/ },
         { dir: 'models', pattern: /\.js$/ },
         { dir: 'ui', pattern: /\.js$/ }
-    ], function(dirData, callback) {
-        var directory = dirData.dir;
-        var patternRegExp = dirData.pattern;
+    ];
+    
+    // Find the resources matching the resource patterns
+    async.map(resourcePatterns, function(resourcePattern, callback) {
+        var directory = resourcePattern.dir;
+        var patternRegExp = resourcePattern.pattern;
         fs.readdir(path.join(params.appDevDir, directory), function(err, files) {
             // Determine which files match the pattern
             // The pattern can be set to true to automatically match all files
-            (patternRegExp ? files.filter(patternRegExp.test, patternRegExp) : files).forEach(function(file) {
-                resources.push(path.join(directory, file));
+            var filteredResources = patternRegExp ? files.filter(patternRegExp.test, patternRegExp) : files;
+            // Resolve the relative paths
+            var resources = filteredResources.map(function(file) {
+                return path.join(directory, file);
             });
-            callback(err);
+            callback(err, resources);
         });
-    }, function(err) {
-        params.resources = resources.map(function(resource) {
+    }, function(err, resources) {
+        // "resources" is an array of arrays, so flatten it to a one-dimensional array
+        var flattenedResources = resources.reduce(function(a, b) {
+            return a.concat(b);
+        }, []);
+        
+        // Start with an empty resources array...
+        params.resources = []
+        // Then add the resource directories...
+        .concat(resourceDirs)
+        // Then add the discovered resource files...
+        .concat(flattenedResources)
+        // Finally, calculate a few other related paths for each resource
+        .map(function(resource) {
             return {
                 // The relative resource path
                 resource: resource,
@@ -191,4 +207,4 @@ var enumResources = function(params, callback) {
     });
 };
 
-module.exports.setupStack = [setup, enumResources];
+module.exports.setupStack = [setup];
