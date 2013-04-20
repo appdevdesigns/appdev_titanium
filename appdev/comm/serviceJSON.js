@@ -119,7 +119,7 @@ var ServiceJSON = {
             }
             
             var success = false;
-                        
+            
             // Got a JSON response but was the service action a success?
             if (data && data.success && (data.success !== 'false')) {
                 // SUCCESS!
@@ -131,11 +131,6 @@ var ServiceJSON = {
             }
             // FAILED
             else {
-                // Execute the optional failure callback
-                if ($.isFunction(options.failure)) {
-                    options.failure(data);
-                }
-                
                 if (options.retry) {
                     // Retry the request until the it succeeds
                     console.log('Request to ['+options.url+'] failed!  Retrying later.');
@@ -155,6 +150,10 @@ var ServiceJSON = {
                         });
                         ServiceJSON.waitingRequests = [];
                     });
+                }
+                // Execute the optional failure callback
+                else if ($.isFunction(options.failure)) {
+                    options.failure(data);
                 }
             } // failed
             
