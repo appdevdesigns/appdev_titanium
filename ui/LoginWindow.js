@@ -13,8 +13,6 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
 
     // Create the child views
     create: function() {
-        var _this = this;
-        
         // Create the user ID label and text field
         this.add(Ti.UI.createLabel({
             left: AD.UI.padding,
@@ -71,6 +69,14 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             titleid: 'cancel'
         }));
         cancel.addEventListener('click', this.proxy('close'));
+        
+        // Close the window when it loses focus
+        this.window.addEventListener('blur', this.proxy(function(event) {
+            // Check that the window itself is losing focus, not just one of its children
+            if (event.source === this.window) {
+                this.close();
+            }
+        }));
     },
     
     // Called when the user submits their login credentials
