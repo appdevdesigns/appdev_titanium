@@ -156,7 +156,7 @@ var login = function(options) {
     else {
         // Ask the user for their login password
         var PasswordPromptWindow = require('ui/PasswordPromptWindow');
-        $winPasswordPrompt = new PasswordPromptWindow({
+        var $winPasswordPrompt = new PasswordPromptWindow({
             title: 'passwordPromptLoginTitle',
             message: 'passwordPromptLoginMessage',
             verifyCallback: function(guess) {
@@ -304,7 +304,7 @@ var getViewer = function() {
             url: '/api/site/viewer/whoAmI',
             success: function(response) {
                 Ti.API.log('Viewer information received');
-                viewer = response.data;
+                var viewer = response.data;
                 AD.PropertyStore.set('viewer_data', {
                     viewer: viewer,
                     server: AD.Defaults.serverBaseURL
