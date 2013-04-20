@@ -147,7 +147,7 @@ var ServiceJSON = {
                     // Reauthenticate
                     AD.winLogin.open(function() {
                         // Resend all waiting requests
-                        Ti.API.log('Resending requests:');
+                        console.log('Resending requests:');
                         ServiceJSON.waitingRequests.forEach(function(request) {
                             ServiceJSON.post(request);
                         });
@@ -192,7 +192,7 @@ var ServiceJSON = {
             
             // Called when the request returns an error (this should be very rare and signifies a major network error)
             var errorMessage = 'JSON request to "'+options.url+'" failed.';
-            Ti.API.error(errorMessage);
+            console.error(errorMessage);
         };
         xhr.open('POST', options.url);
         xhr.setRequestHeader('accept', 'application/json');

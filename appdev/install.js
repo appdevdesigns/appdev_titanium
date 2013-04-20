@@ -167,7 +167,7 @@ module.exports.install = function() {
     }
     if (compareVersions(AD.Defaults.version, currentVersion) > 0) {
         // (Re)install the application
-        Ti.API.log((installed ? 'Upgrading' : 'Installing') + ' app from '+currentVersion+' to '+AD.Defaults.version+' ...');
+        console.log((installed ? 'Upgrading' : 'Installing') + ' app from '+currentVersion+' to '+AD.Defaults.version+' ...');
         
         if (installed) {
             // Updating NextSteps
@@ -238,7 +238,7 @@ module.exports.install = function() {
             encryption.authorizeAdmin();
             
             protectionDfd.done(function(passwordProtect) {
-                Ti.API.log(passwordProtect);
+                console.log(passwordProtect);
                 var StringPromptWindow = require('ui/StringPromptWindow');
                 var WindowClass = StringPromptWindow[passwordProtect ? 'LoginPassword' : 'EncryptionKey'];
                 $winStringPrompt = new WindowClass();

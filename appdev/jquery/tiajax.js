@@ -188,10 +188,10 @@ var jQuery = module.exports = require('jquery');
       if (!xhr) {
         return;
       }
-      Ti.API.debug("Sending " + type + " request to " + s.url);
+      console.debug("Sending " + type + " request to " + s.url);
       if (type === "POST") {
-        Ti.API.debug("POSTing data:");
-        Ti.API.debug(s.data);
+        console.debug("POSTing data:");
+        console.debug(s.data);
       }
       if (s.username != null) {
         xhr.open(type, s.url, s.async, s.username, s.password);

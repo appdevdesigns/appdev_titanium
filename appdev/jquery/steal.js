@@ -12,7 +12,7 @@ var steal = module.exports = function() {
     args.forEach(function(arg) {
         if (steal.includedFiles.indexOf(arg) === -1) {
             // This file has never been included before, so include it now
-            Ti.API.info('Stealing '+arg);
+            console.info('Stealing '+arg);
             steal.includedFiles.push(arg);
             require('appdev/'+arg);
         }
@@ -31,10 +31,10 @@ steal.then = steal;
 
 steal.dev = {
     log: function(message) {
-        Ti.API.info(message);
+        console.info(message);
     },
     warn: function(message) {
-        Ti.API.warn(message);
+        console.warn(message);
     }
 };
 

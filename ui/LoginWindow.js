@@ -82,12 +82,12 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
         };
         
         // Send login request to the server
-        Ti.API.log('Attempting to login as {'+loginData.userID+', '+loginData.pWord+'}');
+        console.log('Attempting to login as {'+loginData.userID+', '+loginData.pWord+'}');
         AD.ServiceJSON.post({
             params: loginData,
             url: '/service/site/login/authenticate',
             success: this.proxy(function(data) {
-                Ti.API.log('Login succeeded!');
+                console.log('Login succeeded!');
                 
                 this.close();
                 
@@ -97,7 +97,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
                 }
             }),
             failure: function(data) {
-                Ti.API.log('Login failed!');
+                console.log('Login failed!');
             }
         });
     },

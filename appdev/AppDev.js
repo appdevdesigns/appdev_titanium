@@ -29,8 +29,8 @@ AD.init = function(options) {
     // Called when an initialization attempt fails
     var failCallback = function(error) {
         // The AppDev initialization failed
-        Ti.API.error('Initialization failed!');
-        Ti.API.log(JSON.stringify(error));
+        console.error('Initialization failed!');
+        console.log(JSON.stringify(error));
         
         if (!$winError) {
             // Create the error window the first time it is needed
@@ -39,7 +39,7 @@ AD.init = function(options) {
                 error: error,
                 retry: function() {
                     // Retry initialization
-                    Ti.API.log('Retrying initialization...');
+                    console.log('Retrying initialization...');
                     tryInit();
                 }
             });
@@ -115,7 +115,7 @@ var boot = function(options) {
     
     // Load the UI module
     AD.UI = $.extend(true, require('appdev/UIBase'), require('UI'));
-    Ti.API.log('Loaded UI modules');
+    console.log('Loaded UI modules');
 };
 
 var install = function(options) {
@@ -167,7 +167,7 @@ var login = function(options) {
         });
     }
     loginDfd.done(function(success) {
-        Ti.API.log('Logged in successfully!');
+        console.log('Logged in successfully!');
     });
     return loginDfd.promise();
 };
@@ -181,25 +181,25 @@ var initialize = function(options) {
     AD.PropertyStore.read();
     
     // Load model dependencies
-    Ti.API.log('Loading model dependencies...');
+    console.log('Loading model dependencies...');
     AD.Model = require('appdev/db/ADModel');
     require('appdev/db/model_SQL');
     require('appdev/db/model_SQLMultilingual');
     require('appdev/db/ServerModel');
     require('appdev/db/SyncedModel');
-    Ti.API.log('Loaded model dependencies');
+    console.log('Loaded model dependencies');
     AD.ServiceModel = require('appdev/db/serviceModel');
     // Now load each of the AppDev models
-    Ti.API.log('Loading models...');
+    console.log('Loading models...');
     options.models.forEach(function(model) {
-        Ti.API.log('Loading '+model+' model');
+        console.log('Loading '+model+' model');
         var Model = require('models/'+model);
         // Wrap the new class so that the id property CommonJS appends an 'id' attribute
         // to all objects returned by require, overwriting the Model.id attribute.  Restore
         // it to its original value, the primary key of the model
         Model.id = Model.primaryKey;
     });
-    Ti.API.log('Finshed loading models');
+    console.log('Finshed loading models');
     
     // Add a new task, represented by a deferred, that must be completed during initialization
     var addInitDfd = function(newInitDfd) {
@@ -230,7 +230,7 @@ var initialize = function(options) {
         // Create the login window
         require('ui/LoginWindow');
         AD.winLogin = new AD.UI.LoginWindow();
-        Ti.API.log('Created LoginWindow');
+        console.log('Created LoginWindow');
         
         // Attempt to read the viewer out of the PropertyStore
         var viewer = AD.PropertyStore.get('viewer');
@@ -240,13 +240,13 @@ var initialize = function(options) {
         }
         else {
             // Get the user's viewer data from the server, possibly causing an authentication request
-            Ti.API.log('Requesting viewer information...');
+            console.log('Requesting viewer information...');
             var getViewerDfd = $.Deferred();
             addInitDfd(getViewerDfd);
             AD.ServiceJSON.post({
                 url: '/api/site/viewer/whoAmI',
                 success: function(response) {
-                    Ti.API.log('Viewer information received');
+                    console.log('Viewer information received');
                     viewer = response.data;
                     AD.PropertyStore.set('viewer', viewer);
                     addInitDfd(AD.setViewer(viewer));
@@ -268,7 +268,7 @@ var initialize = function(options) {
         addInitDfd(AD.setViewer({viewer_id: 1})); // dummy viewer_id
     }
     
-    Ti.API.log('Finished AppDev initialization');
+    console.log('Finished AppDev initialization');
     
     if (options.windows) {
         initDfd.done(function() {
@@ -306,7 +306,7 @@ var refreshCaches = function() {
             return;
         }
         
-        Ti.API.log('Building '+name+' cache...');
+        console.log('Building '+name+' cache...');
         // Only load models associated with this viewer
         var filter = {viewer_id: AD.Viewer.viewer_id};
         // Expand the cache filter to include the filter specified in the model definition
@@ -326,15 +326,15 @@ var refreshCaches = function() {
         }).fail(cacheDfd.reject);
         
         refreshDfds.push(cacheDfd.done(function() {
-            Ti.API.log('Built '+name+' cache');
+            console.log('Built '+name+' cache');
         }));
     });
     // When all deferreds in refreshDfds have resolved, then resolve the returned deferred
     $.when.apply($, refreshDfds).done(function() {
-        Ti.API.log('All model caches built');
+        console.log('All model caches built');
         dfd.resolve();
     }).fail(function(error) {
-        Ti.API.error('Model cache building failed');
+        console.error('Model cache building failed');
         dfd.reject({
             description: 'Could not load application data',
             technical: error,

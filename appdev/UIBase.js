@@ -35,12 +35,12 @@ if (AD.Platform.isAndroid) {
 UI.useableScreenWidth = UI.screenWidth - UI.padding * 2;
 
 // Log display info for debugging purposes
-Ti.API.log('Display info:');
+console.log('Display info:');
 ['platformWidth', 'platformHeight', 'xdpi', 'ydpi', 'density', 'logicalDensityFactor', 'dpi'].forEach(function(key) {
     var value = Ti.Platform.displayCaps[key];
-    Ti.API.log(key+': '+value+' ['+(typeof value)+']');
+    console.log(key+': '+value+' ['+(typeof value)+']');
 });
-Ti.API.log(UI.screenWidth+'x'+UI.screenHeight+' dips');
+console.log(UI.screenWidth+'x'+UI.screenHeight+' dips');
 
 // Create the cancel/edit buttons on the nav bar that allow the user to edit a tableview
 UI.enableTableEditing = function(window, table) {

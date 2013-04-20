@@ -23,7 +23,7 @@ var EncryptionKey = module.exports = {
             // Use PBKDF2 to generate the password hash
             var start = Date.now();
             var hash = AD.sjcl.codec.hex.fromBits(AD.sjcl.misc.pbkdf2(password, EncryptionKey.passwordSalt, EncryptionKey.iterations, EncryptionKey.keySize));
-            Ti.API.info(EncryptionKey.iterations+' PBKDF2 iterations in '+(Date.now() - start)+' ms');
+            console.info(EncryptionKey.iterations+' PBKDF2 iterations in '+(Date.now() - start)+' ms');
             if (useCache) {
                 EncryptionKey.hashCache[password] = hash;
             }
@@ -80,6 +80,6 @@ if (!iterations) {
     // take approximately EncryptionKey.optimalHashTime milliseconds to hash
     iterations = EncryptionKey.iterations = Ti.App.deployType === 'development' ? 1 : Math.max(Math.floor(EncryptionKey.optimalHashTime * testIterations / timeElapsed), EncryptionKey.minIterations);
     Ti.App.Properties.setInt('iterations', iterations);
-    Ti.API.log('Using '+iterations+' PBKDF2 iterations');
+    console.log('Using '+iterations+' PBKDF2 iterations');
 }
 

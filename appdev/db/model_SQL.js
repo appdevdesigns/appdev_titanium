@@ -198,8 +198,8 @@ module.exports = $.Model('AD.Model.ModelSQL', {
     updateFromReq: function (params) {
 
         if (typeof params.req == 'undefined') {
-            Ti.API.log('invalid parameters provided:');
-            Ti.API.log(params);
+            console.log('invalid parameters provided:');
+            console.log(params);
         }
         var req = params.req;
         var id = params.id;
@@ -433,7 +433,7 @@ module.exports = $.Model('AD.Model.ModelSQL', {
             
             if (err) {
             
-                Ti.API.log(err);
+                console.log(err);
             
             } else {
             
