@@ -1,16 +1,27 @@
 var AD = require('AppDev');
 var $ = require('jquery');
 
-module.exports = $.Window('AD.UI.ErrorWindow', {}, {
+module.exports = $.Window('AppDev.UI.ErrorWindow', {
+    defaults: {
+        error: {
+            description: 'Unknown error',
+            technical: 'Unknown error occurred'
+        }
+    }
+}, {
     init: function(options) {
+        this.error = this.options.error;
+        this.operation = options.operation || null;
+        
         // Initialize the base $.Window object
         this._super({
             createParams: {
-                layout: 'vertical'
+                layout: 'vertical',
+                fullscreen: true
             },
-            title: 'startupErrorTitle'
+            title: 'startupErrorTitle',
+            autoOpen: true
         });
-        this.setError(this.options.error);
     },
     
     // Create child views
@@ -28,7 +39,7 @@ module.exports = $.Window('AD.UI.ErrorWindow', {}, {
             left: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
-            font: AD.UI.mediumSmall
+            font: AD.UI.Fonts.mediumSmall
         }));
         
         var retryCallback = this.options.retry;
@@ -41,20 +52,18 @@ module.exports = $.Window('AD.UI.ErrorWindow', {}, {
                 height: AD.UI.buttonHeight,
                 titleid: 'retry'
             }));
+            var _this = this;
             retryButton.addEventListener('click', function(event) {
                 retryCallback();
+                _this.dfd.reject();
             });
         }
     },
     
-    // Update the error message
-    setError: function(error) {
-        // Default to a generic error message
-        this.error = error || {
-            description: 'Unknown error',
-            technical: 'Unknown error occurred'
-        };
+    // Initialize the child views
+    initialize: function() {
+        var technical = this.error.technical;
         this.getChild('description').text = this.error.description;
-        this.getChild('info').text = this.error.technical + (this.error.fix ? '\n\n'+this.error.fix+'\n' : '');
+        this.getChild('info').text = (typeof technical === 'object' ? JSON.stringify(technical) : technical) + (this.error.fix ? '\n\n'+this.error.fix+'\n' : '');
     }
 });

@@ -3,10 +3,10 @@ var defaults = {
     dbName: 'MyDBFilename',
     development: true,
     Model: {
-        defaultConnectionType: 'server'
+        //defaultConnectionType: 'synced'
     },
-    localStorageEnabled: false,
-    serverStorageEnabled: true,
+    //localStorageEnabled: true,
+    //serverStorageEnabled: true,
     version: '0.0'
 };
 module.exports = defaults;

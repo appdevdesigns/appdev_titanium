@@ -1,6 +1,3 @@
-var syncEnabled = Ti.App.Properties.getBool('sync_enabled_preference');
-var syncServerURL = Ti.App.Properties.getString('server_url_preference');
-console.log(syncEnabled ? 'Syncing to ['+syncServerURL+']' : 'Sync disabled');
 var defaults = {
     application: Ti.App.name,
     dbName: Ti.App.name,
@@ -12,14 +9,23 @@ var defaults = {
             server: 'server',
             synced: 'synced'
         },
-        defaultConnectionType: syncEnabled ? 'synced' : 'local' // may be overridden by applications
+        defaultConnectionType: 'synced' // may be overridden by applications
     },
     localStorageEnabled: true, // may be overridden by applications
-    serverStorageEnabled: syncEnabled, // may be overridden by applications
+    get serverStorageEnabled() {
+        return defaults.syncEnabled; // may be overridden by applications
+    },
     languageKey: 'en',
-    serverBaseURL: syncServerURL,
+    get serverBaseURL() {
+        return Ti.App.Properties.getString('server_url_preference');
+    },
+    get syncEnabled() {
+        return Ti.App.Properties.getBool('sync_enabled_preference');
+    },
     feedbackAddress: 'appdev.feedback@gmail.com',
     version: Ti.App.version
 };
+
+console.log(defaults.syncEnabled ? 'Syncing to '+defaults.serverBaseURL : 'Sync disabled');
 
 module.exports = defaults;

@@ -20,43 +20,17 @@ AD.init = function(options) {
         // If the initialization succeeds, resolve the appDevInitCompleteDfd deferred that was returned from this function.
         // It if fails, retry the initialization
         var initDfd = $.Deferred();
-        initialize(options).then(initDfd.resolve, initDfd.reject);
-        initDfd.done(appDevInitCompleteDfd.resolve).fail(failCallback);
-    };
-    
-    var $winError = null;
-    
-    // Called when an initialization attempt fails
-    var failCallback = function(error) {
-        // The AppDev initialization failed
-        console.error('Initialization failed!');
-        console.log(JSON.stringify(error));
-        
-        if (!$winError) {
-            // Create the error window the first time it is needed
-            require('ui/ErrorWindow');
-            $winError = new AD.UI.ErrorWindow({
+        initialize(options).then(initDfd.resolve, initDfd.reject).fail(function(data) {
+            var error = data.error;
+            AD.UI.displayError({
                 error: error,
-                retry: function() {
-                    // Retry initialization
-                    console.log('Retrying initialization...');
-                    tryInit();
-                }
+                actions: error.actions,
+                retry: tryInit,
+                operation: data.dfd
             });
-            $winError.open();
-        }
-        else {
-            // Update the error message of the existing error window
-            $winError.setError(error);
-        }
+        });
+        initDfd.done(appDevInitCompleteDfd.resolve);
     };
-    
-    // After initialization, close the error window if it has been created
-    appDevInitCompleteDfd.done(function() {
-        if ($winError && $winError.isOpen) {
-            $winError.close();
-        }
-    });
     
     // Boot and install the application, then initialize it
     boot(options);
@@ -68,6 +42,32 @@ AD.init = function(options) {
     delete AD.init;
     
     return appDevInitCompleteDfd.promise();
+};
+
+// Attach a failure handler to this deferred that will display an error window with an optional retry callback
+AD.handleError = function(dfd, retry) {
+    dfd.fail(function(error) {
+        AD.UI.displayError({
+            error: error,
+            actions: error.actions,
+            retry: retry,
+            operation: dfd
+        });
+    });
+};
+
+// Run the function operation until it succeeds
+AD.run = function(operation, context, args) {
+    var operationDfd = null;
+    var status = {
+        dfd: operationDfd // this deferred will be replaced as the operation is re-run
+    };
+    var run = function() {
+        status.dfd = operationDfd = operation.apply(context || this, args || []);
+        AD.handleError(operationDfd, run);
+    };
+    run();
+    return status;
 };
 
 // Initialize all AppDev resources
@@ -115,6 +115,8 @@ var boot = function(options) {
     
     // Load the UI module
     AD.UI = $.extend(true, require('appdev/UIBase'), require('UI'));
+    require('ui/ErrorWindow');
+    require('ui/AppTabGroup');
     console.log('Loaded UI modules');
 };
 
@@ -129,7 +131,7 @@ var login = function(options) {
     AD.EncryptionKey.passwordHash = Ti.App.Properties.getString('passwordHash');
     if (!AD.EncryptionKey.passwordHash) {
         // The password hash has not been set yet, so login is impossible
-        // Either the application has not yet been installed or this is a pre-1.0.3 version that has yet to be upgraded
+        // Either the application has not yet been installed or this is a pre-1.1 version that has yet to be upgraded
         loginDfd.resolve(true);
     }
     else if (!AD.Defaults.localStorageEnabled) {
@@ -154,7 +156,7 @@ var login = function(options) {
     else {
         // Ask the user for their login password
         var PasswordPromptWindow = require('ui/PasswordPromptWindow');
-        $winPasswordPrompt = new PasswordPromptWindow({
+        var $winPasswordPrompt = new PasswordPromptWindow({
             title: 'passwordPromptLoginTitle',
             message: 'passwordPromptLoginMessage',
             verifyCallback: function(guess) {
@@ -203,8 +205,16 @@ var initialize = function(options) {
     
     // Add a new task, represented by a deferred, that must be completed during initialization
     var addInitDfd = function(newInitDfd) {
-        newInitDfd.fail(initDfd.reject);
-        initDfds.push(newInitDfd);
+        // Only add initialization steps if initialization has not yet completed
+        if (initDfd.state() === 'pending') {
+            newInitDfd.fail(function(error) {
+                initDfd.reject({
+                    error: error,
+                    dfd: newInitDfd
+                });
+            });
+            initDfds.push(newInitDfd);
+        }
     };
     
     // Resolve initDfd when all deferreds in initDfds have been resolved/rejected
@@ -212,7 +222,6 @@ var initialize = function(options) {
     var checkInitDone = function() {
         if (initDfdsEmpty && initDfds.length === 0) {
             // The deferred array was empty during last iteration and is still empty, so initialization is done
-            clearInterval(checkInitInterval);
             initDfd.resolve();
             return;
         }
@@ -225,55 +234,50 @@ var initialize = function(options) {
     };
     // Call checkInitDone five times every second
     var checkInitInterval = setInterval(checkInitDone, 200);
+    initDfd.always(function() {
+        clearInterval(checkInitInterval);
+    });
     
-    if (AD.Defaults.serverStorageEnabled) {
-        // Create the login window
-        require('ui/LoginWindow');
-        AD.winLogin = new AD.UI.LoginWindow();
-        console.log('Created LoginWindow');
+    
+    // Create the login window
+    require('ui/LoginWindow');
+    AD.winLogin = new AD.UI.LoginWindow();
+    console.log('Created LoginWindow');
+    
+    var viewerDfd = getViewer().done(function() {
+        addInitDfd(refreshCaches());
+    });
+    addInitDfd(viewerDfd);
+    
+    // getViewerStatus holds status information regarding the getViewer call
+    var getViewerStatus = {
+        dfd: viewerDfd
+    };
+    var serverBaseURLOld = AD.Defaults.syncEnabled && AD.Defaults.serverBaseURL; // false if sync is disabled
+    var reloadViewerInterval = setInterval(function() {
+        var serverBaseURL = AD.Defaults.syncEnabled && AD.Defaults.serverBaseURL; // false if sync is disabled
+        var syncChanged = AD.Defaults.syncEnabled && serverBaseURL !== serverBaseURLOld;
+        // True if the error window is open and the error was a result of this getViewer operation
+        var errorDisplayed = AD.UI.$winError && AD.UI.$winError.operation === getViewerStatus.dfd;
         
-        // Attempt to read the viewer out of the PropertyStore
-        var viewer = AD.PropertyStore.get('viewer');
-        if (viewer) {
-            // Found viewer information, so WhoAmI request is unnecessary
-            AD.setViewer(viewer);
+        // Only retrieve the viewer if the sync server URL is changing, the getViewer error
+        // window is not already open, and the AppDev initialization has already completed
+        if (syncChanged && !errorDisplayed && initDfd.state() === 'resolved') {
+            console.log('serverBaseURLOld: '+serverBaseURLOld+', serverBaseURL: '+serverBaseURL);
+            console.log('Updating viewer...');
+            serverBaseURLOld = serverBaseURL;
+            getViewerStatus = AD.run(getViewer);
         }
-        else {
-            // Get the user's viewer data from the server, possibly causing an authentication request
-            console.log('Requesting viewer information...');
-            var getViewerDfd = $.Deferred();
-            addInitDfd(getViewerDfd);
-            AD.ServiceJSON.post({
-                url: '/api/site/viewer/whoAmI',
-                success: function(response) {
-                    console.log('Viewer information received');
-                    viewer = response.data;
-                    AD.PropertyStore.set('viewer', viewer);
-                    addInitDfd(AD.setViewer(viewer));
-                    getViewerDfd.resolve();
-                },
-                failure: function(error) {
-                    getViewerDfd.reject({
-                        description: 'Could not resolve viewer',
-                        technical: error,
-                        fix: AD.Defaults.development ?
-                            'Please verify the AppDev Node.js server is running and that the "Server URL" application preference is set to the correct address.' :
-                            'Please verify that you are connected to the VPN.'
-                    });
-                }
-            });
-        }
-    }
-    else {
-        addInitDfd(AD.setViewer({viewer_id: 1})); // dummy viewer_id
-    }
+    }, 5000);
+    initDfd.always(function() {
+        clearInterval(reloadViewerInterval);
+    });
     
     console.log('Finished AppDev initialization');
     
     if (options.windows) {
         initDfd.done(function() {
             // Initialize the top-level UI
-            require('ui/AppTabGroup');
             var $appTabGroup = new AD.UI.AppTabGroup({
                 windows: options.windows
             });
@@ -284,14 +288,60 @@ var initialize = function(options) {
     return initDfd.promise();
 };
 
+var getViewer = function() {
+    // Attempt to read the viewer out of the PropertyStore
+    var serverBaseURL = AD.Defaults.serverBaseURL;
+    var viewerData = AD.PropertyStore.get('viewer_data');
+    if (viewerData && viewerData.server === serverBaseURL) {
+        // The viewer information is cached and the server is the same, so use the cached viewer
+        AD.setViewer(viewerData.viewer);
+    }
+    else if (AD.Defaults.serverStorageEnabled) {
+        // Get the user's viewer data from the server, possibly causing an authentication request
+        Ti.API.log('Requesting viewer information...');
+        var getViewerDfd = $.Deferred();
+        AD.ServiceJSON.post({
+            url: '/api/site/viewer/whoAmI',
+            success: function(response) {
+                Ti.API.log('Viewer information received');
+                var viewer = response.data;
+                AD.PropertyStore.set('viewer_data', {
+                    viewer: viewer,
+                    server: AD.Defaults.serverBaseURL
+                });
+                AD.setViewer(viewer);
+                getViewerDfd.resolve();
+            },
+            failure: function(error) {
+                getViewerDfd.reject({
+                    description: 'Could not resolve viewer',
+                    technical: error,
+                    fix: AD.Defaults.development ?
+                        'Please verify the that "Server URL" application preference is set to the correct address and that the AppDev Node.js server is running.' :
+                        'Please verify the that "Server URL" application preference is set to the correct address and that the server is accessible.',
+                    actions: [{
+                        title: 'preferences',
+                        callback: 'preferences',
+                        platform: 'Android'
+                    }]
+                });
+            }
+        });
+        return getViewerDfd;
+    }
+    else {
+        // Use a dummy viewer
+        AD.setViewer({ viewer_id: 1 });
+    }
+    // Return a deferred that resolves immediately
+    return $.Deferred().resolve().promise();
+};
+
 AD.Viewer = null;
 
 // Set the AppDev viewer model instance
 AD.setViewer = function(viewerData) {
     AD.Viewer = AD.Models.Viewer.model(viewerData);
-    
-    // Reload the caches
-    return refreshCaches();
 };
 
 // Refresh each of the model caches
@@ -339,8 +389,8 @@ var refreshCaches = function() {
             description: 'Could not load application data',
             technical: error,
             fix: AD.Defaults.development ?
-                'Please verify that the necessary AppDev module is enabled through the component manager interface.' :
-                'Please verify that you are connected to the VPN.'
+                'Please verify that the NextSteps AppDev module is enabled through the component manager interface.' :
+                'Please verify that the server is accessible.'
         });
     });
     return dfd.promise();
