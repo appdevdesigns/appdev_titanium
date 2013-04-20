@@ -3,10 +3,6 @@ var AD = require('AppDev');
 
 module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
     actions: [{
-        title: 'cancel',
-        callback: 'cancel', // special pre-defined callback to reject the deferred
-        leftNavButton: true
-    }, {
         title: 'done',
         callback: function() {
             // Resolve the deferred with all the chosen contacts
@@ -17,6 +13,10 @@ module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
         },
         rightNavButton: true,
         backButton: true
+    }, {
+        title: 'cancel',
+        callback: 'cancel', // special pre-defined callback to reject the deferred
+        leftNavButton: true
     }]
 }, {
     init: function(options) {
