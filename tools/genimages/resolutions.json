@@ -43,6 +43,10 @@
     "height": 1136,
     "path": "iphone/Default-568h@2x.png"
 }, {
+    "width": 512,
+    "height": 512,
+    "path": "android/LargeAppIcon.png"
+}, {
     "width": 480,
     "height": 800,
     "path": "android/images/res-long-port-hdpi/default.png"
