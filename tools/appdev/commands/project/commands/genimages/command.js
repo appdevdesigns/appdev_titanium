@@ -1,5 +1,4 @@
 var imagemagick = null, $ = null, xmldom = null;
-
 module.exports.load = function() {
     // Load dependencies
     imagemagick = require('imagemagick');
@@ -9,7 +8,8 @@ module.exports.load = function() {
 
 var generateImages = function(params, callback) {
     var path = require('path');
-    var svgPath = path.resolve(process.cwd(), params.svg);
+    // The SVG filename defaults to the project name
+    var svgPath = path.resolve(params.projectDir, params.svg || (params.project+'.svg'));
     
     // Read in the SVG data files
     var fs = require('fs-extra');
@@ -25,7 +25,7 @@ var generateImages = function(params, callback) {
     var $svg = $root.find('svg');
     
     // Calculate the output directory path
-    var outputDir = path.join(path.dirname(svgPath), 'Resources');
+    var outputDir = params.projectResourcesDir;
     console.log('Output directory:'.label, outputDir);
     
     // Calculate the original dimensions of the SVG image
@@ -106,6 +106,5 @@ module.exports.COA = function() {
     this.title('Generate PNG splash screens from SVG image').helpful()
         .arg()
             .name('svg').title('SVG image')
-            .req() // argument is required
             .end(); // end argument definition
 };
