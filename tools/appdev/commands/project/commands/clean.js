@@ -70,6 +70,7 @@ var cleanBuildDir = function(params, callback) {
 
 var project = require('../project.js');
 module.exports.operationStack = [
+    project.enumResources,
     project.clean,
     project.prune,
     project.cleanGitIgnore,
