@@ -5,12 +5,12 @@
   "main": "app.js",
   "private": true,
   "dependencies": {
-    "async": "*",
-    "coa": "*",
+    "async": "0.2.x",
+    "coa": "0.3.x",
     "colors": "git://github.com/Marak/colors.js.git#master",
-    "fs-extra": "*",
-    "npm": "*",
-    "q": "*"
+    "fs-extra": "0.6.x",
+    "npm": "1.2.x",
+    "q": "0.9.x"
   },
   "bin": {
     "appdev": "app.js",
