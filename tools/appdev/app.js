@@ -4,7 +4,7 @@ var colors = require('colors');
 colors.setTheme({
     error: 'red',
     hint: 'cyan',
-    label: 'blue',
+    label: ['blue', 'bold'],
     info: 'cyan'
 });
 

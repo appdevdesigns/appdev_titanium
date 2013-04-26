@@ -7,7 +7,7 @@
   "dependencies": {
     "async": "*",
     "coa": "*",
-    "colors": "*",
+    "colors": "git://github.com/Marak/colors.js.git#master",
     "fs-extra": "*",
     "npm": "*",
     "q": "*"
