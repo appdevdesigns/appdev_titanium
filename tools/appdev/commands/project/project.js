@@ -62,11 +62,13 @@ var removeReference = function(params, resource, callback) {
 module.exports.update = function(params, callback) {
     async.each(params.resources, async.apply(updateReference, params), callback);
 };
+module.exports.update.flag = '!resources';
 
 // Update all of the project's resource references
 module.exports.clean = function(params, callback) {
     async.each(params.resources, async.apply(removeReference, params), callback);
 };
+module.exports.clean.flag = '!resources';
 
 // Remove all dead symbolic links from the project
 module.exports.prune = function(params, callback) {
@@ -95,6 +97,7 @@ module.exports.prune = function(params, callback) {
         });
     }).on('error', callback).on('end', callback);
 };
+module.exports.prune.flag = '!prune';
 
 // Modify the .gitignore file
 var updateGitIgnore = function(params, operationName, getIgnorePatterns, callback) {
@@ -139,6 +142,7 @@ module.exports.augmentGitIgnore = function(params, callback) {
         });
     }, callback);
 };
+module.exports.augmentGitIgnore.flag = '!gitignore';
 
 // Update the project's .gitignore file to stop ignoring all AppDev resources
 module.exports.cleanGitIgnore = function(params, callback) {
@@ -146,6 +150,7 @@ module.exports.cleanGitIgnore = function(params, callback) {
         return null;
     }, callback);
 };
+module.exports.cleanGitIgnore.flag = '!gitignore';
 
 var setup = function(params, callback) {
     // Calculate the paths of the AppDev, and Titanium, and project directories

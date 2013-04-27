@@ -20,12 +20,6 @@ var compareVersions = function(v1, v2) {
 };
 
 var cleaniOSSimulatorApp = function(params, callback) {
-    if (!params.application) {
-        // Only run this if the "application" flag is set
-        callback(null);
-        return;
-    }
-    
     var appName = params.project+'.app';
     var simulatorPath = path.join(process.env.HOME, 'Library', 'Application Support', 'iPhone Simulator');
     var applicationsPath = null;
@@ -63,6 +57,7 @@ var cleaniOSSimulatorApp = function(params, callback) {
         }
     ], callback);
 };
+cleaniOSSimulatorApp.flag = 'application';
 
 // Remove the "build" directory from the project
 var cleanBuildDir = function(params, callback) {
@@ -70,6 +65,7 @@ var cleanBuildDir = function(params, callback) {
     console.log('remove'.red, path.relative(params.titaniumDir, buildDir).info);
     fs.remove(buildDir, callback);
 };
+cleanBuildDir.flag = 'build';
 
 var project = require('../project.js');
 module.exports.operationStack = [
