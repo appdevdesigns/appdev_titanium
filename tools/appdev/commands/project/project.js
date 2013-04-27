@@ -7,6 +7,7 @@ var Callback = require('callback.js');
 
 // Create the project
 module.exports.create = function(params, callback) {
+    console.log('create'.green, 'project', params.project.info, 'at', params.projectDir.info);
     async.series([
         function(callback) {
             // Create the project root directory, ignoring errors if it already exists
@@ -92,8 +93,9 @@ module.exports.prune = function(params, callback) {
 };
 
 // Modify the .gitignore file
-var updateGitIgnore = function(params, getIgnorePatterns, callback) {
+var updateGitIgnore = function(params, operationName, getIgnorePatterns, callback) {
     var gitIgnorePath = path.join(params.projectDir, '.gitignore');
+    console.log(operationName, path.relative(params.titaniumDir, gitIgnorePath).info);
     async.waterfall([
         function(callback) {
             // File content defaults to an empty string in the case of a ENOENT error
@@ -126,7 +128,7 @@ var updateGitIgnore = function(params, getIgnorePatterns, callback) {
 
 // Update the project's .gitignore file to ignore all AppDev resources
 module.exports.augmentGitIgnore = function(params, callback) {
-    updateGitIgnore(params, function() {
+    updateGitIgnore(params, 'augment'.green, function() {
         // Calculate the resource paths relative to the project directory
         return params.resources.map(function(resource) {
             return path.relative(params.projectDir, resource.projectPath);
@@ -136,7 +138,7 @@ module.exports.augmentGitIgnore = function(params, callback) {
 
 // Update the project's .gitignore file to stop ignoring all AppDev resources
 module.exports.cleanGitIgnore = function(params, callback) {
-    updateGitIgnore(params, function() {
+    updateGitIgnore(params, 'clean'.red, function() {
         return null;
     }, callback);
 };

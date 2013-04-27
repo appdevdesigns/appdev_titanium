@@ -56,6 +56,7 @@ var cleaniOSSimulatorApp = function(params, callback) {
         function(projectApps, callback) {
             // Remove the associated apps that are associated with the project
             var projects = projectApps.map(function(projectApp) {
+                console.log('remove'.red, projectApp.info);
                 return path.resolve(projectApp, '..');
             });
             async.each(projects, fs.remove, callback);
@@ -65,7 +66,9 @@ var cleaniOSSimulatorApp = function(params, callback) {
 
 // Remove the "build" directory from the project
 var cleanBuildDir = function(params, callback) {
-    fs.remove(path.join(params.projectDir, 'build'), callback);
+    var buildDir = path.join(params.projectDir, 'build');
+    console.log('remove'.red, path.relative(params.titaniumDir, buildDir).info);
+    fs.remove(buildDir, callback);
 };
 
 var project = require('../project.js');
