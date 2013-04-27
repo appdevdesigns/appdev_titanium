@@ -32,6 +32,10 @@ var updateReference = function(params, resource, callback) {
             fs.remove(source, Callback.suppressErrors(['ENOENT'], callback));
         },
         function(callback) {
+            // Create the directory containing the resource, ignoring errors if it already exists
+            fs.mkdirs(path.dirname(source), Callback.suppressErrors(['EEXIST'], callback));
+        },
+        function(callback) {
             // Calculate the target, where the original resource is located
             var target = resource.appDevPath;
             var targetRelative = path.relative(params.titaniumDir, target);
