@@ -10,6 +10,7 @@
     "colors": "git://github.com/Marak/colors.js.git#master",
     "fs-extra": "0.6.x",
     "npm": "1.2.x",
+    "underscore": "1.4.x",
     "q": "0.9.x"
   },
   "bin": {
