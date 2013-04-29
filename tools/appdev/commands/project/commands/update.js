@@ -6,11 +6,14 @@ module.exports.operationStack = [
     project.augmentGitIgnore
 ];
 
-module.exports.COA = function() {
-    return this.name('update').title('Update project').helpful()
-        .opt()
-            .name('copy').title('Copy files')
-            .short('c').long('copy')
-            .flag() // option requires no value
-            .end();
+module.exports.COA = {
+    name: 'update',
+    title: 'Update project',
+    opts: [{
+        name: 'copy',
+        title: 'Copy files',
+        short: 'c',
+        long: 'copy',
+        flag: true
+    }]
 };

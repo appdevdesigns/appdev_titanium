@@ -77,16 +77,20 @@ module.exports.operationStack = [
     cleanBuildDir
 ];
 
-module.exports.COA = function() {
-    return this.name('clean').title('Clean project').helpful()
-        .opt()
-            .name('application').title('Clean iOS simulator application')
-            .short('a').long('application')
-            .flag() // option requires no value
-            .end()
-        .opt()
-            .name('build').title('Clean build directory')
-            .short('b').long('build')
-            .flag() // option requires no value
-            .end();
+module.exports.COA = {
+    name: 'clean',
+    title: 'Clean project',
+    opts: [{
+        name: 'application',
+        title: 'Clean iOS simulator application',
+        short: 'a',
+        long: 'application',
+        flag: true,
+    }, {
+        name: 'build',
+        title: 'Clean build directory',
+        short: 'b',
+        long: 'build',
+        flag: true
+    }]
 };

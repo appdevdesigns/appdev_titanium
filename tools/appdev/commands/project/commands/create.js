@@ -7,6 +7,7 @@ module.exports.operationStack = [
     project.augmentGitIgnore
 ];
 
-module.exports.COA = function() {
-    return this.name('create').title('Create project').helpful();
+module.exports.COA = {
+    name: 'create',
+    title: 'Create project'
 };

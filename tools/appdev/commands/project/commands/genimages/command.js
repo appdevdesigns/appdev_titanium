@@ -103,9 +103,10 @@ module.exports.operationStack = [
     generateImages
 ];
 
-module.exports.COA = function() {
-    this.title('Generate PNG splash screens from SVG image').helpful()
-        .arg()
-            .name('svg').title('SVG image')
-            .end(); // end argument definition
+module.exports.COA = {
+    title: 'Generate PNG splash screens from SVG image',
+    args: [{
+        name: 'svg',
+        title: 'SVG image'
+    }]
 };
