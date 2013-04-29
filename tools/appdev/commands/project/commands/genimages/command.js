@@ -11,6 +11,11 @@ var generateImages = function(params, callback) {
     // The SVG filename defaults to the project name
     var svgPath = path.resolve(params.projectDir, params.svg || (params.project+'.svg'));
     
+    // Calculate the output directory path
+    var outputDir = params.projectResourcesDir;
+    console.log('SVG file:'.label, svgPath);
+    console.log('Output directory:'.label, outputDir);
+    
     // Read in the SVG data files
     var fs = require('fs-extra');
     var svgData = fs.readFileSync(svgPath, 'utf8');
@@ -23,10 +28,6 @@ var generateImages = function(params, callback) {
     var svgDoc = domParser.parseFromString(svgData, 'image/svg+xml');
     var $root = $(svgDoc);
     var $svg = $root.find('svg');
-    
-    // Calculate the output directory path
-    var outputDir = params.projectResourcesDir;
-    console.log('Output directory:'.label, outputDir);
     
     // Calculate the original dimensions of the SVG image
     var originalDimensions = {
