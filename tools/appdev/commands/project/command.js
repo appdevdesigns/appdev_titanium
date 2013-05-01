@@ -19,6 +19,12 @@ module.exports.COA = {
             req: true
         }],
         opts: [{
+            name: 'copy',
+            title: 'Copy files',
+            short: 'c',
+            long: 'copy',
+            flag: true
+        }, {
             name: 'resources',
             title: 'Do not manipulate resources',
             short: 'R',
@@ -38,5 +44,5 @@ module.exports.COA = {
             flag: true
         }]
     },
-    inherited: ['project', 'resources', 'prune', 'gitignore']
+    inherited: ['project']
 };

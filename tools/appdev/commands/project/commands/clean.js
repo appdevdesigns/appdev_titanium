@@ -80,7 +80,6 @@ module.exports.operationStack = [
 module.exports.COA = {
     name: 'clean',
     title: 'Clean project',
-    opts: ['application', 'build'],
     definitions: {
         opts: [{
             name: 'application',

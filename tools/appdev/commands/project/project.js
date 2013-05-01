@@ -63,13 +63,16 @@ var removeReference = function(params, resource, callback) {
 module.exports.update = function(params, callback) {
     async.each(params.resources, async.apply(updateReference, params), callback);
 };
-module.exports.update.flag = '!resources';
-
 // Update all of the project's resource references
 module.exports.clean = function(params, callback) {
     async.each(params.resources, async.apply(removeReference, params), callback);
 };
-module.exports.clean.flag = '!resources';
+[module.exports.update, module.exports.clean].forEach(function(resourceOperation) {
+    _.extend(resourceOperation, {
+        flag: '!resources',
+        opts: ['copy']
+    });
+});
 
 // Remove all dead symbolic links from the project
 module.exports.prune = function(params, callback) {
