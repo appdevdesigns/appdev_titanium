@@ -102,7 +102,6 @@ var generateImages = function(params, callback) {
 module.exports.operationStack = [
     generateImages
 ];
-
 module.exports.COA = {
     title: 'Generate PNG splash screens from SVG image',
     args: ['svg'],

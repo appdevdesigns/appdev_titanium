@@ -67,16 +67,14 @@ var cleanBuildDir = function(params, callback) {
 };
 cleanBuildDir.flag = 'build';
 
-var project = require('../project.js');
 module.exports.operationStack = [
-    project.enumResources,
-    project.clean,
-    project.prune,
-    project.cleanGitIgnore,
+    'enumResources',
+    'clean',
+    'prune',
+    'cleanGitIgnore',
     cleaniOSSimulatorApp,
     cleanBuildDir
 ];
-
 module.exports.COA = {
     name: 'clean',
     title: 'Clean project',

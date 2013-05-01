@@ -6,8 +6,10 @@ var walker = require('walker');
 var _ = require('underscore');
 var Callback = require('callback.js');
 
+var operations = module.exports.operations = {};
+
 // Create the project
-module.exports.create = function(params, callback) {
+operations.create = function(params, callback) {
     console.log('create'.green, 'project', params.project.info, 'at', params.projectDir.info);
     async.series([
         function(callback) {
@@ -60,14 +62,14 @@ var removeReference = function(params, resource, callback) {
 };
 
 // Update all of the project's resource references
-module.exports.update = function(params, callback) {
+operations.update = function(params, callback) {
     async.each(params.resources, async.apply(updateReference, params), callback);
 };
 // Update all of the project's resource references
-module.exports.clean = function(params, callback) {
+operations.clean = function(params, callback) {
     async.each(params.resources, async.apply(removeReference, params), callback);
 };
-[module.exports.update, module.exports.clean].forEach(function(resourceOperation) {
+[operations.update, operations.clean].forEach(function(resourceOperation) {
     _.extend(resourceOperation, {
         flag: '!resources',
         opts: ['copy']
@@ -75,7 +77,7 @@ module.exports.clean = function(params, callback) {
 });
 
 // Remove all dead symbolic links from the project
-module.exports.prune = function(params, callback) {
+operations.prune = function(params, callback) {
     var callback = _.once(callback);
     walker(params.projectResourcesDir).on('symlink', function(file, stat) {
         async.waterfall([
@@ -101,7 +103,7 @@ module.exports.prune = function(params, callback) {
         });
     }).on('error', callback).on('end', callback);
 };
-module.exports.prune.flag = '!prune';
+operations.prune.flag = '!prune';
 
 // Modify the .gitignore file
 var updateGitIgnore = function(params, operationName, getIgnorePatterns, callback) {
@@ -138,7 +140,7 @@ var updateGitIgnore = function(params, operationName, getIgnorePatterns, callbac
 };
 
 // Update the project's .gitignore file to ignore all AppDev resources
-module.exports.augmentGitIgnore = function(params, callback) {
+operations.augmentGitIgnore = function(params, callback) {
     updateGitIgnore(params, 'augment'.green, function() {
         // Calculate the resource paths relative to the project directory
         return params.resources.map(function(resource) {
@@ -146,15 +148,15 @@ module.exports.augmentGitIgnore = function(params, callback) {
         });
     }, callback);
 };
-module.exports.augmentGitIgnore.flag = '!gitignore';
+operations.augmentGitIgnore.flag = '!gitignore';
 
 // Update the project's .gitignore file to stop ignoring all AppDev resources
-module.exports.cleanGitIgnore = function(params, callback) {
+operations.cleanGitIgnore = function(params, callback) {
     updateGitIgnore(params, 'clean'.red, function() {
         return null;
     }, callback);
 };
-module.exports.cleanGitIgnore.flag = '!gitignore';
+operations.cleanGitIgnore.flag = '!gitignore';
 
 var setup = function(params, callback) {
     // Calculate the paths of the AppDev, and Titanium, and project directories
@@ -170,7 +172,7 @@ var setup = function(params, callback) {
 };
 
 // Fill the params "resources" array property with an entry for each AppDev resource file
-module.exports.enumResources = function(params, callback) {
+operations.enumResources = function(params, callback) {
     // These are resource directories
     var resourceDirs = ['appdev'];
     // These patterns match resource files in the specified directory

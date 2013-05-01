@@ -44,5 +44,8 @@ module.exports.COA = {
             flag: true
         }]
     },
-    inherited: ['project']
+    inherited: ['project'],
+    get operations() {
+        return project.operations;
+    }
 };
