@@ -80,17 +80,20 @@ module.exports.operationStack = [
 module.exports.COA = {
     name: 'clean',
     title: 'Clean project',
-    opts: [{
-        name: 'application',
-        title: 'Clean iOS simulator application',
-        short: 'a',
-        long: 'application',
-        flag: true,
-    }, {
-        name: 'build',
-        title: 'Clean build directory',
-        short: 'b',
-        long: 'build',
-        flag: true
-    }]
+    opts: ['application', 'build'],
+    definitions: {
+        opts: [{
+            name: 'application',
+            title: 'Clean iOS simulator application',
+            short: 'a',
+            long: 'application',
+            flag: true,
+        }, {
+            name: 'build',
+            title: 'Clean build directory',
+            short: 'b',
+            long: 'build',
+            flag: true
+        }]
+    }
 };

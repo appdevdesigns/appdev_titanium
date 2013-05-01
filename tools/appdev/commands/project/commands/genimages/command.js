@@ -105,8 +105,11 @@ module.exports.operationStack = [
 
 module.exports.COA = {
     title: 'Generate PNG splash screens from SVG image',
-    args: [{
-        name: 'svg',
-        title: 'SVG image'
-    }]
+    args: ['svg'],
+    definitions: {
+        args: [{
+            name: 'svg',
+            title: 'SVG image'
+        }]
+    }
 };
