@@ -1,16 +1,12 @@
-var project = null;
+var project = require('./project.js');
 
-module.exports.load = function() {
-    project = require('./project.js');
-};
+module.exports.load = project.load;
 
 module.exports.COA = {
     title: 'Manage AppDev Titanium projects',
     loadCommands: {
         rootDirectory: __dirname,
-        get setupStack() {
-            return project.setupStack;
-        }
+        setupStack: project.setupStack
     },
     definitions: {
         args: [{
@@ -45,7 +41,5 @@ module.exports.COA = {
         }]
     },
     inherited: ['project'],
-    get operations() {
-        return project.operations;
-    }
+    operations: project.operations
 };

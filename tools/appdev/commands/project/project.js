@@ -2,9 +2,13 @@
 var path = require('path');
 var fs = require('fs-extra');
 var async = require('async');
-var walker = require('walker');
 var _ = require('underscore');
 var Callback = require('callback.js');
+
+var walker = null;
+module.exports.load = function() {
+    walker = require('walker');
+};
 
 var operations = module.exports.operations = {};
 
