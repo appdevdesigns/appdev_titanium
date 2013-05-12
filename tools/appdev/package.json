@@ -4,6 +4,9 @@
   "version": "0.0.1",
   "main": "app.js",
   "private": true,
+  "scripts": {
+    "postinstall": "node . install"
+  },
   "dependencies": {
     "async": "~0.2.8",
     "coa": "~0.3.9",
