@@ -1,8 +1,9 @@
-var imagemagick = null, $ = null, xmldom = null;
+var imagemagick = null, $ = null, temp = null, xmldom = null;
 module.exports.load = function() {
     // Load dependencies
     imagemagick = require('imagemagick');
     $ = require('jquery');
+    temp = require('temp');
     xmldom = require('xmldom');
 };
 
@@ -11,8 +12,9 @@ var generateImages = function(params, callback) {
     // The SVG filename defaults to the project name
     var svgPath = path.resolve(params.projectDir, params.svg || (params.project+'.svg'));
     
-    // Calculate the output directory path
+    // Calculate the output and temporary directory paths
     var outputDir = params.projectResourcesDir;
+    var tempDir = temp.mkdirSync('genimages');
     console.log('SVG file:'.label, svgPath);
     console.log('Output directory:'.label, outputDir);
     
@@ -63,16 +65,17 @@ var generateImages = function(params, callback) {
                 var translateVector = { x: 0, y: 0 };
                 translateVector[scaleX > scaleY ? 'x' : 'y'] = translate;
                 
-                // Calculate the paths
-                var imagePathPNG = path.resolve(outputDir, resolution.path);
-                var imagePathSVG = imagePathPNG.replace('png', 'svg');
-                var imageDirname = path.dirname(imagePathPNG);
+                // Calculate the paths of the temporary SVG and the generated PNG files
+                var imagePathPNG = path.join(outputDir, resolution.path);
+                var imagePathSVG = path.join(tempDir, resolution.path.replace(/png$/, 'svg'));
                 console.log('generate'.green, resolution.path.info);
                 
                 async.series([
                     function(callback) {
-                        // Ensure that the directory exists
-                        fs.mkdirs(imageDirname, Callback.suppressErrors(['EEXIST'], callback));
+                        // Ensure that the paths to the PNG and SVG files exist
+                        async.each([imagePathPNG, imagePathSVG], function(file, callback) {
+                            fs.mkdirs(path.dirname(file), Callback.suppressErrors(['EEXIST'], callback));
+                        }, callback);
                     },
                     function(callback) {
                         // Manipulate the elements as necessary
@@ -88,10 +91,6 @@ var generateImages = function(params, callback) {
                     function(callback) {
                         // Render the SVG as a PNG file via ImageMagick
                         imagemagick.convert([imagePathSVG, imagePathPNG], callback);
-                    },
-                    function(callback) {
-                        // Now delete the SVG file
-                        fs.unlink(imagePathSVG, callback);
                     }
                 ], callback);
             }, callback);
