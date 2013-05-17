@@ -65,9 +65,14 @@ var generateImages = function(params, callback) {
                 var translateVector = { x: 0, y: 0 };
                 translateVector[scaleX > scaleY ? 'x' : 'y'] = translate;
                 
+                // Split the relative path into the directory components, then feed
+                // that into path.join to get the platform-specific image relative path
+                // On Windows, for example, this will transform
+                // "android/images/high/ApplicationIcon.png" into "android\\images\\high\\ApplicationIcon.png"
+                var imageRelativePath = path.join.apply(path, resolution.path.split('/'));
                 // Calculate the paths of the temporary SVG and the generated PNG files
-                var imagePathPNG = path.join(outputDir, resolution.path);
-                var imagePathSVG = path.join(tempDir, resolution.path.replace(/png$/, 'svg'));
+                var imagePathPNG = path.join(outputDir, imageRelativePath);
+                var imagePathSVG = path.join(tempDir, imageRelativePath.replace(/png$/, 'svg'));
                 console.log('generate'.green, resolution.path.info);
                 
                 async.series([
