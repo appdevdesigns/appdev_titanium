@@ -3,13 +3,7 @@
   "description": "Manage AppDev Titanium projects.",
   "version": "0.0.1",
   "private": true,
-  "main": "app.js",
   "dependencies": {
-    "async": "*",
-    "fs-extra": "*",
-    "walker": "*"
-  },
-  "bin": {
-    "project" : "app.js"
+    "walker": "~1.0.3"
   }
 }

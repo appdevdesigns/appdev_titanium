@@ -1,0 +1,24 @@
+{
+  "name": "appdev",
+  "description": "AppDev Titanium command line tool.",
+  "version": "0.0.1",
+  "main": "app.js",
+  "private": true,
+  "scripts": {
+    "postinstall": "node . install"
+  },
+  "dependencies": {
+    "async": "~0.2.8",
+    "coa": "~0.3.9",
+    "colors": "git://github.com/Marak/colors.js.git#master",
+    "fs-extra": "~0.6.0",
+    "npm": "~1.2.20",
+    "q": "~0.9.3",
+    "underscore": "~1.4.4"
+  },
+  "bin": {
+    "appdev": "app.js",
+    "ad": "app.js"
+  },
+  "preferGlobal": true
+}

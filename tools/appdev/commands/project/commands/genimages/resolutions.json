@@ -27,8 +27,8 @@
     "height": 1024,
     "path": "iphone/Default-Portrait.png"
 }, {
-    "width": 768,
-    "height": 1024,
+    "width": 1024,
+    "height": 768,
     "path": "iphone/Default-Landscape.png"
 }, {
     "width": 320,
