@@ -46,9 +46,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     // Create the options table view
     create: function() {
         // Create rows for each of the options
-        var tableData = this.options.options.map(function(option) {
-            return this.createRow(option);
-        }, this);
+        var tableData = this.options.options.map(this.createRow, this);
         
         // Create the options table
         var _this = this;
@@ -70,13 +68,10 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                     this.selected = -1;
                 }
                 
-                var section = optionsTable.data[0];
-                if (section) {
-                    // Decrement the row index of rows after the deleted row to maintain the integrity of their indices
-                    section.rows.slice(deletedIndex).forEach(function(row) {
-                        --row.index;
-                    });
-                }
+                // Re-index the rows to maintain the integrity of their indices
+                this.getRows().forEach(function(row, index) {
+                    row.index = index;
+                });
                 --this.rowCount;
                 
                 // Remove the option to the options array and notify the caller of the removal
@@ -89,16 +84,15 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     // The index of the selected row, or -1 if no row is selected
     // Will be set initially when creating a row through createRow whose id matches the specified initial row
     selected: -1,
-    
     // Called when a row is selected
     onSelect: function(index) {
-        if (index === -1) {
-            // Nothing has been selected, or the previously selected option has been deleted
-            this.dfd.reject();
+        var row = this.getRows()[index];
+        if (row) {
+            this.dfd.resolve(row.item);
         }
         else {
-            var row = this.getChild('optionsTable').data[0].rows[index];
-            this.dfd.resolve(row.item);
+            // Nothing has been selected, or the previously selected option has been deleted
+            this.dfd.reject();
         }
     },
     
@@ -109,20 +103,16 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             groupName: this.options.groupName
         });
         $winAddOption.getDeferred().done(this.proxy(function(newOption) {
-            var newRow = this.createRow(newOption);
-            // Unselect the previous options
-            var optionsTable = this.getChild('optionsTable');
-            try {
-                // This will generate an exception if there are no rows in the table, but that is OK
-                optionsTable.data[0].rows.forEach(function(row) {
-                    row.hasCheck = false;
-                });
-            } catch(e) {}
+            // Unselect the other options
+            this.getRows().forEach(function(row) {
+                row.hasCheck = false;
+            });
             
             // Select the new option and add it to the table
+            var newRow = this.createRow(newOption);
             this.selected = newRow.index;
             newRow.hasCheck = true;
-            optionsTable.appendRow(newRow);
+            this.getChild('optionsTable').appendRow(newRow);
             
             // Add the option to the options array and notify the caller of the addition
             this.options.options.push(newOption);
@@ -144,7 +134,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         if (typeof option === 'string') {
             row = {
                 title: option,
-                item: {label: option, value: option},
+                item: { label: option, value: option },
                 id: this.rowCount
             };
         }
@@ -162,6 +152,12 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             row.hasCheck = true;
         }
         return Ti.UI.createTableViewRow(row);
+    },
+
+    // Return an array of the rows in the table
+    getRows: function() {
+        var section = this.getChild('optionsTable').data[0];
+        return section ? (section.rows || []) : [];
     }
 });
 
