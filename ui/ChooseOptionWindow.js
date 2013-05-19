@@ -140,7 +140,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         }
         else if (typeof option === 'object') {
             row = {
-                title: option.label+": "+option.value,
+                title: option.label+': '+option.value,
                 item: option,
                 id: option.id
             };
