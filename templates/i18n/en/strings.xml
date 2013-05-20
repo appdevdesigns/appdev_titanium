@@ -20,7 +20,7 @@
     <string name="correct">Correct</string>
     <string name="incorrect">Incorrect</string>
     
-	<!-- Button labels used throughout the app -->
+    <!-- Button labels used throughout the app -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>
