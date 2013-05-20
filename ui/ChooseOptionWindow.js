@@ -12,14 +12,32 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     }, {
         callback: function() {
             if (this.dfd.state() === 'pending') {
-                // "Select" the currently selected option only if the window was not closing in response to the selection of an option
-                this.onSelect(this.selected);
+                // Fill the array with the titles of all the selected rows
+                var selected = [];
+                this.getRows().forEach(function(row) {
+                    if (row.hasCheck) {
+                        selected.push(row.option);
+                    }
+                });
+
+                if (this.options.multiselect) {
+                    this.dfd.resolve(selected);
+                }
+                else {
+                    // Use the first (and only) selected option
+                    this.resolve(selected[0]);
+                }
             }
         },
         menuItem: false,
         onClose: true
     }],
     
+    defaults: {
+        multiselect: false,
+        initial: null
+    },
+
     // Convert a multivalue object used to store contact information and convert it to an array of options useable by ChooseOptionWindow
     multivalueToOptionsArray: function(multivalue) {
         var options = [];
@@ -36,9 +54,22 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     }
 }, {
     init: function(options) {
+        // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
+        $.extend(true, this.options, options);
+
+        this.Model = this.options.Model;
+        if (typeof this.Model === 'string') {
+            // "Model" can also be a string representing the name of the model class
+            this.Model = AD.Models[this.Model];
+        }
+        if (this.Model && this.Model.cache && !this.options.options) {
+            // Automatically generate the options from the model instance cache
+            this.options.options = this.Model.cache.getArray();
+        }
+
         // Initialize the base $.Window object
         this._super({
-            title: $.formatString('chooseOptionTitle', AD.Localize(this.options.groupName).toLowerCase()),
+            title: $.formatString('chooseOptionTitle', AD.Localize(this.options.groupName+(this.options.multiselect ? 's' : '')).toLowerCase()),
             autoOpen: true
         });
     },
@@ -55,19 +86,25 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         });
         optionsTable.addEventListener('click', function(event) {
             // An option row was clicked
-            _this.onSelect(event.index);
+            var row = _this.select(event.index);
+            if (!_this.options.multiselect) {
+                _this.resolve(row.option);
+            }
         });
         this.add('optionsTable', optionsTable);
         
+        if (this.options.multiselect) {
+            // Select all initially selected options
+            this.options.initial.forEach(this.select, this);
+        }
+        else {
+            // Select the initially selected option
+            this.select(this.options.initial);
+        }
+
         if (this.options.editable) {
             optionsTable.editable = true;
             optionsTable.addEventListener('delete', this.proxy(function(event) {
-                var deletedIndex = event.rowData.index;
-                if (this.selected === deletedIndex) {
-                    // The selected option was deleted
-                    this.selected = -1;
-                }
-                
                 // Re-index the rows to maintain the integrity of their indices
                 this.getRows().forEach(function(row, index) {
                     row.index = index;
@@ -75,20 +112,27 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                 --this.rowCount;
                 
                 // Remove the option from the options array and notify the caller of the removal
+                var deletedIndex = event.rowData.index;
                 this.options.options.splice(deletedIndex, 1);
                 this.onOptionsUpdate();
             }));
         }
     },
     
-    // The index of the selected row, or -1 if no row is selected
-    // Will be set initially when creating a row through createRow whose id matches the specified initial row
-    selected: -1,
-    // Called when a row is selected
-    onSelect: function(index) {
+    // Select the row at the given index
+    select: function(index) {
         var row = this.getRows()[index];
         if (row) {
-            this.dfd.resolve(row.item);
+            // Toggle the selection state of the row
+            row.hasCheck = !row.hasCheck;
+        }
+        return row;
+    },
+
+    // Complete the "choose option" operation with the specified option
+    resolve: function(option) {
+        if (option) {
+            this.dfd.resolve(option);
         }
         else {
             // Nothing has been selected, or the previously selected option has been deleted
@@ -103,14 +147,15 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             groupName: this.options.groupName
         });
         $winAddOption.getDeferred().done(this.proxy(function(newOption) {
-            // Unselect the other options
-            this.getRows().forEach(function(row) {
-                row.hasCheck = false;
-            });
+            if (!this.options.multiselect) {
+                // Unselect the other options
+                this.getRows().forEach(function(row) {
+                    row.hasCheck = false;
+                });
+            }
             
             // Select the new option and add it to the table
             var newRow = this.createRow(newOption);
-            this.selected = newRow.index;
             newRow.hasCheck = true;
             this.getChild('optionsTable').appendRow(newRow);
             
@@ -134,23 +179,19 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         if (typeof option === 'string') {
             row = {
                 title: option,
-                item: { label: option, value: option },
+                option: { label: option, value: option },
                 id: this.rowCount
             };
         }
         else if (typeof option === 'object') {
             row = {
-                title: option.label+': '+option.value,
-                item: option,
-                id: option.id
+                title: option.title || (option.label+': '+option.value),
+                option: option,
+                id: option.id || this.rowCount
             };
         }
-        row.index = row.item.index = this.rowCount++;
-        if (row.id === this.options.initial) {
-            // This is the initially selected row
-            this.selected = row.index;
-            row.hasCheck = true;
-        }
+        row.index = row.option.index = this.rowCount++;
+        row.hasCheck = false;
         return Ti.UI.createTableViewRow(row);
     },
 
@@ -172,3 +213,13 @@ var AddOptionWindow = AD.UI.StringPromptWindow('AppDev.UI.ChooseOptionWindow.Add
         });
     }
 });
+
+// Create a specialized ChooseOptionsWindow class that allows multiple options to be selected
+// This functionality is present in ChooseOptionWindow, but
+// ChooseOptionsWindow simply enables multiselect by default.
+AD.UI.ChooseOptionWindow('AppDev.UI.ChooseOptionsWindow', {
+    defaults: {
+        multiselect: true,
+        initial: []
+    }
+}, {});
