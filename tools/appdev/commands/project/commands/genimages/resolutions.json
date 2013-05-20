@@ -7,6 +7,10 @@
     "height": 114,
     "path": "iphone/appicon@2x.png"
 }, {
+    "width": 128,
+    "height": 128,
+    "path": "android/appicon.png"
+}, {
     "width": 72,
     "height": 72,
     "path": "android/images/high/ApplicationIcon.png"
@@ -46,6 +50,10 @@
     "width": 512,
     "height": 512,
     "path": "android/LargeAppIcon.png"
+}, {
+    "width": 320,
+    "height": 480,
+    "path": "android/default.png"
 }, {
     "width": 480,
     "height": 800,
