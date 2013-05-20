@@ -3,9 +3,10 @@ var $ = require('jquery');
 
 var SyncedModel = module.exports = $.Model('AD.Model.SyncedModel', {
     overrideMethod: function(object, name, method) {
+    	var original = object[name];
         object[name] = function() {
             // Delegate to the original method, likely the LocalModel version, if sync is disabled
-            return (AD.Defaults.syncEnabled ? method : this._super).apply(this, arguments);
+            return (AD.Defaults.syncEnabled ? method : original).apply(this, arguments);
         };
     },
     
