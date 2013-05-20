@@ -74,7 +74,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                 });
                 --this.rowCount;
                 
-                // Remove the option to the options array and notify the caller of the removal
+                // Remove the option from the options array and notify the caller of the removal
                 this.options.options.splice(deletedIndex, 1);
                 this.onOptionsUpdate();
             }));
