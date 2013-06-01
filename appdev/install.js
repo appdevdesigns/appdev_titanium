@@ -31,13 +31,13 @@ var installDatabases = function(dbVersion) {
     var pre1_1 = compareVersions(dbVersion, '0') > 0 && compareVersions(dbVersion, '1.1') < 0;
     if (pre1_1) {
         // Add device_id columns
-        query("ALTER TABLE nextsteps_contact ADD COLUMN device_id DEFAULT ?", [Ti.Platform.id]);
-        query("ALTER TABLE nextsteps_group ADD COLUMN device_id DEFAULT ?", [Ti.Platform.id]);
+        query("ALTER TABLE nextsteps_contact ADD COLUMN device_id TEXT DEFAULT ?", [Ti.Platform.id]);
+        query("ALTER TABLE nextsteps_group ADD COLUMN device_id TEXT DEFAULT ?", [Ti.Platform.id]);
         
         // Add and populate guid columns
-        query("ALTER TABLE nextsteps_contact ADD COLUMN contact_guid DEFAULT NULL");
+        query("ALTER TABLE nextsteps_contact ADD COLUMN contact_guid TEXT DEFAULT NULL");
         query("UPDATE nextsteps_contact SET contact_guid = contact_id||'.'||device_id");
-        query("ALTER TABLE nextsteps_group ADD COLUMN group_guid DEFAULT NULL");
+        query("ALTER TABLE nextsteps_group ADD COLUMN group_guid TEXT DEFAULT NULL");
         query("UPDATE nextsteps_group SET group_guid = group_id||'.'||device_id");
         
         // Contact year_id is now a 1-based index, rather than a 0-based index
