@@ -122,7 +122,7 @@ var boot = function(options) {
 
 var install = function(options) {
     // Install the application if necessary
-    return require('appdev/install').install(options);
+    return require(AD.Platform.isiOS ? '/install' : '../install').install();
 };
 
 var login = function(options) {
