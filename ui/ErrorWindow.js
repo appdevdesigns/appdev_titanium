@@ -27,16 +27,16 @@ module.exports = $.Window('AppDev.UI.ErrorWindow', {
     // Create child views
     create: function() {
         this.add('description', Ti.UI.createLabel({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.Fonts.header,
             textAlign: 'center'
         }));
         this.add('info', Ti.UI.createLabel({
-            top: AD.UI.padding * 2,
             left: AD.UI.padding,
+            top: AD.UI.padding * 2,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.Fonts.mediumSmall

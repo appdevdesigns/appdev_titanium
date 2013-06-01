@@ -184,15 +184,15 @@ var AddOptionWindow = $.Window('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {
     // Create the option name text field
     create: function() {
         this.add('optionLabel', Ti.UI.createLabel({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: 240,
             text: $.formatString('newOptionTitle', AD.Localize(this.options.groupName).toLowerCase()),
             font: AD.UI.Fonts.header
         }));
         var optionName = this.add('optionName', Ti.UI.createTextField({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: AD.UI.textFieldHeight,
             returnKeyType: Ti.UI.RETURNKEY_DONE,

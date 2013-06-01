@@ -30,16 +30,16 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
     // Create child views
     create: function() {
         this.add('messageLabel', Ti.UI.createLabel({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.Fonts.small,
             text: AD.Localize(this.options.message)
         }));
         var string = this.add('string', Ti.UI.createTextField({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: AD.UI.textFieldHeight,
             font: AD.UI.Fonts.small,
@@ -58,8 +58,8 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
         doneButton.addEventListener('click', onSubmit);
         string.addEventListener('return', onSubmit);
         this.add('status', Ti.UI.createLabel({
-            top: AD.UI.padding * 2,
             left: AD.UI.padding,
+            top: AD.UI.padding * 2,
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.Fonts.small
