@@ -121,8 +121,15 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     
     // Select the row at the given index
     select: function(index) {
-        var row = this.getRows()[index];
+        var rows = this.getRows();
+        var row = rows[index];
         if (row) {
+            if (!this.options.multiselect) {
+                // Unselect the other rows
+                rows.forEach(function(row) {
+                    row.hasCheck = false;
+                });
+            }
             // Toggle the selection state of the row
             row.hasCheck = !row.hasCheck;
         }
@@ -147,17 +154,10 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             groupName: this.options.groupName
         });
         $winAddOption.getDeferred().done(this.proxy(function(newOption) {
-            if (!this.options.multiselect) {
-                // Unselect the other options
-                this.getRows().forEach(function(row) {
-                    row.hasCheck = false;
-                });
-            }
-            
-            // Select the new option and add it to the table
+            // Add the new option row to the table and select it
             var newRow = this.createRow(newOption);
-            newRow.hasCheck = true;
             this.getChild('optionsTable').appendRow(newRow);
+            this.select(newRow.index);
             
             // Add the option to the options array and notify the caller of the addition
             this.options.options.push(newOption);
