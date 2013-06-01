@@ -42,13 +42,13 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     multivalueToOptionsArray: function(multivalue) {
         var options = [];
         $.each(multivalue, function(label, values) {
-            for (var i = 0; i < values.length; ++i) {
+            values.forEach(function(value, index) {
                 options.push({
-                    label: label + (i === 0 ? '' : i+1),
-                    value: values[i],
-                    id: label+':'+i
+                    title: label + (index === 0 ? '' : ' '+(index+1)) + ': ' + value,
+                    value: value,
+                    id: label+':'+index
                 });
-            }
+            });
         });
         return options;
     }
@@ -86,7 +86,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         });
         optionsTable.addEventListener('click', function(event) {
             // An option row was clicked
-            var row = _this.select(event.index);
+            var row = _this.select(event.row.id);
             if (!_this.options.multiselect) {
                 _this.resolve(row.option);
             }
@@ -119,10 +119,17 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         }
     },
     
-    // Select the row at the given index
-    select: function(index) {
+    // Select the row with the given id
+    select: function(id) {
         var rows = this.getRows();
-        var row = rows[index];
+        var row = null;
+        // Find the row with the specified id
+        $.each(rows, function(index, currentRow) {
+            if (currentRow.id === id) {
+                row = currentRow;
+                return false; // stop iterating
+            }
+        });
         if (row) {
             if (!this.options.multiselect) {
                 // Unselect the other rows
@@ -157,7 +164,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             // Add the new option row to the table and select it
             var newRow = this.createRow(newOption);
             this.getChild('optionsTable').appendRow(newRow);
-            this.select(newRow.index);
+            this.select(newRow.id);
             
             // Add the option to the options array and notify the caller of the addition
             this.options.options.push(newOption);
@@ -175,23 +182,21 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     rowCount: 0,
     // Return a row data structure representing the option
     createRow: function(option) {
-        var row = {};
         if (typeof option === 'string') {
-            row = {
+            // Convert simple string options to full option objects
+            option = {
                 title: option,
-                option: { label: option, value: option },
-                id: this.rowCount
+                value: option,
+                id: option
             };
         }
-        else if (typeof option === 'object') {
-            row = {
-                title: option.title || (option.label+': '+option.value),
-                option: option,
-                id: option.id || this.rowCount
-            };
-        }
-        row.index = row.option.index = this.rowCount++;
-        row.hasCheck = false;
+        var row = {
+            title: option.title,
+            option: option,
+            id: option.id || this.rowCount,
+            hasCheck: false
+        };
+        row.index = option.index = this.rowCount++;
         return Ti.UI.createTableViewRow(row);
     },
 
