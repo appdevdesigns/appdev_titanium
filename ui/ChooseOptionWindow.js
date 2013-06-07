@@ -106,7 +106,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     // Display the AddOptionWindow
     addOption: function() {
         var $winAddOption = new AddOptionWindow({
-            tab: this.options.tab,
+            tab: this.tab,
             groupName: this.options.groupName
         });
         $winAddOption.getDeferred().done(this.proxy(function(newOption) {

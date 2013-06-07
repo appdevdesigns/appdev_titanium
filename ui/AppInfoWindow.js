@@ -108,7 +108,7 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {
 
     // Create the child views
     create: function() {
-        var tab = this.options.tab;
+        var tab = this.tab;
         var $contentView = this.add($.View.create(Ti.UI.createScrollView({
             left: 0,
             top: 0,
