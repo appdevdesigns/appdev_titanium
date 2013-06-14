@@ -77,7 +77,10 @@ var ADModel = module.exports = {
     // All instances derived from AD.Model will have these static properties
     staticProperties: {
         defaults: {
-            device_id: Ti.Platform.id
+            device_id: Ti.Platform.id,
+            get viewer_id() {
+                return AD.Viewer ? AD.Viewer.viewer_id : null;
+            }
         },
         convert: {
             integer: function(raw) {
