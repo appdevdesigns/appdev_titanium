@@ -113,7 +113,11 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                 
                 // Remove the option from the options array and notify the caller of the removal
                 var deletedIndex = event.rowData.index;
-                this.options.options.splice(deletedIndex, 1);
+                var deletedOption = this.options.options.splice(deletedIndex, 1)[0];
+                if (this.Model) {
+                    // The option is also a model instance, so destroy it
+                    deletedOption.destroy();
+                }
                 this.onOptionsUpdate();
             }));
         }
@@ -160,15 +164,34 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             tab: this.tab,
             groupName: this.options.groupName
         });
-        $winAddOption.getDeferred().done(this.proxy(function(newOption) {
+        var Model = this.Model;
+        var addOptionDfd;
+        if (Model) {
+            addOptionDfd = $.Deferred();
+            $winAddOption.getDeferred().done(function(optionLabel) {
+                // Create a new model instance to represent this option
+                var newOption = new Model();
+                newOption.attr(Model.labelKey, optionLabel);
+                newOption.save().then(function() {
+                    addOptionDfd.resolve(newOption);
+                }, addOptionDfd.reject);
+            });
+        }
+        else {
+            addOptionDfd = $winAddOption.getDeferred();
+        }
+        addOptionDfd.done(this.proxy(function(newOption) {
             // Add the new option row to the table and select it
             var newRow = this.createRow(newOption);
             this.getChild('optionsTable').appendRow(newRow);
             this.select(newRow.id);
             
-            // Add the option to the options array and notify the caller of the addition
-            this.options.options.push(newOption);
-            this.onOptionsUpdate();
+            // This is unnecessary when options are model instances because the model cache is maintained
+            if (!this.Model) {
+                // Add the option to the options array and notify the caller of the addition
+                this.options.options.push(newOption);
+                this.onOptionsUpdate();
+            }
         }));
     },
     
@@ -191,11 +214,17 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             };
         }
         var row = {
-            title: option.title,
             option: option,
-            id: option.id || this.rowCount,
             hasCheck: false
         };
+        if (this.Model) {
+            row.title = option.attr(this.Model.labelKey);
+            row.id = option.getId();
+        }
+        else {
+            row.title = option.title;
+            row.id = option.id || this.rowCount;
+        }
         row.index = option.index = this.rowCount++;
         return Ti.UI.createTableViewRow(row);
     },
