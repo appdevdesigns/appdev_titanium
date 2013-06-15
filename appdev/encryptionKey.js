@@ -35,7 +35,7 @@ var EncryptionKey = module.exports = {
         return Ti.Utils.sha256(randomString + Date.now());
     },
     isEncrypted: function() {
-        return Ti.App.deployType !== 'development';
+        return AD.Defaults.alwaysEncrypt || Ti.App.deployType !== 'development';
     },
     get: function() {
         return EncryptionKey.password; // will be null if not logged in

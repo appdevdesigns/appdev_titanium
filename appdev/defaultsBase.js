@@ -2,6 +2,7 @@ var defaults = {
     application: Ti.App.name,
     dbName: Ti.App.name,
     development: Ti.App.deployType === 'development' || Ti.App.deployType === 'test',
+    alwaysEncrypt: false, // may be overridden by applications 
     Model: {
         // Model definitions reference the connection type by the key, NOT the value!!!
         ConnectionTypes: {
