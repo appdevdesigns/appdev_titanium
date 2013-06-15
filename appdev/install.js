@@ -22,7 +22,9 @@ var compareVersions = module.exports.compareVersions = function(v1, v2) {
 var installDatabases = function(dbVersion) {
     // Turn off iCloud backup for the database file
     var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, AD.Defaults.dbName+'.sql');
-    file.remoteBackup = false;
+    if (file.exists()) {
+        file.remoteBackup = false;
+    }
 };
 
 module.exports.install = function(hooks) {
