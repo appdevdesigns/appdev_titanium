@@ -84,6 +84,10 @@ module.exports.install = function(hooks) {
             // The app is already installed, so do not prompt for the random database encryption key
             dfd.resolve({ updated: true });
         }
+        else if (!AD.EncryptionKey.isEncrypted()) {
+            // Encryption is unnecessary
+            dfd.resolve({ installed: true });
+        }
         else if (AD.Platform.isiOS) {
             // Installing on iOS
             

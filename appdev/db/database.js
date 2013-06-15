@@ -6,6 +6,7 @@ var dmarieDB = require(dmarieModulePath);
 module.exports = {
     open: function(dbName) {
         // Open the encrypted database
-        return dmarieDB.openDB(dbName+'.sql', AD.EncryptionKey.get());
+        var dbFile = dbName+'.sql';
+        return AD.EncryptionKey.isEncrypted() ? dmarieDB.openDB(dbFile, AD.EncryptionKey.get()) : Ti.Database.open(AD.Platform.isAndroid ? dbFile : dbName)
     }
 };

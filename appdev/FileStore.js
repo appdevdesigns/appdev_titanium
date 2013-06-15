@@ -4,7 +4,13 @@ var $ = require('jquery');
 module.exports = $.Class('AD.FileStore', {}, {
     init: function(options) {
         this.file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, options.fileName);
-        this.data = this.file.exists() ? JSON.parse(AD.sjcl.decrypt(AD.EncryptionKey.get(), this.file.read().text)) : (options.defaultData || {});
+        if (this.file.exists()) {
+            var text = this.file.read().text;
+            this.data = JSON.parse(AD.EncryptionKey.isEncrypted() ? AD.sjcl.decrypt(AD.EncryptionKey.get(), text) : text);
+        }
+        else {
+            this.data = options.defaultData || {};
+        }
     },
     
     getData: function() {
@@ -15,6 +21,7 @@ module.exports = $.Class('AD.FileStore', {}, {
     },
     
     flush: function() {
-        this.file.write(AD.sjcl.encrypt(AD.EncryptionKey.get(), JSON.stringify(this.data)));
+        var text = JSON.stringify(this.data);
+        this.file.write(AD.EncryptionKey.isEncrypted() ? AD.sjcl.encrypt(AD.EncryptionKey.get(), text) : text);
     }
 });

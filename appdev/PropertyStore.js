@@ -69,32 +69,44 @@ module.exports = PropertyStore = {
     },
     
     read: function(legacyDecryptor) {
-        var key = AD.EncryptionKey.get();
-        if (!key) {
-            // Encryption key has not been generated yet
-            return;
-        }
-        
         // Import the encrypted property store from Tianium.App.Properties
         var propertyStore = Ti.App.Properties.getString('property_store');
-        var decryptor = legacyDecryptor ? this.decrypt_legacy : this.decrypt;
-        var decrypted = propertyStore ? decryptor(key, propertyStore) : '{}';
-        var store = JSON.parse(decrypted);
+        var text;
+        if (AD.EncryptionKey.isEncrypted()) {
+            var key = AD.EncryptionKey.get();
+            if (!key) {
+                // Encryption key has not been generated yet
+                return;
+            }
+            var decryptor = legacyDecryptor ? this.decrypt_legacy : this.decrypt;
+            text = propertyStore ? decryptor(key, propertyStore) : '{}';
+        }
+        else {
+            // Property store is unencrypted
+            text = propertyStore || '{}';
+        }
+        var store = JSON.parse(text);
         // Call PropertyStore.set for each property so that the triggers will be called
         $.each(store, $.proxy(this, 'set'));
     },
     write: function(legacyEncryptor) {
-        var key = AD.EncryptionKey.get();
-        if (!key) {
-            // Encryption key has not been generated yet
-            return;
-        }
-        
         // Export the encrypted property store to Ti.App.Properties
         var propertyStore = JSON.stringify(this.store);
-        var encryptor = legacyEncryptor ? this.encrypt_legacy : this.encrypt;
-        var encrypted = key ? encryptor(key, propertyStore) : propertyStore;
-        Ti.App.Properties.setString('property_store', encrypted);
+        var text;
+        if (AD.EncryptionKey.isEncrypted()) {
+            var key = AD.EncryptionKey.get();
+            if (!key) {
+                // Encryption key has not been generated yet
+                return;
+            }
+            var encryptor = legacyEncryptor ? this.encrypt_legacy : this.encrypt;
+            text = encryptor(key, propertyStore);
+        }
+        else {
+            // Property store is unencrypted
+            text = propertyStore;
+        }
+        Ti.App.Properties.setString('property_store', text);
     },
     
     encrypt: function(key, propertyStore) {
