@@ -8,8 +8,21 @@ var ADModel = module.exports = {
         
         var staticProperties = $.extend(true, {
             __adModule: definition._adModule,
-            __adModel: definition._adModel
+            __adModel: definition._adModel,
+            attributes: {}
         }, ADModel.staticProperties, definition);
+        
+        // Augment the attributes object with the remaining model fields, giving them the default type
+        // This is to ensure the $.Model is aware of each of the defined attributes, not just the ones with special types
+        var modelFields = staticProperties.modelFields || (staticProperties.fields && staticProperties.fields.trans);
+        if (modelFields) {
+            var attributes = staticProperties.attributes;
+            $.each(modelFields, function(field) {
+                if (!attributes[field]) {
+                    attributes[field] = 'default';
+                }
+            });
+        }
         
         // Lookup the connection type name in the ConnectionTypes array and assign it the default value if it could not be found
         var connectionTypes = AD.Defaults.Model.ConnectionTypes;
