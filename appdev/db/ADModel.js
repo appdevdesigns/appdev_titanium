@@ -92,7 +92,7 @@ var ADModel = module.exports = {
         defaults: {
             device_id: Ti.Platform.id,
             get viewer_id() {
-                return AD.Viewer ? AD.Viewer.viewer_id : null;
+                return AD.Viewer ? AD.Viewer.viewer_id : AD.Defaults.viewerId;
             }
         },
         convert: {

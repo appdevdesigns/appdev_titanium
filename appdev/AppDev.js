@@ -331,7 +331,7 @@ var getViewer = function() {
     }
     else {
         // Use a dummy viewer
-        AD.setViewer({ viewer_id: 1 });
+        AD.setViewer({ viewer_id: AD.Defaults.viewerId });
     }
     // Return a deferred that resolves immediately
     return $.Deferred().resolve().promise();

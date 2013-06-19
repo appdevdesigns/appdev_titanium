@@ -23,6 +23,7 @@ var defaults = {
     get syncEnabled() {
         return Ti.App.Properties.getBool('sync_enabled_preference');
     },
+    viewerId: 1,
     feedbackAddress: 'appdev.feedback@gmail.com',
     version: Ti.App.version
 };
