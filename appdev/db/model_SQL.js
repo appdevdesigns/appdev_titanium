@@ -546,8 +546,11 @@ module.exports = $.Model('AD.Model.ModelSQL', {
                 joinedTable.tref = tref;
                 joinedTable.type = 'LEFT';
                 joinedTable.joinToTref = 'p';
-                // Add the field's language code to the current model (with tref)
-                joinedTable.condition = [{ tref: tref, key: 'language_code', value: langCode }];
+                joinedTable.condition = [];
+                if (typeof joinedTable.hasLanguageCode === 'undefined' || joinedTable.hasLanguageCode === true) {
+                    // Add the field's language code to the current model (with tref)
+                    joinedTable.condition.push({ tref: tref, key: 'language_code', value: langCode });
+                }
                 curDataMgr.selectedFields[joinedTable.label] = { tref: tref };
                 curDataMgr.joinedTables.push(joinedTable);
                 
@@ -587,5 +590,6 @@ var copyTableInfo = function(tableInfo) {
     if (typeof tableInfo.label != 'undefined') {
         copiedInfo.label = tableInfo.label;
     }
+    copiedInfo.hasLanguageCode = (tableInfo.hasLanguageCode === false) ? false : true;
     return copiedInfo;
 };
