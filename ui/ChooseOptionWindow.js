@@ -16,9 +16,16 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                 var selected = [];
                 this.getRows().forEach(function(row) {
                     if (row.hasCheck) {
-                        selected.push(row.option);
+                        var option = row.option;
+                        if (option && this.Model) {
+                            // Load the true model from the model cache
+                            // Because the option is a property of a Ti.UI.TableViewRow instance, it is
+                            // passed through the Titanium proxy and no longer refers to the original model
+                            option = this.Model.cache.getById(option.getId());
+                        }
+                        selected.push(option);
                     }
-                });
+                }, this);
 
                 if (this.options.multiselect) {
                     this.dfd.resolve(selected);
