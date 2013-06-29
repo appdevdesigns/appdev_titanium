@@ -76,6 +76,18 @@ var boot = function(options) {
     $.Model.prototype.getId = function() {
         return this.attr(this.constructor.id);
     };
+    // Return the label of this model instance
+    $.Model.prototype.getLabel = function() {
+        return this.attr(this.constructor.labelKey);
+    };
+    // Return an array of ids of the models
+    $.Model.getIds = function(models) {
+        return models.map(function(model) { return model.getId(); });
+    };
+    // Return an array of labels of the models
+    $.Model.getLabels = function(models) {
+        return models.map(function(model) { return model.getLabel(); });
+    };
     
     AD.Deferreds = {
         login: $.Deferred(), // dictionary of registered important initialization deferreds
