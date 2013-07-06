@@ -200,5 +200,30 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }
         // Pipe the deferred to ensure that the callback option is executed before any attached callbacks are executed
         return dfd.pipe();
+    },
+
+    // Export the database, represented as a Javascript object
+    export: function(dbName) {
+        var self = this;
+        var dfd = $.Deferred();
+        self.execute(dbName, "SELECT name FROM sqlite_master WHERE type='table'").done(function(tableArgs) {
+            var dump = {
+                tables: {}
+            };
+
+            var tables = tableArgs[0];
+            tables.forEach(function(table) {
+                var tableName = table.name;
+                self.execute(dbName, "SELECT * FROM ?", [tableName]).done(function(rowArgs) {
+                    dump.tables[tableName] = {
+                        rows: rowArgs[1],
+                        data: rowArgs[0]
+                    };
+                }).fail(dfd.reject);
+            });
+            // This assummes that the "execute" call is blocking, which it is
+            dfd.resolve(dump);
+        }).fail(dfd.reject);
+        return dfd.promise();
     }
 }, {});
