@@ -155,7 +155,6 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             
             // Get the names of the fields in the result set
             var fieldNames = [];
-            console.log(result.fieldCount());
             var fieldCount = result.fieldCount();
             for (var field = 0; field < fieldCount; ++field) {
                 fieldNames.push(result.fieldName(field));
