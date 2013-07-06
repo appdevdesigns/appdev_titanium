@@ -225,5 +225,32 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             dfd.resolve(dump);
         }).fail(dfd.reject);
         return dfd.promise();
+    },
+
+    // Import the database, represented as a Javascript object
+    import: function(dbName, dump) {
+        var self = this;
+        var dfd = $.Deferred();
+        $.each(dump.tables, function(name, table) {
+            // Empty the table
+            self.execute(dbName, "DELETE FROM ?", [name]).done(function() {
+                var rowNames = table.rows;
+                var dataRows = table.data;
+                var maxInserts = 250;
+                for (var startRow = 0; startRow < dataRows.length; startRow += maxInserts) {
+                    var values = [name];
+                    var selectSQL = dataRows.slice(startRow, startRow + maxInserts).map(function(row) {
+                        return rowNames.map(function(rowName) {
+                            values.push(row[rowName]);
+                            return '?';
+                        }).join(',');
+                    }).join(' UNION ALL SELECT ');
+                    self.execute(dbName, "INSERT INTO ? ("+rowNames.join(',')+") SELECT "+selectSQL, values).fail(dfd.reject);
+                }
+            }).fail(dfd.reject);
+        });
+        // This assummes that the "execute" call is blocking, which it is
+        dfd.resolve();
+        return dfd.promise();
     }
 }, {});
