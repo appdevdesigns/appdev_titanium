@@ -83,6 +83,16 @@ var ServiceJSON = {
         ServiceJSON.post(request);
     },
     
+    // Convert a URL and a query object to a url that includes a querystring
+    makeURL: function(baseURL, query) {
+        var queryParts = [];
+        for (var key in query) {
+            queryParts.push(key+'='+encodeURIComponent(query[key]));
+        }
+        var querystring = queryParts.join('&');
+        return baseURL + (querystring ? ('?'+querystring) : '');
+    },
+
     /**
      * @class AppDev.ServiceJSON.request()
      * @parent AD.serviceJSON
@@ -179,7 +189,7 @@ var ServiceJSON = {
             return;
         }
         
-        var url = options.url;
+        var url = ServiceJSON.makeURL(options.url, options.query || {});
         if (!/^https?:\/\//.test(options.url)) {
             var serverBaseURL = AD.Defaults.serverBaseURL;
             // Server URL is not specified yet, so ignore this request
