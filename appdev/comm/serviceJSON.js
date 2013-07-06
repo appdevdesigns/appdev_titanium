@@ -84,7 +84,7 @@ var ServiceJSON = {
     },
     
     /**
-     * @class AppDev.ServiceJSON.post()
+     * @class AppDev.ServiceJSON.request()
      * @parent AD.serviceJSON
      * Post an Ajax request asynchronously.
      *
@@ -104,7 +104,7 @@ var ServiceJSON = {
      *    Auto means errors will be shown unless a failure callback is
      *    provided.
      */
-    post: function(options) {
+    request: function(options) {
         var onload = function(response) {
             // Called when the request returns successfully
             
@@ -146,7 +146,7 @@ var ServiceJSON = {
                         // Resend all waiting requests
                         console.log('Resending requests:');
                         ServiceJSON.waitingRequests.forEach(function(request) {
-                            ServiceJSON.post(request);
+                            ServiceJSON.request(request);
                         });
                         ServiceJSON.waitingRequests = [];
                     });
@@ -208,15 +208,24 @@ var ServiceJSON = {
             var errorMessage = 'JSON request to "'+url+'" failed.';
             console.error(errorMessage);
         };
-        xhr.open('POST', url);
+        xhr.open(options.method || 'GET', url);
         xhr.setRequestHeader('accept', 'application/json');
         xhr.setRequestHeader('content-type', 'application/json');
         xhr.send(JSON.stringify(options.params));
         return xhr;
         
-    } // post
+    } // request
     
 }; // ServiceJSON
+
+// Add the GET and POST request shortcuts
+['get', 'post'].forEach(function(method) {
+    ServiceJSON[method] = function(options) {
+        return ServiceJSON.request($.extend({
+            method: method.toUpperCase()
+        }, options));
+    };
+});
 
 AD.Deferreds.login.done(function() {
     // After logging in, initialize request resending
