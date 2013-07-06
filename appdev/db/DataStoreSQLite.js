@@ -138,6 +138,12 @@ module.exports = $.Class('AD.DataStore.SQLite', {
     
     // Execute the specified SQLite query
     execute: function(dbName, query, values, callback) {
+        if ($.isFunction(values)) {
+            // The 'values' parameter was omitted
+            callback = values;
+            values = [];
+        }
+
         // Execute the query
         var database = this.openDatabase(dbName);
         var expandedQuery = this.expandQuery(query, values);
