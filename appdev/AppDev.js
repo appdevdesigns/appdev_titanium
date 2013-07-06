@@ -115,7 +115,7 @@ var boot = function(options) {
     AD.PropertyStore = require('appdev/PropertyStore');
     
     AD.Comm = {};
-    AD.Comm.HTML = require('appdev/comm/HTML');
+    AD.Comm.HTTP = require('appdev/comm/HTTP');
     
     AD.Models = {};
     

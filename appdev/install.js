@@ -177,6 +177,12 @@ module.exports.install = function(hooks) {
             if (hooks && $.isFunction(hooks.onInstall)) {
                 hooks.onInstall(currentVersion);
             }
+            
+            if (compareVersions(currentVersion, '0') > 0 && compareVersions(currentVersion, '1.5') < 0) {
+                // Rename the file ServiceJSON.retryingRequests.json to HTTP.retryingRequests.json
+                var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'ServiceJSON.retryingRequests.json');
+                file.rename('HTTP.retryingRequests.json');
+            }
         }
     });
     return dfd.promise();

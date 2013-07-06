@@ -21,78 +21,6 @@ var ServiceJSON = {
         }
     },
     
-    // An array of requests that are delayed because a network error (user is offline)
-    retryDelay: 1000,
-    retryingRequests: [],
-    retryingRequestsStore: null, // initialized after login
-    addRetryingRequest: function(requestOptions) {
-        if (requestOptions.retrying) {
-            // This request is already retrying, so do not add it again
-            return;
-        }
-        
-        var failed = false;
-        var request = $.extend({}, requestOptions);
-        request.retrying = true;
-        request.success = function() {
-            console.log('Successfully completed delayed request to ['+request.url+']!');
-            ServiceJSON.removeRetryingRequest(request);
-        };
-        request.failure = function() {
-            failed = true;
-        };
-        request.complete = function() {
-            // Retry the next request (or this one if it failed)
-            console.log('Completed delayed request to ['+request.url+']!');
-            if (failed) {
-                // Wait before retrying this request
-                setTimeout(ServiceJSON.retryRequests, ServiceJSON.retryDelay);
-            }
-            else {
-                // Retry the next request immediately
-                ServiceJSON.retryRequests();
-            }
-        };
-        ServiceJSON.retryingRequests.push(request);
-        ServiceJSON.retryingRequestsStore.flush();
-    },
-    removeRetryingRequest: function(requestOptions) {
-        // The request completed, so remove it from the list of retrying requests
-        var index = ServiceJSON.retryingRequests.indexOf(requestOptions);
-        if (index === -1) {
-            console.error('Could not find request in ServiceJSON.retryingRequests!');
-            console.log(JSON.stringify(requestOptions));
-        }
-        else {
-            ServiceJSON.retryingRequests.splice(index, 1);
-            ServiceJSON.retryingRequestsStore.flush();
-        }
-    },
-    
-    // Retry waiting requests
-    retryRequests: function() {
-        var requestCount = ServiceJSON.retryingRequests.length;
-        if (requestCount === 0) {
-            // There are no requests in the retryingRequests array, so nothing is needed here
-            setTimeout(ServiceJSON.retryRequests, ServiceJSON.retryDelay);
-            return;
-        }
-        console.log(requestCount+' requests in retryingRequests queue.');
-        var request = ServiceJSON.retryingRequests[0];
-        console.log('Retrying request to ['+request.url+']...');
-        ServiceJSON.post(request);
-    },
-    
-    // Convert a URL and a query object to a url that includes a querystring
-    makeURL: function(baseURL, query) {
-        var queryParts = [];
-        for (var key in query) {
-            queryParts.push(key+'='+encodeURIComponent(query[key]));
-        }
-        var querystring = queryParts.join('&');
-        return baseURL + (querystring ? ('?'+querystring) : '');
-    },
-
     /**
      * @class AppDev.ServiceJSON.request()
      * @parent AD.serviceJSON
@@ -128,49 +56,27 @@ var ServiceJSON = {
                 console.log(response); 
             }
             
-            var success = false;
-            
             // Got a JSON response but was the service action a success?
-            if (data && data.success && (data.success !== 'false')) {
-                // SUCCESS!
-                if ($.isFunction(options.success)) {
-                    // Execute the optional success callback
-                    options.success(data);
-                }
-                success = true;
+            if (data && data.success) {
+                options.HTTP.onSuccess(response);
             }
-            // FAILED
-            else {
-                if (options.retry) {
-                    // Retry the request until the it succeeds
-                    console.log('Request to ['+options.url+'] failed!  Retrying later.');
-                    ServiceJSON.addRetryingRequest(options);
-                }
-                
+            else if (data && data.errorID == 55) {
                 // Authentication failure (i.e. session timeout)
-                if (data && data.errorID == 55) {
-                    ServiceJSON.addWaitingRequest(options);
-                    
-                    // Reauthenticate
-                    AD.winLogin.open(function() {
-                        // Resend all waiting requests
-                        console.log('Resending requests:');
-                        ServiceJSON.waitingRequests.forEach(function(request) {
-                            ServiceJSON.request(request);
-                        });
-                        ServiceJSON.waitingRequests = [];
+                ServiceJSON.addWaitingRequest(options);
+
+                // Reauthenticate
+                AD.winLogin.open(function() {
+                    // Resend all waiting requests
+                    console.log('Resending requests:');
+                    ServiceJSON.waitingRequests.forEach(function(request) {
+                        ServiceJSON.request(request);
                     });
-                }
-                // Execute the optional failure callback
-                else if ($.isFunction(options.failure)) {
-                    options.failure(data);
-                }
-            } // failed
-            
-            // Call complete AFTER the success or failure callback
-            if ($.isFunction(options.complete)) {
-                // Call the complete callback if it was provided
-                options.complete();
+                    ServiceJSON.waitingRequests = [];
+                });
+            }
+            else {
+                // The request failed
+                options.HTTP.onFailure(response);
             }
             
             return success;
@@ -180,7 +86,7 @@ var ServiceJSON = {
         if (AD.winLogin && AD.winLogin.isOpen && options.url !== '/service/site/login/authenticate') {
             if (options.retry) {
                 // Treat this request as a failure because it will retry it later
-                onload(null);
+                options.HTTP.onFailure(null);
             }
             else {
                 // Delay this request until the authentication completes
@@ -189,41 +95,15 @@ var ServiceJSON = {
             return;
         }
         
-        var url = ServiceJSON.makeURL(options.url, options.query || {});
-        if (!/^https?:\/\//.test(options.url)) {
-            var serverBaseURL = AD.Defaults.serverBaseURL;
-            // Server URL is not specified yet, so ignore this request
-            if (!serverBaseURL) {
-                onload(null);
-                return;
-            }
-            
-            // Add the scheme, domain, and port to this relative URL
-            url = serverBaseURL+url;
-        }
-        
-        var xhr = Ti.Network.createHTTPClient();
-        xhr.onload = function() {
-            onload(this.responseText);
-        };
-        xhr.onerror = function(err) {
-            // The server responds with a 401 Unauthorized error if the user is not
-            // authenticated, so give the success callback a chance to handle the error
-            if (onload(this.responseText)) {
-                // onload returned true, so the 'error' was that the user was unauthenticated
-                return;
-            }
-            
-            // Called when the request returns an error (this should be very rare and signifies a major network error)
-            var errorMessage = 'JSON request to "'+url+'" failed.';
-            console.error(errorMessage);
-        };
-        xhr.open(options.method || 'GET', url);
-        xhr.setRequestHeader('accept', 'application/json');
-        xhr.setRequestHeader('content-type', 'application/json');
-        xhr.send(JSON.stringify(options.params));
-        return xhr;
-        
+        return AD.Comm.HTTP.request($.extend(true, {
+            params: JSON.stringify(options.params),
+            headers: $.extend({
+                'accept': 'application/json',
+                'content-type': 'application/json'
+            }, options.headers),
+            success: onload,
+            failure: onload
+        }, options));
     } // request
     
 }; // ServiceJSON
@@ -235,25 +115,6 @@ var ServiceJSON = {
             method: method.toUpperCase()
         }, options));
     };
-});
-
-AD.Deferreds.login.done(function() {
-    // After logging in, initialize request resending
-    var requestStore = ServiceJSON.retryingRequestsStore = new AD.FileStore({
-        fileName: 'ServiceJSON.retryingRequests.json',
-        defaultData: []
-    });
-    var requests = requestStore.getData();
-    requests.forEach(function(request) {
-        // Set the retrying property to false because this the request is new and has not been retried yet.
-        // Otherwise, the request will be rejected as a duplicate by ServiceJSON.addRetryingRequest.
-        request.retrying = false;
-        ServiceJSON.addRetryingRequest(request);
-    });
-    requestStore.setData(ServiceJSON.retryingRequests);
-    
-    // Start retrying failed requests
-    ServiceJSON.retryRequests();
 });
 
 module.exports = ServiceJSON;
