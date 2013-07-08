@@ -97,19 +97,19 @@ var HTTP = {
      */
     request: function(options) {
         options.HTTP = {
-            onComplete: function() {
+            onComplete: function(xhr) {
                 // Call complete AFTER the success or failure callback
                 if ($.isFunction(options.complete)) {
                     // Call the complete callback if it was provided
-                    options.complete();
+                    options.complete(xhr);
                 }
             },
             onSuccess: function(response) {
                 if ($.isFunction(options.success)) {
                     // Execute the optional success callback
-                    options.success(response);
+                    options.success(response, xhr);
                 }
-                options.HTTP.onComplete();
+                options.HTTP.onComplete(xhr);
             },
             onFailure: function(response) {
                 if (options.retry) {
@@ -119,9 +119,9 @@ var HTTP = {
                 }
                 // Execute the optional failure callback
                 if ($.isFunction(options.failure)) {
-                    options.failure(response);
+                    options.failure(response, xhr);
                 }
-                options.HTTP.onComplete();
+                options.HTTP.onComplete(xhr);
             }
         };
 
@@ -140,11 +140,11 @@ var HTTP = {
 
         var xhr = Ti.Network.createHTTPClient();
         xhr.onload = function() {
-            options.HTTP.onSuccess(this.responseText);
+            options.HTTP.onSuccess(this.responseText, this);
         };
         xhr.onerror = function(err) {
             // Called when the request returns an error (the user is probably offline)
-            options.HTTP.onFailure(this.responseText);
+            options.HTTP.onFailure(this.responseText, this);
             console.error('HTTP request to "'+url+'" failed!');
         };
         xhr.open(options.method || 'GET', url);

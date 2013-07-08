@@ -43,7 +43,7 @@ var ServiceJSON = {
      *    provided.
      */
     request: function(options) {
-        var onload = function(response) {
+        var onload = function(response, xhr) {
             // Called when the request returns successfully
             
             // Convert the response text to a JSON object
@@ -58,7 +58,7 @@ var ServiceJSON = {
             
             // Got a JSON response but was the service action a success?
             if (data && data.success) {
-                options.HTTP.onSuccess(response);
+                options.HTTP.onSuccess(response, xhr);
             }
             else if (data && data.errorID == 55) {
                 // Authentication failure (i.e. session timeout)
@@ -76,7 +76,7 @@ var ServiceJSON = {
             }
             else {
                 // The request failed
-                options.HTTP.onFailure(response);
+                options.HTTP.onFailure(response, xhr);
             }
             
             return success;
@@ -86,7 +86,7 @@ var ServiceJSON = {
         if (AD.winLogin && AD.winLogin.isOpen && options.url !== '/service/site/login/authenticate') {
             if (options.retry) {
                 // Treat this request as a failure because it will retry it later
-                options.HTTP.onFailure(null);
+                options.HTTP.onFailure(null, null);
             }
             else {
                 // Delay this request until the authentication completes
