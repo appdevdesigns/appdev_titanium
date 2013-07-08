@@ -116,6 +116,9 @@ var boot = function(options) {
     
     AD.Comm = {};
     AD.Comm.HTTP = require('appdev/comm/HTTP');
+    AD.Comm.GoogleAPIs = require('appdev/GoogleAPIs');
+    AD.Comm.GoogleDrive = require('appdev/comm/GoogleDrive');
+    AD.Comm.GoogleDriveFileAPI = require('appdev/comm/GoogleDriveFileAPI');
     
     AD.Models = {};
     
