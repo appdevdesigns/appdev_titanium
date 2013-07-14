@@ -88,7 +88,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
         };
         
         // Send login request to the server
-        console.log('Attempting to login as {'+loginData.userID+', '+loginData.pWord+'}');
+        console.log('Attempting to login...');
         AD.ServiceJSON.post({
             params: loginData,
             url: '/service/site/login/authenticate',
