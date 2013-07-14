@@ -10,6 +10,7 @@ module.exports = {
                 AD.Comm.GoogleDrive.request({
                     method: 'GET',
                     url: file.downloadUrl,
+                    raw: true,
                     success: function(content) {
                         callback(content, file);
                     }

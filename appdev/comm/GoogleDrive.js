@@ -5,7 +5,13 @@ var GoogleAPIs = AD.Comm.GoogleAPIs;
 var GoogleDrive = module.exports = {};
 
 // Process the HTTP response as necessary
-var processResponse = function(response, xhr) {
+var processResponse = function(response, options, xhr) {
+    if (options.raw) {
+        // Do not to parse the response
+        return response;
+    }
+
+    // Attempt to parse the response text as JSON data
     var data = response;
     try {
         data = JSON.parse(data);
@@ -27,7 +33,7 @@ GoogleDrive.request = function(options) {
         params: options.data,
         success: function(response, xhr) {
             if ($.isFunction(options.success)) {
-                options.success(processResponse(response, xhr), xhr);
+                options.success(processResponse(response, options, xhr), xhr);
             }
         },
         failure: function(response, xhr) {
@@ -40,7 +46,7 @@ GoogleDrive.request = function(options) {
                 });
             }
             else if ($.isFunction(options.failure)) {
-                options.failure(processResponse(response, xhr), xhr);
+                options.failure(processResponse(response, options, xhr), xhr);
             }
             console.error('Request to '+options.url+' failed!');
             console.error(response);
