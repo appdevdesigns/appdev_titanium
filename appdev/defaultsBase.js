@@ -24,11 +24,8 @@ var defaults = {
         return Ti.App.Properties.getBool('sync_enabled_preference');
     },
     viewerId: 1,
-    GoogeAPISecrets: {
-        // should be overridden by applications
-        client_id: null,
-        client_secret: null
-    },
+    // Attempt to load the application-specific GoogleAPISecrets
+    GoogleAPISecrets: require('GoogleAPISecrets'),
     feedbackAddress: 'appdev.feedback@gmail.com',
     version: Ti.App.version
 };
