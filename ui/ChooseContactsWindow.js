@@ -51,7 +51,6 @@ module.exports = $.Window('AppDev.UI.ChooseContactsWindow', {
         // Initialize the base $.Window object
         this._super({
             title: 'chooseContactsTitle',
-            tab: this.options.tab,
             autoOpen: true
         });
     },

@@ -39,7 +39,6 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         // Initialize the base $.Window object
         this._super({
             title: $.formatString('chooseOptionTitle', AD.Localize(this.options.groupName).toLowerCase()),
-            tab: this.options.tab,
             autoOpen: true
         });
     },
@@ -172,7 +171,6 @@ var AddOptionWindow = $.Window('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {
         // Initialize the base $.Window object
         this._super({
             title: $.formatString('addOptionTitle', AD.Localize(this.options.groupName)),
-            tab: this.options.tab,
             autoOpen: true,
             focusedChild: 'optionName',
             createParams: {

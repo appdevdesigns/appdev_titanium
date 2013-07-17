@@ -6,7 +6,6 @@ var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
         // Initialize the base $.Window object
         this._super({
             title: $.formatString('feedbackTitle', AD.Defaults.application),
-            tab: this.options.tab,
             autoOpen: true,
             createParams: {
                 layout: 'vertical'
@@ -101,8 +100,7 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
-            title: 'infoTitle',
-            tab: this.options.tab
+            title: 'infoTitle'
         });
     },
 

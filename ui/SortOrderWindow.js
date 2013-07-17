@@ -29,7 +29,6 @@ module.exports = $.Window('AppDev.UI.SortOrderWindow', {
         // Initialize the base $.Window object
         this._super({
             title: 'sortOrderTitle',
-            tab: this.options.tab,
             autoOpen: true
         });
     },
