@@ -48,5 +48,17 @@ module.exports = {
             data: multipartRequestBody,
             success: callback
         });
+    },
+    list: function(folderId, callback) {
+        AD.Comm.GoogleDrive.request({
+            method: 'GET',
+            url: 'https://www.googleapis.com/drive/v2/files',
+            query: {
+                q: '\''+folderId+'\' in parents and trashed = false'
+            },
+            success: function(response) {
+                callback(response.items);
+            }
+        });
     }
 };
