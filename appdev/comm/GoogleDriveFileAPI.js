@@ -50,11 +50,15 @@ module.exports = {
         });
     },
     list: function(folderId, callback) {
+        var query = 'trashed = false';
+        if (folderId) {
+            query += ' and \''+folderId+'\' in parents';
+        }
         AD.Comm.GoogleDrive.request({
             method: 'GET',
             url: 'https://www.googleapis.com/drive/v2/files',
             query: {
-                q: '\''+folderId+'\' in parents and trashed = false'
+                q: query
             },
             success: function(response) {
                 callback(response.items);
