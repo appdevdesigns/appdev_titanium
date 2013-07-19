@@ -58,7 +58,7 @@ GoogleDrive.request = function(options) {
 GoogleDrive.getAuthorizationCode = function(callback) {
     var GoogleAuthWindow = require('ui/GoogleAuthWindow');
     var $winGoogleAuth = new GoogleAuthWindow({
-        scope: 'https://www.googleapis.com/auth/drive'
+        scope: GoogleAPIs.scope
     });
     $winGoogleAuth.getDeferred().done(function(code) {
         callback(code);

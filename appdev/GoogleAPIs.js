@@ -1,9 +1,10 @@
 var AD = require('AppDev');
 
 module.exports = {
-    client_id: AD.Defaults.GoogleAPISecrets.client_id,
-    client_secret: AD.Defaults.GoogleAPISecrets.client_secret,
+    client_id: AD.Defaults.GoogleAPISettings.client_id,
+    client_secret: AD.Defaults.GoogleAPISettings.client_secret,
     redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
+    scope: AD.Defaults.GoogleAPISettings.scope,
     get access_token() {
         return AD.PropertyStore.get('access_token');
     },

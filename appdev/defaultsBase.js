@@ -24,8 +24,8 @@ var defaults = {
         return Ti.App.Properties.getBool('sync_enabled_preference');
     },
     viewerId: 1,
-    // Attempt to load the application-specific GoogleAPISecrets
-    GoogleAPISecrets: require('GoogleAPISecrets'),
+    // Attempt to load the application-specific GoogleAPISettings
+    GoogleAPISettings: require('GoogleAPISettings'),
     feedbackAddress: 'appdev.feedback@gmail.com',
     version: Ti.App.version
 };
