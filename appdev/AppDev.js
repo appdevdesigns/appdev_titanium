@@ -120,6 +120,8 @@ var boot = function(options) {
     AD.Comm.GoogleDrive = require('appdev/comm/GoogleDrive');
     AD.Comm.GoogleDriveFileAPI = require('appdev/comm/GoogleDriveFileAPI');
     
+    AD.Database = require('appdev/db/Database');
+
     AD.Models = {};
     
     AD.Lang = {

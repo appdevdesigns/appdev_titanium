@@ -13,7 +13,7 @@
 var $ = require('jquery');
 var AD = require('AppDev');
 
-var DataStore = require('appdev/db/DataStoreSQLite');
+var DataStore = AD.Database.DataStore;
 
 // Inherit from AD.Model.ModelSQL
 module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {

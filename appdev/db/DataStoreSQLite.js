@@ -132,7 +132,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             return this.openDatabases[dbName];
         }
         else {
-            return this.openDatabases[dbName] = require('appdev/db/database').open(dbName);
+            return this.openDatabases[dbName] = AD.Database.open(dbName);
         }
     },
     

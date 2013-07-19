@@ -15,7 +15,7 @@ var LogDump = function() {};
 var $ = require('jquery');
 var AD = require('AppDev');
 
-var DataStore = require('appdev/db/DataStoreSQLite');
+var DataStore = AD.Database.DataStore;
 
 module.exports = $.Model('AD.Model.ModelSQL', {
     init: function(options) {
