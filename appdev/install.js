@@ -94,7 +94,9 @@ module.exports.install = function(hooks) {
             if (AD.Defaults.localStorageEnabled) {
                 // Prompt user for random string
                 var StringPromptWindow = require('ui/StringPromptWindow');
-                var $winStringPrompt = new StringPromptWindow.EncryptionKey();
+                var $winStringPrompt = new StringPromptWindow.EncryptionKey({
+                    cancelable: false
+                });
                 $winStringPrompt.getDeferred().done(function(randomString) {
                     // Generate a random key from the random string
                     var key = AD.EncryptionKey.generateKey(randomString);
@@ -139,7 +141,9 @@ module.exports.install = function(hooks) {
                 console.log(passwordProtect);
                 var StringPromptWindow = require('ui/StringPromptWindow');
                 var WindowClass = StringPromptWindow[passwordProtect ? 'LoginPassword' : 'EncryptionKey'];
-                $winStringPrompt = new WindowClass();
+                $winStringPrompt = new WindowClass({
+                    cancelable: false
+                });
                 $winStringPrompt.getDeferred().done(function(password) {
                     if (passwordProtect) {
                         // Use the entered password as the password

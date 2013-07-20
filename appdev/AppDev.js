@@ -176,6 +176,7 @@ var login = function(options) {
         var $winPasswordPrompt = new PasswordPromptWindow({
             title: 'passwordPromptLoginTitle',
             message: 'passwordPromptLoginMessage',
+            cancelable: false,
             verifyCallback: function(guess) {
                 return AD.EncryptionKey.hash(guess) === AD.EncryptionKey.passwordHash;
             }

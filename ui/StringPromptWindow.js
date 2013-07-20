@@ -2,10 +2,19 @@ var AD = require('AppDev');
 var $ = require('jquery');
 
 var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow', {
+    actions: [{
+        title: 'cancel',
+        callback: 'cancel',
+        leftNavButton: true,
+        enabled: function() {
+            return this.options.cancelable;
+        }
+    }],
     defaults: {
         title: 'stringPromptDefaultTitle',
         message: 'stringPromptDefaultMessage',
         initial: '',
+        cancelable: true,
         // Called when validating string input
         // Return an object with the 'valid' field set to the validity of the input string
         // Optionally set the 'reason' field to the reason why the input is invalid
