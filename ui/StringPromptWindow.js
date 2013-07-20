@@ -4,7 +4,7 @@ var $ = require('jquery');
 var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow', {
     defaults: {
         title: 'stringPromptDefaultTitle',
-        message: 'stringPromptDefaulMessage',
+        message: 'stringPromptDefaultMessage',
         // Called when validating string input
         // Return an object with the 'valid' field set to the validity of the input string
         // Optionally set the 'reason' field to the reason why the input is invalid
