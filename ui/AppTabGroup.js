@@ -30,8 +30,13 @@ module.exports = $.View('AppDev.UI.AppTabGroup', {}, {
         }, this);
     },
     
-    // Open the tab group (overrides $.View.open)
+    // Open the tab group
     open: function() {
         this.view.open();
+    },
+
+    // Close the tab group
+    close: function() {
+        this.view.close();
     }
 });

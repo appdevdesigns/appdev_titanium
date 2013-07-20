@@ -143,7 +143,7 @@ var ADModel = module.exports = {
         // Refresh the model cache
         refreshCache: function() {
             var Model = this;
-            var name = Model.name;
+            var name = Model.shortName;
 
             // If cache=true in the model definition, Model.cache will be overwritten
             // with the cache object, but it will remain a 'truthy' value

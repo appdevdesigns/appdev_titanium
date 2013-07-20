@@ -55,7 +55,9 @@ var Database = module.exports = {
                 dump = upgrader.upgrade(dump);
             }
         });
-        return Database.DataStore.import(dbName, dump);
+        return Database.DataStore.import(dbName, dump).done(function() {
+            AD.Model.refreshCaches().done(AD.UI.initialize);
+        });
     },
     
     DataStore: require('appdev/db/DataStoreSQLite')

@@ -292,17 +292,22 @@ var initialize = function(options) {
     
     console.log('Finished AppDev initialization');
     
-    if (options.windows) {
-        initDfd.done(function() {
+    AD.UI.initialize = function() {
+        if (AD.UI.$appTabGroup) {
+            // Close the existing tab group
+            AD.UI.$appTabGroup.close();
+        }
+        if (options.windows) {
             // Initialize the top-level UI
-            var $appTabGroup = new AD.UI.AppTabGroup({
+            AD.UI.$appTabGroup = new AD.UI.AppTabGroup({
                 windows: options.windows
             });
-            $appTabGroup.open();
-        });
-    }
-    
-    return initDfd.promise();
+            AD.UI.$appTabGroup.open();
+            console.log('AppDev UI initialized');
+        }
+    };
+    // Initialize the UI after initialization is completed
+    return initDfd.done(AD.UI.initialize).promise();
 };
 
 var getViewer = function() {
