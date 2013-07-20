@@ -44,6 +44,17 @@ var Database = module.exports = {
             console.warn(error);
             return $.Deferred().reject();
         }
+
+        var upgraders = [];
+        var dumpVersion = dump.version;
+        var compareVersions = require('appdev/install').compareVersions;
+        upgraders.forEach(function(upgrader) {
+            // if dumpVersion < upgrader.version
+            if (compareVersions(dumpVersion, upgrader.version) < 0) {
+                // Run the upgrader on the database dump
+                dump = upgrader.upgrade(dump);
+            }
+        });
         return Database.DataStore.import(dbName, dump);
     },
     
