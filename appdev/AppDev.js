@@ -90,8 +90,7 @@ var boot = function(options) {
     };
     
     AD.Deferreds = {
-        login: $.Deferred(), // dictionary of registered important initialization deferreds
-        buildCaches: $.Deferred()
+        login: $.Deferred() // dictionary of registered important initialization deferreds
     };
     
     // Like L(...), except that the key, rather than null, is returned on Android
@@ -263,7 +262,7 @@ var initialize = function(options) {
     console.log('Created LoginWindow');
     
     var viewerDfd = getViewer().done(function() {
-        addInitDfd(refreshCaches());
+        addInitDfd(AD.Model.refreshCaches());
     });
     addInitDfd(viewerDfd);
     
@@ -360,56 +359,4 @@ AD.Viewer = null;
 // Set the AppDev viewer model instance
 AD.setViewer = function(viewerData) {
     AD.Viewer = AD.Models.Viewer.model(viewerData);
-};
-
-// Refresh each of the model caches
-var refreshCaches = function() {
-    var dfd = AD.Deferreds.buildCaches;
-    var refreshDfds = [];
-    $.each(AD.Models, function(name, Model) {
-        // If cache=true in the model definition, Model.cache will be overwritten
-        // with the cache object, but it will remain a 'truthy' value
-        var cache = Model.cache;
-        if (!cache) {
-            return;
-        }
-        
-        console.log('Building '+name+' cache...');
-        // Only load models associated with this viewer
-        var filter = {viewer_id: AD.Viewer.viewer_id};
-        // Expand the cache filter to include the filter specified in the model definition
-        var cacheFilter = Model.cacheFilter;
-        if ($.isFunction(cacheFilter)) {
-            cacheFilter = Model.cacheFilter();
-        }
-        var cacheDfd = $.Deferred();
-        $.when(cacheFilter).done(function(trueCacheFilter) {
-            // If cacheFilter is a deferred, this will be executed after it is resolved
-            // If it is a plain object, this will be executed immediately
-            $.extend(filter, trueCacheFilter);
-            
-            // Set the cache filter and build the cache
-            cache.setFilter(filter);
-            cache.refresh().then(cacheDfd.resolve, cacheDfd.reject);
-        }).fail(cacheDfd.reject);
-        
-        refreshDfds.push(cacheDfd.done(function() {
-            console.log('Built '+name+' cache');
-        }));
-    });
-    // When all deferreds in refreshDfds have resolved, then resolve the returned deferred
-    $.when.apply($, refreshDfds).done(function() {
-        console.log('All model caches built');
-        dfd.resolve();
-    }).fail(function(error) {
-        console.error('Model cache building failed');
-        dfd.reject({
-            description: 'Could not load application data',
-            technical: error,
-            fix: AD.Defaults.development ?
-                'Please verify that the NextSteps AppDev module is enabled through the component manager interface.' :
-                'Please verify that the server is accessible.'
-        });
-    });
-    return dfd.promise();
 };
