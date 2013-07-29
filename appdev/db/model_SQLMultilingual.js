@@ -17,16 +17,16 @@ var DataStore = require('appdev/db/DataStoreSQLite');
 
 // Inherit from AD.Model.ModelSQL
 module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
-	setup: function(BaseClass) {
-	    if (BaseClass === AD.Model.ModelSQL) {
-	        // This class, AD.Model.ModelSQLMultilingual, is being created, so do nothing
-	        return;
-	    }
-		// Whenever a class is created that derives from this class, after creating the class...
+    setup: function(BaseClass) {
+        if (BaseClass === AD.Model.ModelSQL) {
+            // This class, AD.Model.ModelSQLMultilingual, is being created, so do nothing
+            return;
+        }
+        // Whenever a class is created that derives from this class, after creating the class...
         this.dbTable = (this.tables && this.tables.data) || '';
         this.createModel();
-	},
-	
+    },
+    
     //Evaluates whether or not the given keyName is the primary key for this table.
     isAPrimaryKey: function( name ) {
         return ((this.primaryKey === name) || (this.primaryKey === 'Trans_id'));

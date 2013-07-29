@@ -18,9 +18,9 @@ var AD = require('AppDev');
 var DataStore = require('appdev/db/DataStoreSQLite');
 
 module.exports = $.Model('AD.Model.ModelSQL', {
-	init: function(options) {
-	},
-	
+    init: function(options) {
+    },
+    
     // Constructor function aliases
     _new: function(attrs) {
         return new this(attrs);
