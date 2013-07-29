@@ -15,6 +15,8 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
     }
 }, {
     init: function(options) {
+        $.extend(true, this.options, options);
+        
         // Initialize the base $.Window object
         this._super({
             createParams: {

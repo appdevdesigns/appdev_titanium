@@ -25,7 +25,7 @@
     <!-- ChooseOption labels -->
     <string name="chooseOptionTitle">Choose {0}</string>
     <string name="addOptionTitle">Add {0}</string>
-    <string name="newOptionTitle">New {0} name:</string>
+    <string name="newOptionTitle">Enter the name of the new {0}.</string>
     
     <!-- Button labels used throughout the app -->
     <string name="yes">Yes</string>

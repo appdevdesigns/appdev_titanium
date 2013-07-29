@@ -166,39 +166,13 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
 });
 
 // This window allows the user to add a new option
-var AddOptionWindow = $.Window('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {}, {
+require('ui/StringPromptWindow');
+var AddOptionWindow = AD.UI.StringPromptWindow('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {}, {
     init: function(options) {
-        // Initialize the base $.Window object
+        // Initialize the base AD.UI.StringPromptWindow object
         this._super({
             title: $.formatString('addOptionTitle', AD.Localize(this.options.groupName)),
-            autoOpen: true,
-            focusedChild: 'optionName',
-            createParams: {
-                layout: 'vertical'
-            }
-        });
-    },
-    
-    // Create the option name text field
-    create: function() {
-        this.add('optionLabel', Ti.UI.createLabel({
-            left: AD.UI.padding,
-            top: AD.UI.padding,
-            width: 240,
-            text: $.formatString('newOptionTitle', AD.Localize(this.options.groupName).toLowerCase()),
-            font: AD.UI.Fonts.header
-        }));
-        var optionName = this.add('optionName', Ti.UI.createTextField({
-            left: AD.UI.padding,
-            top: AD.UI.padding,
-            width: AD.UI.useableScreenWidth,
-            height: AD.UI.textFieldHeight,
-            returnKeyType: Ti.UI.RETURNKEY_DONE,
-            borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
-        }));
-        var _this = this;
-        optionName.addEventListener('return', function() {
-            _this.dfd.resolve(_this.getChild('optionName').value);
+            message: $.formatString('newOptionTitle', AD.Localize(this.options.groupName).toLowerCase())
         });
     }
 });
