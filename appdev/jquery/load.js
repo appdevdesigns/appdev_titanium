@@ -7,6 +7,7 @@ require('appdev/jquery/jquery-callbacks');
 require('appdev/jquery/jquery-deferred');
 require('appdev/jquery/tiajax');
 require('appdev/jquery/jqueryex');
+require('appdev/jquery/dev');
 
 // Add jQuery to the global namespace, aliased by $ and jQuery
 var global = require('appdev/global');

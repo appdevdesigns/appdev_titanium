@@ -76,16 +76,16 @@ GoogleDrive.getAccessToken = function(forceRefresh, callback) {
         if (data.refresh_token) {
             // Save the refresh_token
             GoogleAPIs.refresh_token = data.refresh_token;
-            console.log('refresh_token: '+GoogleAPIs.refresh_token);
+            $.dev.log('refresh_token: '+GoogleAPIs.refresh_token);
         }
 
         // Pass back the access_token
         GoogleAPIs.access_token = data.access_token;
-        console.log('access_token: '+GoogleAPIs.access_token);
+        $.dev.log('access_token: '+GoogleAPIs.access_token);
         callback(GoogleAPIs.access_token);
     };
 
-    console.log('refresh_token: '+GoogleAPIs.refresh_token);
+    $.dev.log('refresh_token: '+GoogleAPIs.refresh_token);
     if (GoogleAPIs.refresh_token) {
         // Send an HTTP request to get an access token from the refresh token
         GoogleDrive.request({
