@@ -2,8 +2,32 @@ var jQuery = require('jquery');
 
 // Attach several custom utility functions to the jQuery namespace
 
+// Check whether value is a comparable
+// NaN, null, undefined, and false are considered incomparable values
+jQuery.isComparable = function(value) {
+    return !((typeof value === 'number' && isNaN(value)) || value === null || typeof value === 'undefined' || value === false);
+};
+
 // Return 1 if arg1 is greater than arg2, -1 if arg1 is less than arg2, or 0 if they are equal
 jQuery.compare = function(arg1, arg2) {
+    var arg1Comparable = jQuery.isComparable(arg1);
+    var arg2Comparable = jQuery.isComparable(arg2);
+    if (arg1Comparable && !arg2Comparable) {
+        return 1;
+    }
+    else if (!arg1Comparable && arg2Comparable) {
+        return -1;
+    }
+    else if (!arg1Comparable && !arg2Comparable) {
+        return 0;
+    }
+    
+    if (typeof arg1 !== typeof arg2) {
+        // Convert to string values that can be compared
+        arg1 += '';
+        arg2 += '';
+    }
+    
     if (arg1 > arg2) {
         return 1;
     }
