@@ -111,7 +111,7 @@ $.View('jQuery.Window', {
                 // As of Titanium SDK 3.0.0, each window in a tab group shares a common activity.
                 // Thus, the Android menu will need to be recreated each time the window changes.
                 // See http://developer.appcelerator.com/blog/2012/12/breaking-changes-in-titanium-sdk-3-0.html
-                if (!window.activity.invalidateOptionsMenu) {
+                if (!window.activity || !window.activity.invalidateOptionsMenu) {
                     // For some reason, sometimes, window.activity is an empty
                     // object, so just ignore the 'focus' event in those cases
                     return;
