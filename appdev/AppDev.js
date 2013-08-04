@@ -293,18 +293,47 @@ var initialize = function(options) {
     console.log('Finished AppDev initialization');
     
     AD.UI.initialize = function() {
-        if (AD.UI.$appTabGroup) {
-            // Close the existing tab group
-            AD.UI.$appTabGroup.close();
+        if (!options.windows) {
+            return;
         }
-        if (options.windows) {
+        
+        var createTabGroup = function() {
             // Initialize the top-level UI
             AD.UI.$appTabGroup = new AD.UI.AppTabGroup({
                 windows: options.windows
             });
             AD.UI.$appTabGroup.open();
-            console.log('AppDev UI initialized');
+        };
+        
+        // When reinitializing the UI, close the existing tab group, create a new tab group,
+        // and open it. However, on Android, the application is closed when the root tab
+        // group is closed. To work around this, open a heavyweight window just before
+        // closing the old tab group and close it just after opening the new tab group to
+        // ensure that at least one heavyweight window is open at all times.
+        var $oldTabGroup = AD.UI.$appTabGroup;
+        if ($oldTabGroup) {
+            var $winHeavyweight = new $.Window({
+                createParams: {
+                    backgroundColor: 'black',
+                    modal: false
+                }
+            });
+            $winHeavyweight.open();
+            
+            $oldTabGroup.close();
+            createTabGroup();
+            
+            // Close the old tab group after the new one opens
+            AD.UI.$appTabGroup.getView().addEventListener('open', function() {
+                // Close the temporary heavyweight window after the new tab group opens
+                $winHeavyweight.close();
+            });
         }
+        else {
+            createTabGroup();
+        }
+        
+        console.log('AppDev UI initialized');
     };
     // Initialize the UI after initialization is completed
     return initDfd.done(AD.UI.initialize).promise();
