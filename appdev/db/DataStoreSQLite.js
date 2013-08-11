@@ -231,6 +231,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
     import: function(dbName, dump) {
         var self = this;
         var dfd = $.Deferred();
+        this.execute(dbName, 'PRAGMA foreign_keys = OFF'); // temporarily disable foreign key checks
         $.each(dump.tables, function(name, table) {
             // Empty the table
             self.execute(dbName, "DELETE FROM ?", [name]).done(function() {
@@ -251,6 +252,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         });
         // This assummes that the "execute" call is blocking, which it is
         dfd.resolve();
+        this.execute(dbName, 'PRAGMA foreign_keys = ON'); // re-enable foreign key checks
         return dfd.promise();
     }
 }, {});
