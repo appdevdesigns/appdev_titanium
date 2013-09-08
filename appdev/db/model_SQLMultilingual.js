@@ -96,7 +96,7 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
                 }
             }
             fields[primaryKey] = data;
-            var curDataMgr = self.getCurrentDataMgr(fields, {tableName:self.tables.trans});
+            var curDataMgr = self.getCurrentDataMgr(fields, {dbTable:self.tables.trans});
             listUpdates.push( curDataMgr );
             
             
