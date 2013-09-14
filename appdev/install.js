@@ -94,7 +94,9 @@ module.exports.install = function(hooks) {
             if (AD.Defaults.localStorageEnabled) {
                 // Prompt user for random string
                 var StringPromptWindow = require('ui/StringPromptWindow');
-                var $winStringPrompt = new StringPromptWindow.EncryptionKey();
+                var $winStringPrompt = new StringPromptWindow.EncryptionKey({
+                    cancelable: false
+                });
                 $winStringPrompt.getDeferred().done(function(randomString) {
                     // Generate a random key from the random string
                     var key = AD.EncryptionKey.generateKey(randomString);
@@ -139,7 +141,9 @@ module.exports.install = function(hooks) {
                 console.log(passwordProtect);
                 var StringPromptWindow = require('ui/StringPromptWindow');
                 var WindowClass = StringPromptWindow[passwordProtect ? 'LoginPassword' : 'EncryptionKey'];
-                $winStringPrompt = new WindowClass();
+                $winStringPrompt = new WindowClass({
+                    cancelable: false
+                });
                 $winStringPrompt.getDeferred().done(function(password) {
                     if (passwordProtect) {
                         // Use the entered password as the password
@@ -176,6 +180,12 @@ module.exports.install = function(hooks) {
             
             if (hooks && $.isFunction(hooks.onInstall)) {
                 hooks.onInstall(currentVersion);
+            }
+            
+            if (compareVersions(currentVersion, '0') > 0 && compareVersions(currentVersion, '1.5') < 0) {
+                // Rename the file ServiceJSON.retryingRequests.json to HTTP.retryingRequests.json
+                var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'ServiceJSON.retryingRequests.json');
+                file.rename('HTTP.retryingRequests.json');
             }
         }
     });

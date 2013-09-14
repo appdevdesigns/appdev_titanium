@@ -132,7 +132,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             return this.openDatabases[dbName];
         }
         else {
-            return this.openDatabases[dbName] = require('appdev/db/database').open(dbName);
+            return this.openDatabases[dbName] = AD.Database.open(dbName);
         }
     },
     
@@ -200,5 +200,59 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }
         // Pipe the deferred to ensure that the callback option is executed before any attached callbacks are executed
         return dfd.pipe();
+    },
+
+    // Export the database, represented as a Javascript object
+    export: function(dbName) {
+        var self = this;
+        var dfd = $.Deferred();
+        self.execute(dbName, "SELECT name FROM sqlite_master WHERE type='table'").done(function(tableArgs) {
+            var dump = {
+                tables: {}
+            };
+
+            var tables = tableArgs[0];
+            tables.forEach(function(table) {
+                var tableName = table.name;
+                self.execute(dbName, "SELECT * FROM ?", [tableName]).done(function(rowArgs) {
+                    dump.tables[tableName] = {
+                        rows: rowArgs[1],
+                        data: rowArgs[0]
+                    };
+                }).fail(dfd.reject);
+            });
+            // This assummes that the "execute" call is blocking, which it is
+            dfd.resolve(dump);
+        }).fail(dfd.reject);
+        return dfd.promise();
+    },
+
+    // Import the database, represented as a Javascript object
+    import: function(dbName, dump) {
+        var self = this;
+        var dfd = $.Deferred();
+        this.execute(dbName, 'PRAGMA foreign_keys = OFF'); // temporarily disable foreign key checks
+        $.each(dump.tables, function(name, table) {
+            // Empty the table
+            self.execute(dbName, "DELETE FROM ?", [name]).done(function() {
+                var rowNames = table.rows;
+                var dataRows = table.data;
+                var maxInserts = 250;
+                for (var startRow = 0; startRow < dataRows.length; startRow += maxInserts) {
+                    var values = [name];
+                    var selectSQL = dataRows.slice(startRow, startRow + maxInserts).map(function(row) {
+                        return rowNames.map(function(rowName) {
+                            values.push(row[rowName]);
+                            return '?';
+                        }).join(',');
+                    }).join(' UNION ALL SELECT ');
+                    self.execute(dbName, "INSERT INTO ? ("+rowNames.join(',')+") SELECT "+selectSQL, values).fail(dfd.reject);
+                }
+            }).fail(dfd.reject);
+        });
+        // This assummes that the "execute" call is blocking, which it is
+        dfd.resolve();
+        this.execute(dbName, 'PRAGMA foreign_keys = ON'); // re-enable foreign key checks
+        return dfd.promise();
     }
 }, {});

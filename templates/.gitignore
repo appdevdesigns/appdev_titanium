@@ -2,3 +2,4 @@
 .settings/
 build.log
 build/
+Resources/GoogleAPISecrets.js

@@ -138,6 +138,41 @@ var ADModel = module.exports = {
             JSON: function(val) {
                 return (typeof val === 'object') ? JSON.stringify(val) : val;
             }
+        },
+
+        // Refresh the model cache
+        refreshCache: function() {
+            var Model = this;
+            var name = Model.shortName;
+
+            // If cache=true in the model definition, Model.cache will be overwritten
+            // with the cache object, but it will remain a 'truthy' value
+            var cache = Model.cache;
+            if (!cache) {
+                return $.Deferred().resolve();
+            }
+
+            console.log('Building '+name+' cache...');
+            // Only load models associated with this viewer
+            var filter = { viewer_id: AD.Viewer.viewer_id };
+            // Expand the cache filter to include the filter specified in the model definition
+            var cacheFilter = Model.cacheFilter;
+            if ($.isFunction(cacheFilter)) {
+                cacheFilter = Model.cacheFilter();
+            }
+            var cacheDfd = $.Deferred();
+            $.when(cacheFilter).done(function(trueCacheFilter) {
+                // If cacheFilter is a deferred, this will be executed after it is resolved
+                // If it is a plain object, this will be executed immediately
+                $.extend(filter, trueCacheFilter);
+
+                // Set the cache filter and build the cache
+                cache.setFilter(filter);
+                cache.refresh().then(cacheDfd.resolve, cacheDfd.reject);
+            }).fail(cacheDfd.reject);
+            return cacheDfd.done(function() {
+                console.log('Built '+name+' cache');
+            });
         }
     },
     // All instances derived from AD.Model will have these prototype properties
@@ -150,6 +185,30 @@ var ADModel = module.exports = {
             var deviceId = this.attr('device_id');
             return autoincrement ? (autoincrement+'.'+deviceId) : null;
         }
+    },
+
+    // Refresh all of the model caches
+    refreshCaches: function() {
+        var dfd = $.Deferred();
+        var refreshDfds = [];
+        $.each(AD.Models, function(name, Model) {
+            refreshDfds.push(Model.refreshCache());
+        });
+        // When all deferreds in refreshDfds have resolved, then resolve the returned deferred
+        $.when.apply($, refreshDfds).done(function() {
+            console.log('All model caches built');
+            dfd.resolve();
+        }).fail(function(error) {
+            console.error('Model cache building failed');
+            dfd.reject({
+                description: 'Could not load application data',
+                technical: error,
+                fix: AD.Defaults.development ?
+                    'Please verify that the NextSteps AppDev module is enabled through the component manager interface.' :
+                    'Please verify that the server is accessible.'
+            });
+        });
+        return dfd.promise();
     }
 };
 

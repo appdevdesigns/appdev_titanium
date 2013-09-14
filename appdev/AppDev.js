@@ -90,8 +90,7 @@ var boot = function(options) {
     };
     
     AD.Deferreds = {
-        login: $.Deferred(), // dictionary of registered important initialization deferreds
-        buildCaches: $.Deferred()
+        login: $.Deferred() // dictionary of registered important initialization deferreds
     };
     
     // Like L(...), except that the key, rather than null, is returned on Android
@@ -115,8 +114,13 @@ var boot = function(options) {
     AD.PropertyStore = require('appdev/PropertyStore');
     
     AD.Comm = {};
-    AD.Comm.HTML = require('appdev/comm/HTML');
+    AD.Comm.HTTP = require('appdev/comm/HTTP');
+    AD.Comm.GoogleAPIs = require('appdev/GoogleAPIs');
+    AD.Comm.GoogleDrive = require('appdev/comm/GoogleDrive');
+    AD.Comm.GoogleDriveFileAPI = require('appdev/comm/GoogleDriveFileAPI');
     
+    AD.Database = require('appdev/db/Database');
+
     AD.Models = {};
     
     AD.Lang = {
@@ -171,6 +175,7 @@ var login = function(options) {
         var $winPasswordPrompt = new PasswordPromptWindow({
             title: 'passwordPromptLoginTitle',
             message: 'passwordPromptLoginMessage',
+            cancelable: false,
             verifyCallback: function(guess) {
                 return AD.EncryptionKey.hash(guess) === AD.EncryptionKey.passwordHash;
             }
@@ -257,7 +262,7 @@ var initialize = function(options) {
     console.log('Created LoginWindow');
     
     var viewerDfd = getViewer().done(function() {
-        addInitDfd(refreshCaches());
+        addInitDfd(AD.Model.refreshCaches());
     });
     addInitDfd(viewerDfd);
     
@@ -287,17 +292,51 @@ var initialize = function(options) {
     
     console.log('Finished AppDev initialization');
     
-    if (options.windows) {
-        initDfd.done(function() {
+    AD.UI.initialize = function() {
+        if (!options.windows) {
+            return;
+        }
+        
+        var createTabGroup = function() {
             // Initialize the top-level UI
-            var $appTabGroup = new AD.UI.AppTabGroup({
+            AD.UI.$appTabGroup = new AD.UI.AppTabGroup({
                 windows: options.windows
             });
-            $appTabGroup.open();
-        });
-    }
-    
-    return initDfd.promise();
+            AD.UI.$appTabGroup.open();
+        };
+        
+        // When reinitializing the UI, close the existing tab group, create a new tab group,
+        // and open it. However, on Android, the application is closed when the root tab
+        // group is closed. To work around this, open a heavyweight window just before
+        // closing the old tab group and close it just after opening the new tab group to
+        // ensure that at least one heavyweight window is open at all times.
+        var $oldTabGroup = AD.UI.$appTabGroup;
+        if ($oldTabGroup) {
+            var $winHeavyweight = new $.Window({
+                createParams: {
+                    backgroundColor: 'black',
+                    modal: false
+                }
+            });
+            $winHeavyweight.open();
+            
+            $oldTabGroup.close();
+            createTabGroup();
+            
+            // Close the old tab group after the new one opens
+            AD.UI.$appTabGroup.getView().addEventListener('open', function() {
+                // Close the temporary heavyweight window after the new tab group opens
+                $winHeavyweight.close();
+            });
+        }
+        else {
+            createTabGroup();
+        }
+        
+        console.log('AppDev UI initialized');
+    };
+    // Initialize the UI after initialization is completed
+    return initDfd.done(AD.UI.initialize).promise();
 };
 
 var getViewer = function() {
@@ -354,56 +393,4 @@ AD.Viewer = null;
 // Set the AppDev viewer model instance
 AD.setViewer = function(viewerData) {
     AD.Viewer = AD.Models.Viewer.model(viewerData);
-};
-
-// Refresh each of the model caches
-var refreshCaches = function() {
-    var dfd = AD.Deferreds.buildCaches;
-    var refreshDfds = [];
-    $.each(AD.Models, function(name, Model) {
-        // If cache=true in the model definition, Model.cache will be overwritten
-        // with the cache object, but it will remain a 'truthy' value
-        var cache = Model.cache;
-        if (!cache) {
-            return;
-        }
-        
-        console.log('Building '+name+' cache...');
-        // Only load models associated with this viewer
-        var filter = {viewer_id: AD.Viewer.viewer_id};
-        // Expand the cache filter to include the filter specified in the model definition
-        var cacheFilter = Model.cacheFilter;
-        if ($.isFunction(cacheFilter)) {
-            cacheFilter = Model.cacheFilter();
-        }
-        var cacheDfd = $.Deferred();
-        $.when(cacheFilter).done(function(trueCacheFilter) {
-            // If cacheFilter is a deferred, this will be executed after it is resolved
-            // If it is a plain object, this will be executed immediately
-            $.extend(filter, trueCacheFilter);
-            
-            // Set the cache filter and build the cache
-            cache.setFilter(filter);
-            cache.refresh().then(cacheDfd.resolve, cacheDfd.reject);
-        }).fail(cacheDfd.reject);
-        
-        refreshDfds.push(cacheDfd.done(function() {
-            console.log('Built '+name+' cache');
-        }));
-    });
-    // When all deferreds in refreshDfds have resolved, then resolve the returned deferred
-    $.when.apply($, refreshDfds).done(function() {
-        console.log('All model caches built');
-        dfd.resolve();
-    }).fail(function(error) {
-        console.error('Model cache building failed');
-        dfd.reject({
-            description: 'Could not load application data',
-            technical: error,
-            fix: AD.Defaults.development ?
-                'Please verify that the NextSteps AppDev module is enabled through the component manager interface.' :
-                'Please verify that the server is accessible.'
-        });
-    });
-    return dfd.promise();
 };
