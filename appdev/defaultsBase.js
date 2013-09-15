@@ -16,7 +16,7 @@ var defaults = {
     get serverStorageEnabled() {
         return defaults.syncEnabled; // may be overridden by applications
     },
-    languageKey: 'en',
+    languageKey: Ti.Locale.currentLanguage,
     get serverBaseURL() {
         return Ti.App.Properties.getString('server_url_preference');
     },
@@ -31,5 +31,7 @@ var defaults = {
 };
 
 console.log(defaults.syncEnabled ? 'Syncing to '+defaults.serverBaseURL : 'Sync disabled');
+
+console.log('Current language: '+defaults.languageKey);
 
 module.exports = defaults;
