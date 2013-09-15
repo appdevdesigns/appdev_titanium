@@ -124,7 +124,10 @@ var boot = function(options) {
     AD.Models = {};
     
     AD.Lang = {
-        listLanguages: [{en: 'English'}]
+        listLanguages: [{
+            language_code: 'en',
+            language_label: 'English'
+        }]
     };
     
     AD.ServiceJSON = require('appdev/comm/serviceJSON');
