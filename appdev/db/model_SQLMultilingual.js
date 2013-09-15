@@ -89,7 +89,9 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
             
             //// Now that our data update worked, 
             //// create the corresponding Trans Entries
-            var fields = {};
+            var fields = {
+                language_code: AD.Defaults.languageKey
+            };
             for (var fieldI in self.fields.trans) {
                 if (typeof currModel[fieldI] != 'undefined') {
                     fields[fieldI] = currModel[fieldI];

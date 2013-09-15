@@ -95,10 +95,7 @@ module.exports = $.Model('AD.Model.ModelSQL', {
         
         // search for language
         var key = 'language_code';
-        if (typeof providedData[key] != 'undefined') {
-            // store the value
-            curModel[key] = providedData[key];
-        }
+        currModel[key] = providedData[key] || AD.Defaults.languageKey;
         
         return curModel;
     },
