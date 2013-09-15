@@ -66,8 +66,10 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
         
         var primaryKey = this.primaryKey;
         
+        var autoIncrementKey = this.autoIncrementKey || this.primaryKey;
+        
         var returnObj = { };
-        returnObj[primaryKey] = '-1';
+        returnObj[autoIncrementKey] = '-1';
         
         
         // keep track of DataManagerMultilingual obj as 'self'
@@ -75,144 +77,161 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
 
         
         return DataStore.create( curDataMgr, function( err, data) {   
-        
 
+            var autoIncrementKeyValue = data;
+            
             // the mysql obj returns the insertID of the new row.
             // here we package it in an obj that reflects this object's 
-            // primaryKey field
-            returnObj[primaryKey] = data;
+            // autoIncrementKey field
+            returnObj[autoIncrementKey] = autoIncrementKeyValue;
 
-
-            // list of all the remaining updates to perform
-            var listUpdates = [];
-            
-            
-            //// Now that our data update worked, 
-            //// create the corresponding Trans Entries
-            var fields = {
-                language_code: AD.Defaults.languageKey
-            };
-            for (var fieldI in self.fields.trans) {
-                if (typeof currModel[fieldI] != 'undefined') {
-                    fields[fieldI] = currModel[fieldI];
-                }
+            // Get the primary key of the new object
+            var getPrimaryKeyDfd = $.Deferred();
+            if (!self.autoIncrementKey || self.primaryKey === self.autoIncrementKey) {
+                // The primary key is the same as the autoincrement
+                getPrimaryKeyDfd.resolve(autoIncrementKeyValue);
             }
-            fields[primaryKey] = data;
-            var curDataMgr = self.getCurrentDataMgr(fields, {dbTable:self.tables.trans});
-            listUpdates.push( curDataMgr );
+            else {
+                // Execute a database query to get the primary key (it is probably a dynamically generated GUID)
+                var attrs = {};
+                attrs[autoIncrementKey] = autoIncrementKeyValue;
+                self.findAll(attrs, function(data) {
+                    getPrimaryKeyDfd.resolve(data[0][primaryKey]);
+                }, getPrimaryKeyDfd.reject);
+            }
+            getPrimaryKeyDfd.done(function(primaryKeyValue) {
+
+                // list of all the remaining updates to perform
+                var listUpdates = [];
             
             
-            // this was for the provided language code
-            var providedLangCode = fields.language_code;
+                //// Now that our data update worked, 
+                //// create the corresponding Trans Entries
+                var fields = {
+                    language_code: AD.Defaults.languageKey
+                };
+                for (var fieldI in self.fields.trans) {
+                    if (typeof currModel[fieldI] != 'undefined') {
+                        fields[fieldI] = currModel[fieldI];
+                    }
+                }
+                fields[primaryKey] = primaryKeyValue;
+                var curDataMgr = self.getCurrentDataMgr(fields, {dbTable:self.tables.trans});
+                listUpdates.push( curDataMgr );
+            
+            
+                // this was for the provided language code
+                var providedLangCode = fields.language_code;
 
 
-            // all the remaining language codes need entries as well:
-            var listAllLanguages = AD.Lang.listLanguages; //req.aRAD.response.listLanguages;
-            for (var langI=0; langI<listAllLanguages.length; langI++) {
+                // all the remaining language codes need entries as well:
+                var listAllLanguages = AD.Lang.listLanguages; //req.aRAD.response.listLanguages;
+                for (var langI=0; langI<listAllLanguages.length; langI++) {
             
-                // if this is not the provided language code
-                var curLangCode = listAllLanguages[langI].language_code;
-                if (curLangCode != providedLangCode) {
+                    // if this is not the provided language code
+                    var curLangCode = listAllLanguages[langI].language_code;
+                    if (curLangCode != providedLangCode) {
                 
                 
-                    //// create a new data manager for this new language
+                        //// create a new data manager for this new language
                     
-                    // new copy of the fields
-                    var newFields = {};
-                    for(var fieldI in fields) {
-                        newFields[fieldI] = fields[fieldI];
+                        // new copy of the fields
+                        var newFields = {};
+                        for(var fieldI in fields) {
+                            newFields[fieldI] = fields[fieldI];
+                        }
+                        newFields['language_code'] = curLangCode;
+                    
+                    
+                        // for each of our multilingual fields
+                        for(var mlI=0; mlI< self.multilingualFields.length; mlI++) {
+                    
+                            var fieldKey = self.multilingualFields[mlI];
+                            newFields[fieldKey] = '['+curLangCode+']'+fields[fieldKey];
+                        }
+                    
+                        var newLangMgr = {
+                            dbTable: tableName,
+                            model:newFields
+                        };
+                    
+                        listUpdates.push( newLangMgr );
+                    
                     }
-                    newFields['language_code'] = curLangCode;
-                    
-                    
-                    // for each of our multilingual fields
-                    for(var mlI=0; mlI< self.multilingualFields.length; mlI++) {
-                    
-                        var fieldKey = self.multilingualFields[mlI];
-                        newFields[fieldKey] = '['+curLangCode+']'+fields[fieldKey];
-                    }
-                    
-                    var newLangMgr = {
-                        dbTable: tableName,
-                        model:newFields
-                    };
-                    
-                    listUpdates.push( newLangMgr );
-                    
+            
                 }
             
-            }
             
-            
-            // now we have a list of all the Trans updates that need to happen
-            //
-            // we are going to fire off all of them at once
-            // when they all complete successfully, we'll send our result to
-            // the client.
-            //
-            // even though they are Async, it is all still deterministic, so
-            // use the following data structure to help us:
-            req.aRAD = {};
-            req.aRAD[self.tables.data] = { 
-                total:listUpdates.length, 
-                curr:0, 
-                hadError:false 
-            };
+                // now we have a list of all the Trans updates that need to happen
+                //
+                // we are going to fire off all of them at once
+                // when they all complete successfully, we'll send our result to
+                // the client.
+                //
+                // even though they are Async, it is all still deterministic, so
+                // use the following data structure to help us:
+                req.aRAD = {};
+                req.aRAD[self.tables.data] = { 
+                    total:listUpdates.length, 
+                    curr:0, 
+                    hadError:false 
+                };
 
             
             
-            for(var luI=0; luI<listUpdates.length; luI++) {
+                for(var luI=0; luI<listUpdates.length; luI++) {
             
-                DataStore.create( listUpdates[luI], function( err, data) {
+                    DataStore.create( listUpdates[luI], function( err, data) {
                 
                     if (req.aRAD[self.tables.data].hadError) {
                     
-                        // there was a previous error in another Async result,
-                        // so do nothing.
+                            // there was a previous error in another Async result,
+                            // so do nothing.
                     
-                    } else {
-                    
-                    
-                        if (err) {
-                        
-                        
-                            // warn other Async Results we had an error
-                            req.aRAD[self.tables.data].hadError = true;
-                            
-                            // fire the callback with our error
-                            callback(err, returnObj);
-                            
-                            
                         } else {
+                    
+                    
+                            if (err) {
                         
                         
-                            // mark this Async result as done:
-                            req.aRAD[self.tables.data].curr ++;
+                                // warn other Async Results we had an error
+                                req.aRAD[self.tables.data].hadError = true;
                             
-                            // if this was the last one then
-                            if (req.aRAD[self.tables.data].curr >= req.aRAD[self.tables.data].total) {
-                            
-                                // if we have a notification hub defined:
-                                if (self.__hub != null) {
-                                    
-                                    // Publish an .created notification for this Model:
-                                    // published data:  { id: [newPrimaryKeyValue] }
-                                    var subscriptionKey = self._notificationKey() + '.created';
-                                    self.__hub.publish(subscriptionKey, {id:returnObj[primaryKey]});
-                                }
-                                
-                                // all finished successfully, so return
+                                // fire the callback with our error
                                 callback(err, returnObj);
-                            }
                             
-                        }
+                            
+                            } else {
                         
-                    }
-                });  // end create()
+                        
+                                // mark this Async result as done:
+                                req.aRAD[self.tables.data].curr ++;
+                            
+                                // if this was the last one then
+                                if (req.aRAD[self.tables.data].curr >= req.aRAD[self.tables.data].total) {
+                            
+                                    // if we have a notification hub defined:
+                                    if (self.__hub != null) {
+                                    
+                                        // Publish an .created notification for this Model:
+                                        // published data:  { id: [newPrimaryKeyValue] }
+                                        var subscriptionKey = self._notificationKey() + '.created';
+                                        self.__hub.publish(subscriptionKey, {id:autoIncrementKeyValue});
+                                    }
+                                
+                                    // all finished successfully, so return
+                                    callback(err, returnObj);
+                                }
+                            
+                            }
+                        
+                        }
+                    });  // end create()
             
             
-            }
+                }
 
+            });
             
         });  // end create() for dataTable
     },
