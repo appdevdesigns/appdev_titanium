@@ -19,7 +19,7 @@ var compareVersions = module.exports.compareVersions = function(v1, v2) {
 };
 
 // Create the necessary databases for the application
-var installDatabases = function(dbVersion) {
+var installDatabases = function(installData) {
     // Turn off iCloud backup for the database file
     var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, AD.Defaults.dbName+'.sql');
     if (file.exists()) {
@@ -166,10 +166,23 @@ module.exports.install = function(hooks) {
     }
     dfd.done(function(data) {
         if (data.installed || data.updated) {
+            var DataStore = require('appdev/db/DataStoreSQLite');
+            
+            // This is the data that is passed to hooks
+            var installData = {
+                previousVersion: currentVersion, // the app version before the upgrade
+                currentVersion: AD.Defaults.version, // the app version after the upgrade
+                dbName: AD.Defaults.dbName,
+                query: function(query, values) {
+                    // Run a database query
+                    return DataStore.execute(installData.dbName, query, values);
+                }
+            };
+            
             if (AD.Defaults.localStorageEnabled) {
-                installDatabases(currentVersion);
+                installDatabases(installData);
                 if (hooks && $.isFunction(hooks.installDatabases)) {
-                    hooks.installDatabases(currentVersion);
+                    hooks.installDatabases(installData);
                 }
             }
             
@@ -179,7 +192,7 @@ module.exports.install = function(hooks) {
             Ti.App.Properties.setString('version', AD.Defaults.version);
             
             if (hooks && $.isFunction(hooks.onInstall)) {
-                hooks.onInstall(currentVersion);
+                hooks.onInstall(installData);
             }
             
             if (compareVersions(currentVersion, '0') > 0 && compareVersions(currentVersion, '1.5') < 0) {
