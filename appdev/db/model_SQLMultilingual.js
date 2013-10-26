@@ -125,11 +125,11 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
 
 
                 // all the remaining language codes need entries as well:
-                var listAllLanguages = AD.Lang.listLanguages; //req.aRAD.response.listLanguages;
+                var listAllLanguages = AD.Defaults.supportedLanguages; //req.aRAD.response.listLanguages;
                 for (var langI=0; langI<listAllLanguages.length; langI++) {
             
                     // if this is not the provided language code
-                    var curLangCode = listAllLanguages[langI].language_code;
+                    var curLangCode = listAllLanguages[langI];
                     if (curLangCode != providedLangCode) {
                 
                 

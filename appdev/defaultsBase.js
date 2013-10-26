@@ -16,7 +16,12 @@ var defaults = {
     get serverStorageEnabled() {
         return defaults.syncEnabled; // may be overridden by applications
     },
-    languageKey: Ti.Locale.currentLanguage,
+    get languageKey() {
+        var currentLanguage = Ti.Locale.currentLanguage;
+        return defaults.supportedLanguages.indexOf(currentLanguage) === -1 ? defaults.defaultLanguage : currentLanguage;
+    },
+    supportedLanguages: ['en'], // may be overridden by applications
+    defaultLanguage: 'en',
     get serverBaseURL() {
         return Ti.App.Properties.getString('server_url_preference');
     },

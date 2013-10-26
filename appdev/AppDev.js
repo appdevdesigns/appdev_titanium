@@ -123,13 +123,6 @@ var boot = function(options) {
 
     AD.Models = {};
     
-    AD.Lang = {
-        listLanguages: [{
-            language_code: 'en',
-            language_label: 'English'
-        }]
-    };
-    
     AD.ServiceJSON = require('appdev/comm/serviceJSON');
     
     // Load the UI module
