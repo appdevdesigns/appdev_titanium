@@ -17,7 +17,7 @@ var Database = module.exports = {
     
     // Backup the database to a JSON dump
     export: function(dbName) {
-        return Database.DataStore.export(dbName).done(function(dump) {
+        return Database.DataStore.exportDatabase(dbName).done(function(dump) {
             // Do not backup the auto-generated android-metadata table
             delete dump.tables.android_metadata;
             
@@ -58,7 +58,7 @@ var Database = module.exports = {
                 dump = upgrader.upgrade(dump);
             }
         });
-        return Database.DataStore.import(dbName, dump).done(function() {
+        return Database.DataStore.importDatabase(dbName, dump).done(function() {
             AD.Model.refreshCaches().done(AD.UI.initialize);
         });
     },
