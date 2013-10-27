@@ -170,14 +170,67 @@ module.exports.install = function(hooks) {
             
             // This is the data that is passed to hooks
             var installData = {
+                labels: null,
                 previousVersion: currentVersion, // the app version before the upgrade
                 currentVersion: AD.Defaults.version, // the app version after the upgrade
                 dbName: AD.Defaults.dbName,
                 query: function(query, values) {
                     // Run a database query
                     return DataStore.execute(installData.dbName, query, values);
+                },
+                installLabels: function(tableName) {
+                    var table = installData.labels[tableName];
+                    var dataTableName = tableName+'_data';
+                    var transTableName = tableName+'_trans';
+                    var getDataMgr = function(dbTable, model) {
+                        return {
+                            dbName: installData.dbName,
+                            dbTable: dbTable,
+                            model: $.extend(table.has_guid ? {
+                                viewer_id: AD.Defaults.viewerId,
+                                device_id: Ti.Platform.id
+                            } : {}, model),
+                            joinedTables: [],
+                            selectedFields: { _empty: true }
+                        };
+                    };
+                    
+                    table.labels.forEach(function(label) {
+                        // Create the data table entry
+                        DataStore.create(getDataMgr(dataTableName)).done(function(primaryKey) {
+                            // Get the value of the linked field from the new entry
+                            var getLinkedFieldDfd = $.Deferred();
+                            if (table.has_guid) {
+                                DataStore.read(getDataMgr(dataTableName, $.makeObject([{
+                                    key: table.primary_key,
+                                    value: primaryKey
+                                }]))).done(function(labelArgs) {
+                                    getLinkedFieldDfd.resolve(labelArgs[0][0][table.linked_field]);
+                                });
+                            }
+                            else {
+                                getLinkedFieldDfd.resolve(primaryKey);
+                            }
+                            
+                            // Create the trans table entries for each label
+                            getLinkedFieldDfd.done(function(linkedField) {
+                                $.each(label, function(language, label) {
+                                    DataStore.create(getDataMgr(transTableName, $.makeObject([
+                                        { key: table.linked_field, value: linkedField },
+                                        { key: 'language_code', value: language },
+                                        { key: table.label_field, value: label }
+                                    ])));
+                                });
+                            });
+                        });
+                    });
                 }
             };
+            // Read in the labels data file
+            var labelsFile = Titanium.Filesystem.getFile(Titanium.Filesystem.resourcesDirectory, 'labels.json');
+            if (labelsFile.exists) {
+                installData.labels = JSON.parse(labelsFile.read().text);
+            }
             
             if (AD.Defaults.localStorageEnabled) {
                 installDatabases(installData);

@@ -88,6 +88,15 @@ jQuery.indexArray = function(array, key) {
     return object;
 };
 
+// Create an object from an array of key/value pairs
+jQuery.makeObject = function(keyValueArray) {
+    var object = {};
+    keyValueArray.forEach(function(keyValue) {
+        object[keyValue.key] = keyValue.value;
+    });
+    return object;
+};
+
 // Return the string with the first leter capitalized
 jQuery.capitalize = function(string) {
     return string ? (string[0].toUpperCase() + string.slice(1)) : string;
