@@ -11,7 +11,8 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             columns.push(key);
             values.push(value);
         });
-        var query = 'INSERT INTO '+dataMgr.dbTable+' ('+ columns.join(', ') + ') VALUES ('+ $.createArray(columns.length, '?').join(', ') + ')';
+        var valuesClause = ' ('+ columns.join(', ') + ') VALUES ('+ $.createArray(columns.length, '?').join(', ') + ')';
+        var query = 'INSERT INTO '+dataMgr.dbTable+(columns.length === 0 ? ' DEFAULT VALUES' : valuesClause);
         return this.execute(dataMgr.dbName, query, values, callback);
     },
     
