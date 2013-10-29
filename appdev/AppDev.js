@@ -100,6 +100,7 @@ var boot = function(options) {
     
     AD.CryptoJS = require('appdev/cryptojs');
     AD.sjcl = require('appdev/sjcl');
+    AD.Base64 = require('appdev/base64');
     
     AD.Platform = require('appdev/Platform');
     
