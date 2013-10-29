@@ -11,7 +11,8 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             columns.push(key);
             values.push(value);
         });
-        var query = 'INSERT INTO '+dataMgr.dbTable+' ('+ columns.join(', ') + ') VALUES ('+ $.createArray(columns.length, '?').join(', ') + ')';
+        var valuesClause = ' ('+ columns.join(', ') + ') VALUES ('+ $.createArray(columns.length, '?').join(', ') + ')';
+        var query = 'INSERT INTO '+dataMgr.dbTable+(columns.length === 0 ? ' DEFAULT VALUES' : valuesClause);
         return this.execute(dataMgr.dbName, query, values, callback);
     },
     
@@ -202,8 +203,8 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         return dfd.pipe();
     },
 
-    // Export the database, represented as a Javascript object
-    export: function(dbName) {
+    // Export the entire database, represented as a Javascript object
+    exportDatabase: function(dbName) {
         var self = this;
         var dfd = $.Deferred();
         self.execute(dbName, "SELECT name FROM sqlite_master WHERE type='table'").done(function(tableArgs) {
@@ -214,43 +215,66 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             var tables = tableArgs[0];
             tables.forEach(function(table) {
                 var tableName = table.name;
-                self.execute(dbName, "SELECT * FROM ?", [tableName]).done(function(rowArgs) {
-                    dump.tables[tableName] = {
-                        rows: rowArgs[1],
-                        data: rowArgs[0]
-                    };
+                self.exportTable(dbName, tableName).done(function(tableDump) {
+                    dump.tables[tableName] = tableDump;
                 }).fail(dfd.reject);
             });
-            // This assummes that the "execute" call is blocking, which it is
+            // This assumes that the "execute" call is blocking, which it is
             dfd.resolve(dump);
         }).fail(dfd.reject);
         return dfd.promise();
     },
 
     // Import the database, represented as a Javascript object
-    import: function(dbName, dump) {
+    importDatabase: function(dbName, dump) {
+        var self = this;
+        var dfd = $.Deferred();
+        // Import each the table from the dump
+        $.each(dump.tables, function(tableName, tableDump) {
+            self.importTable(dbName, tableName, tableDump).fail(dfd.reject);
+        });
+        // This assumes that the "execute" call is blocking, which it is
+        dfd.resolve();
+        return dfd.promise();
+    },
+    
+    // Export a single database table, represented as a Javascript object
+    exportTable: function(dbName, tableName) {
+        var dfd = $.Deferred();
+        this.execute(dbName, "SELECT * FROM ?", [tableName]).done(function(rowArgs) {
+            dfd.resolve({
+                rows: rowArgs[1],
+                data: rowArgs[0]
+            });
+        }).fail(dfd.reject);
+        return dfd.promise();
+    },
+    
+    // Import a single database table, represented as a Javascript object
+    importTable: function(dbName, tableName, dump) {
         var self = this;
         var dfd = $.Deferred();
         this.execute(dbName, 'PRAGMA foreign_keys = OFF'); // temporarily disable foreign key checks
-        $.each(dump.tables, function(name, table) {
-            // Empty the table
-            self.execute(dbName, "DELETE FROM ?", [name]).done(function() {
-                var rowNames = table.rows;
-                var dataRows = table.data;
-                var maxInserts = 250;
-                for (var startRow = 0; startRow < dataRows.length; startRow += maxInserts) {
-                    var values = [name];
-                    var selectSQL = dataRows.slice(startRow, startRow + maxInserts).map(function(row) {
-                        return rowNames.map(function(rowName) {
-                            values.push(row[rowName]);
-                            return '?';
-                        }).join(',');
-                    }).join(' UNION ALL SELECT ');
-                    self.execute(dbName, "INSERT INTO ? ("+rowNames.join(',')+") SELECT "+selectSQL, values).fail(dfd.reject);
-                }
-            }).fail(dfd.reject);
-        });
-        // This assummes that the "execute" call is blocking, which it is
+        
+        // Empty the table
+        this.execute(dbName, "DELETE FROM ?", [tableName]).done(function() {
+            // Now insert the data back in
+            var rowNames = dump.rows;
+            var dataRows = dump.data;
+            var maxInserts = 250;
+            for (var startRow = 0; startRow < dataRows.length; startRow += maxInserts) {
+                var values = [tableName];
+                var selectSQL = dataRows.slice(startRow, startRow + maxInserts).map(function(row) {
+                    return rowNames.map(function(rowName) {
+                        values.push(row[rowName]);
+                        return '?';
+                    }).join(',');
+                }).join(' UNION ALL SELECT ');
+                self.execute(dbName, "INSERT INTO ? ("+rowNames.join(',')+") SELECT "+selectSQL, values).fail(dfd.reject);
+            }
+        }).fail(dfd.reject);
+        
+        // This assumes that the "execute" call is blocking, which it is
         dfd.resolve();
         this.execute(dbName, 'PRAGMA foreign_keys = ON'); // re-enable foreign key checks
         return dfd.promise();
