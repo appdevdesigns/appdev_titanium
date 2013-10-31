@@ -150,12 +150,7 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
                             newFields[fieldKey] = '['+curLangCode+']'+fields[fieldKey];
                         }
                     
-                        var newLangMgr = {
-                            dbTable: tableName,
-                            model:newFields
-                        };
-                    
-                        listUpdates.push( newLangMgr );
+                        listUpdates.push( self.getCurrentDataMgr(newFields, {dbTable:self.tables.trans}) );
                     
                     }
             
