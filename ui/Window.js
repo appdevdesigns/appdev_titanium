@@ -200,7 +200,9 @@ $.View('jQuery.Window', {
     open: function() {
         this.isOpen = true;
         if (this.options.modal) {
-            this.window.open({ modal: true });
+            this.window.open({
+                fullscreen: true
+            });
         }
         else if (this.tab) {
             this.tab.open(this.window);
