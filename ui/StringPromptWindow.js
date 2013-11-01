@@ -15,6 +15,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
         message: 'stringPromptDefaultMessage',
         initial: '',
         cancelable: true,
+        modal: true,
         // Called when validating string input
         // Return an object with the 'valid' field set to the validity of the input string
         // Optionally set the 'reason' field to the reason why the input is invalid
@@ -34,8 +35,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
             },
             title: this.options.title,
             focusedChild: 'string',
-            autoOpen: true,
-            modal: true
+            autoOpen: true
         });
     },
     

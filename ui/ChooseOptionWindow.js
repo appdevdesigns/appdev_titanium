@@ -247,10 +247,14 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
 require('ui/StringPromptWindow');
 var AddOptionWindow = AD.UI.StringPromptWindow('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {}, {
     init: function(options) {
+        // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
+        $.extend(true, this.options, options);
+        
         // Initialize the base AD.UI.StringPromptWindow object
         this._super({
             title: $.formatString('addOptionTitle', AD.Localize(this.options.groupName)),
-            message: $.formatString('newOptionTitle', AD.Localize(this.options.groupName).toLowerCase())
+            message: $.formatString('newOptionTitle', AD.Localize(this.options.groupName).toLowerCase()),
+            modal: false
         });
     }
 });
