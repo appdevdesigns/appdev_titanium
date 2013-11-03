@@ -147,7 +147,7 @@ var boot = function(options) {
     AD.ServiceJSON = require('appdev/comm/serviceJSON');
     
     // Load the UI module
-    AD.UI = $.extend(true, require('appdev/UIBase'), require('UI'));
+    AD.UI = $.extend(true, require('ui/UIBase'), require('ui/UI'));
     require('ui/ErrorWindow');
     require('ui/AppTabGroup');
     console.log('Loaded UI modules');
