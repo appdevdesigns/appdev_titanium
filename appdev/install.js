@@ -1,9 +1,14 @@
 var AD = require('AppDev');
 
+// Return the version string as an array of its period delimited parts with the pre-release identifier removed
+var parseVersion = function(version) {
+    return /^([^\-]*)/.exec(version)[1].split('.');
+};
+
 // Return 1 if v1 is higher than v2, return -1 if v1 is lower than v2, and return 0 if they are equal
 var compareVersions = module.exports.compareVersions = function(v1, v2) {
-    var v1Parts = v1.split('.');
-    var v2Parts = v2.split('.');
+    var v1Parts = parseVersion(v1);
+    var v2Parts = parseVersion(v2);
     var maxLength = Math.max(v1Parts.length, v2Parts.length);
     for (var i = 0; i < maxLength; ++i) {
         var v1Part = parseInt(v1Parts[i], 10) || 0;
@@ -59,6 +64,9 @@ module.exports.install = function(hooks) {
     if (!installed) {
         currentVersion = '0';
     }
+    console.log('Installed: '+installed);
+    console.log('Current version: '+currentVersion);
+    console.log('AD.Defaults.version: '+AD.Defaults.version);
     if (compareVersions(AD.Defaults.version, currentVersion) > 0) {
         // (Re)install the application
         console.log((installed ? 'Upgrading' : 'Installing') + ' app from '+currentVersion+' to '+AD.Defaults.version+' ...');
@@ -248,7 +256,7 @@ module.exports.install = function(hooks) {
                 hooks.onInstall(installData);
             }
             
-            if (compareVersions(currentVersion, '0') > 0 && compareVersions(currentVersion, '1.5') < 0) {
+            if (compareVersions(currentVersion, '0.0.0') > 0 && compareVersions(currentVersion, '1.5') < 0) {
                 // Rename the file ServiceJSON.retryingRequests.json to HTTP.retryingRequests.json
                 var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'ServiceJSON.retryingRequests.json');
                 file.rename('HTTP.retryingRequests.json');
