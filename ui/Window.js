@@ -111,13 +111,18 @@ $.View('jQuery.Window', {
                 // As of Titanium SDK 3.0.0, each window in a tab group shares a common activity.
                 // Thus, the Android menu will need to be recreated each time the window changes.
                 // See http://developer.appcelerator.com/blog/2012/12/breaking-changes-in-titanium-sdk-3-0.html
-                if (!window.activity || !window.activity.invalidateOptionsMenu) {
-                    // For some reason, sometimes, window.activity is an empty
-                    // object, so just ignore the 'focus' event in those cases
-                    return;
+                var activity = window.activity;
+                if (!activity || !activity.invalidateOptionsMenu) {
+                    // This window does not have a real activity associated with it (its "activity" property might
+                    // simply be an empty Javascript object), so get the activity from the application tab group
+                    var tabGroup = AD.UI.$appTabGroup ? AD.UI.$appTabGroup.getView() : null;
+                    activity = tabGroup ? tabGroup.activity : null;
+                    if (!activity || !activity.invalidateOptionsMenu) {
+                        // If we still cannot find a valid activity, then abort
+                        return;
+                    }
                 }
-                window.activity.invalidateOptionsMenu();
-                window.activity.onCreateOptionsMenu = function(event) {
+                activity.onCreateOptionsMenu = function(event) {
                     // When a menu needs to be created in response to a press of the 'menu' button, create a menu item for each action
                     actions.forEach(function(action) {
                         // The menuItem property, if not specified, defaults to true
@@ -127,6 +132,7 @@ $.View('jQuery.Window', {
                         }
                     });
                 };
+                activity.invalidateOptionsMenu();
             });
         }
         
