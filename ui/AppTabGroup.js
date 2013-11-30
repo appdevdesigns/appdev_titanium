@@ -38,5 +38,10 @@ module.exports = $.View('AppDev.UI.AppTabGroup', {}, {
     // Close the tab group
     close: function() {
         this.view.close();
+    },
+    
+    // Return the currently focused tab
+    getActiveTab: function() {
+        return this.view.activeTab;
     }
 });

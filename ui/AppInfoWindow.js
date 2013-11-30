@@ -116,7 +116,6 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {
 
     // Create the child views
     create: function() {
-        var tab = this.tab;
         var $contentView = this.add($.View.create(Ti.UI.createScrollView({
             left: 0,
             top: 0,
@@ -154,7 +153,7 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {
         }));
         feedbackButton.addEventListener('click', function(templateData) {
             // Display the feedback window
-            var winFeedback = new FeedbackWindow({ tab: tab });
+            var winFeedback = new FeedbackWindow();
         });
         $contentView.add(Ti.UI.createLabel({
             left: AD.UI.padding,

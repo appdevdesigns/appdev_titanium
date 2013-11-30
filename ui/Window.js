@@ -32,7 +32,7 @@ $.View('jQuery.Window', {
         $.extend(true, this.options, options);
         this.options.createParams.title = AD.Localize(this.options.title); // can be either a string or a key in the locale file
         
-        this.tab = this.tab || this.options.tab;
+        this.tab = this.tab || this.options.tab || (AD.UI.$appTabGroup && AD.UI.$appTabGroup.getActiveTab());
         
         // Create the window
         var window = this.window = Ti.UI.createWindow(this.options.createParams);
