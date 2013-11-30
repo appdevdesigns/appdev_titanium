@@ -39,11 +39,6 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
         this.modelFields = $.extend({}, this.fields.data, this.fields.trans);
     },
     
-    fromTable: function () {
-        var dbName = this.dbName || AD.Defaults.dbName;
-        return dbName+'.'+this.tables.data+' as d  INNER JOIN ' + dbName + '.' + this.tables.trans + ' as t ON d.' + this.primaryKey + '=t.' + this.primaryKey;
-    },
-    
     createFromReq: function (params) {
 
         var req = params.req;
@@ -244,58 +239,56 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
             
         // gather any defined field values for this transaction:
         var currModel = this.loadFromReq(req);
-
-        for(var fI in currModel) {
-        
-            if (fieldValues != '') fieldValues += ', ';
-            
-            var tableID = 'd';
-            
-            // if field is in trans model switch to t.
-            if (typeof this.fields.trans[fI] != 'undefined') {
-                tableID = 't';
-            }
-            fieldValues += tableID+'.'+fI + '=?';
-            values.push( currModel[fI] );
-        }
-        
-        
-        //// compile Condition statement:
         var condition = this.condFromReq(req);
-        if (id != '-1') {
         
-            if (condition != '') {
-                condition += ' AND ';
-            }
-            condition += '( d.' + this.primaryKey+'='+id + ')';
-        }
-
-        //// table name 
-        var tableName = this.fromTable();
-        
-        
-        var sql = 'UPDATE '+tableName + ' SET ' + fieldValues;
-        if (condition != '') {
-            sql += ' WHERE '+condition;
-        }
-
-      
-    //log(req, '      sql:['+sql+']');
         var self = this;
+        
+        var dataModel = {};
+        var transModel = {};
+        $.each(currModel, function(key, value) {
+            if (self.fields.data[key]) {
+                dataModel[key] = value;
+            }
+            if (self.fields.trans[key]) {
+                transModel[key] = value;
+            }
+        });
+        var dataDataMgr = this.getCurrentDataMgr(dataModel, {
+            primaryKey: this.primaryKey,
+            id: id,
+            condition: condition,
+            dbTable: this.tables.data
+        });
+        var transDataMgr = this.getCurrentDataMgr(transModel, {
+            primaryKey: this.primaryKey,
+            id: id,
+            condition: condition,
+            dbTable: this.tables.trans
+        });
+        
         var returnObj = {};
         
-        DataStore.runSQL( sql, values, function(err, results, fields) {
-        
-            // if we have a notification hub defined:
-            if (self.__hub != null) {
-                
-                // Publish an .updated notification for this Model:
-                // published data:  { id: [newPrimaryKeyValue] }
-                var subscriptionKey = self._notificationKey() + '.updated';
-                self.__hub.publish(subscriptionKey, {id:id});
-            }
+        DataStore.update( dataDataMgr, function(err, data) {
             
-            callback(err, returnObj);
+            if (err) {
+                callback(err, returnObj);
+                return;
+            }
+             
+            DataStore.update( transDataMgr, function(err, data) {
+            
+                // if we have a notification hub defined:
+                if (self.__hub != null) {
+                
+                    // Publish an .updated notification for this Model:
+                    // published data:  { id: [newPrimaryKeyValue] }
+                    var subscriptionKey = self._notificationKey() + '.updated';
+                    self.__hub.publish(subscriptionKey, {id:id});
+                }
+            
+                callback(err, returnObj);
+            
+            });
         
         });
          
@@ -308,28 +301,20 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
         var callback = params.callback;
             
         //// create SQL for Data table
-        
-        //// compile Condition statement:
+        var currModel = {};
+        currModel[this.primaryKey] = id;
         var condition = this.condFromReq(req);
-        if (id != '-1') {
         
-            if (condition != '') {
-                condition += ' AND ';
-            }
-            condition += '(' + this.primaryKey+'='+id + ')';
-        }
-        
-        
-        var dbName = this.dbName || AD.Defaults.dbName;
-        var sql = 'DELETE FROM '+dbName+'.'+this.tables.data + ' WHERE ' + condition;
-         
+        var dataDataMgr = this.getCurrentDataMgr(currModel, {
+            condition: condition,
+            dbTable: this.tables.data
+        });
          
         // run data sql
-        log(req, 'sql:['+sql+']');
         var self = this;
         var returnObj = {};
         var values = [];
-        DataStore.runSQL( sql, values, function(err, results, fields) {
+        DataStore.destroy( dataDataMgr, function(err, data) {
 
 
             if (err) {
@@ -338,14 +323,15 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
             
             } else {
             
-                
-                
             // on success
                 // create sql for trans table
-                var sql = 'DELETE FROM '+dbName+'.'+self.tables.trans + ' WHERE ' + condition;
+                var transDataMgr = self.getCurrentDataMgr(currModel, {
+                    condition: condition,
+                    dbTable: self.tables.trans
+                });
                 
                 // run trans sql
-                DataStore.runSQL( sql, values, function(err, results, fields) {
+                DataStore.destroy( transDataMgr, function(err, data) {
                 
                     // if we have a notification hub defined:
                     if (self.__hub != null) {
