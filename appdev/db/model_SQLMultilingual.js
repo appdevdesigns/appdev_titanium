@@ -10,6 +10,8 @@
 //// 
 //// 
 
+var log = console.log;
+
 var $ = require('jquery');
 var AD = require('AppDev');
 
