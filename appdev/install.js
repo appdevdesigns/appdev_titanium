@@ -240,6 +240,9 @@ module.exports.install = function(hooks) {
                 installData.labels = JSON.parse(labelsFile.read().text);
             }
             
+            // Load the property store so that it will be accessible to the installer hooks
+            AD.PropertyStore.read();
+            
             if (AD.Defaults.localStorageEnabled) {
                 installDatabases(installData);
                 if (hooks && $.isFunction(hooks.installDatabases)) {
