@@ -120,9 +120,29 @@ var boot = function(options) {
     AD.Comm.GoogleDrive = require('appdev/comm/GoogleDrive');
     AD.Comm.GoogleDriveFileAPI = require('appdev/comm/GoogleDriveFileAPI');
     
+    // Load model dependencies
+    console.log('Loading model dependencies...');
     AD.Database = require('appdev/db/Database');
-
+    AD.Model = require('appdev/db/ADModel');
+    require('appdev/db/model_SQL');
+    require('appdev/db/model_SQLMultilingual');
+    require('appdev/db/ServerModel');
+    require('appdev/db/SyncedModel');
+    console.log('Loaded model dependencies');
+    AD.ServiceModel = require('appdev/db/serviceModel');
+    
+    // Now load each of the AppDev models
+    console.log('Loading models...');
     AD.Models = {};
+    options.models.forEach(function(model) {
+        console.log('Loading '+model+' model');
+        var Model = require('models/'+model);
+        // Wrap the new class so that the id property CommonJS appends an 'id' attribute
+        // to all objects returned by require, overwriting the Model.id attribute.  Restore
+        // it to its original value, the primary key of the model
+        Model.id = Model.primaryKey;
+    });
+    console.log('Finshed loading models');
     
     AD.ServiceJSON = require('appdev/comm/serviceJSON');
     
@@ -195,27 +215,6 @@ var initialize = function(options) {
     
     // Initialize the property store
     AD.PropertyStore.read();
-    
-    // Load model dependencies
-    console.log('Loading model dependencies...');
-    AD.Model = require('appdev/db/ADModel');
-    require('appdev/db/model_SQL');
-    require('appdev/db/model_SQLMultilingual');
-    require('appdev/db/ServerModel');
-    require('appdev/db/SyncedModel');
-    console.log('Loaded model dependencies');
-    AD.ServiceModel = require('appdev/db/serviceModel');
-    // Now load each of the AppDev models
-    console.log('Loading models...');
-    options.models.forEach(function(model) {
-        console.log('Loading '+model+' model');
-        var Model = require('models/'+model);
-        // Wrap the new class so that the id property CommonJS appends an 'id' attribute
-        // to all objects returned by require, overwriting the Model.id attribute.  Restore
-        // it to its original value, the primary key of the model
-        Model.id = Model.primaryKey;
-    });
-    console.log('Finshed loading models');
     
     // Add a new task, represented by a deferred, that must be completed during initialization
     var addInitDfd = function(newInitDfd) {
