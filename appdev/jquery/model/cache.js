@@ -26,6 +26,8 @@ steal('jquery/model').then(function($) {
         },
         init: function() {
             this.Model = this.constructor.Model;
+            this.modelArray = [];
+            this.modelMap = {};
             if (this.options.createCache) {
                 // Create the cache
                 this.refresh();

@@ -23,9 +23,7 @@ module.exports = {
         var delimiter = '\r\n--' + boundary + '\r\n';
         var closeDelimiter = '\r\n--' + boundary + '--';
 
-        // The blob returned by base64encode has linbreaks
-        // (\r\n) in it for some reason, so strip them out
-        var base64Data = Ti.Utils.base64encode(fileData.content).text.replace(/\r\n/g, '');
+        var base64Data = AD.Base64.encode(fileData.content);
         var multipartRequestBody =
             delimiter +
             'Content-Type: application/json\r\n\r\n' +

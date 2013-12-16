@@ -20,7 +20,7 @@ var defaults = {
         var currentLanguage = Ti.Locale.currentLanguage;
         return defaults.supportedLanguages.indexOf(currentLanguage) === -1 ? defaults.defaultLanguage : currentLanguage;
     },
-    supportedLanguages: ['en'], // may be overridden by applications
+    supportedLanguages: ['en', 'zh-Hans'], // may be overridden by applications
     defaultLanguage: 'en',
     get serverBaseURL() {
         return Ti.App.Properties.getString('server_url_preference');

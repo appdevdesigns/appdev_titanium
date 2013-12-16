@@ -420,6 +420,8 @@ module.exports = $.Model('AD.Model.ModelSQL', {
         this.prepForRead(req, curDataMgr);
         var selectedFields = (curDataMgr.selectedFields._empty) ? this.modelFields : curDataMgr.selectedFields;
         
+        var self = this;
+        
         // Now, execute the read
         DataStore.read( curDataMgr, function(err, results, fields) { 
         
@@ -474,7 +476,41 @@ module.exports = $.Model('AD.Model.ModelSQL', {
         LogDump(req, 'here is an error.');
         throw ('someone didnt include a req in the params to this fn()');
     }
-
+            
+            if (!err) {
+                // Auto-generated untranslated labels have an undesirable prefixed
+                // language code. Until we provide support for user-translated labels,
+                // remove the language code prefix from the returned data
+                var hideLanguageCode = function(labelField) {
+                    returnArray.forEach(function(row) {
+                        var rawLabel = row[labelField];
+                        var matches = /^\[([a-zA-Z-]+)\](.*)$/.exec(rawLabel);
+                        if (matches) {
+                            // This label has a prefixed language code
+                            var languageCode = matches[1];
+                            var label = matches[2];
+                            if (AD.Defaults.supportedLanguages.indexOf(languageCode) !== -1) {
+                                // The language code is actually a supported language, so
+                                // remove the language code prefix from the label field
+                                row[labelField] = label;
+                            }
+                        }
+                    });
+                };
+                if (self._isMultilingual && self.labelKey) {
+                    // Hide the language code on this model's multilingual label
+                    hideLanguageCode(self.labelKey);
+                }
+                if (self.lookupLabels) {
+                    // Hide the language code on each of this model's multilingual lookup labels
+                    $.each(self.lookupLabels, function(field, lookupLabel) {
+                        if (lookupLabel.hasLanguageCode !== false) {
+                            hideLanguageCode(lookupLabel.label);
+                        }
+                    });
+                }
+            }
+            
             callback(err, returnArray);
             
         });  // returns True|False
