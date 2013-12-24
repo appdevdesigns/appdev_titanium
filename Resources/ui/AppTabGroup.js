@@ -30,6 +30,18 @@ module.exports = $.View('AppDev.UI.AppTabGroup', {}, {
         }, this);
     },
     
+    // Initialize the tab group
+    initialize: function() {
+        if (AD.Platform.isAndroid) {
+            this.addEventListener('focus', function() {
+                var actionBar = this.view.activity.actionBar;
+                if (actionBar) {
+                    actionBar.title = Ti.App.name;
+                }
+            });
+        }
+    },
+    
     // Open the tab group
     open: function() {
         this.view.open();
