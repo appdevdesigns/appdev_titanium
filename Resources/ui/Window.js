@@ -133,6 +133,14 @@ $.View('jQuery.Window', {
                     });
                 };
                 activity.invalidateOptionsMenu();
+                
+                var actionBar = activity.actionBar;
+                if (actionBar && _this.options.parent) {
+                    actionBar.displayHomeAsUp = true;
+                    actionBar.onHomeIconItemSelected = function() {
+                        _this.dfd.reject();
+                    };
+                }
             });
         }
         
