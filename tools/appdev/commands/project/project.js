@@ -165,6 +165,7 @@ operations.cleanGitIgnore.flag = '!gitignore';
 var setup = function(params, callback) {
     // Calculate the paths of the AppDev, and Titanium, and project directories
     params.appDevDir = path.resolve(__dirname, '..', '..', '..', '..');
+    params.appDevResourcesDir = path.resolve(params.appDevDir, 'Resources');
     params.titaniumDir = path.resolve(params.appDevDir, '..');
     params.projectDir = path.resolve(params.titaniumDir, params.project);
     params.projectResourcesDir = path.resolve(params.projectDir, 'Resources');
@@ -187,17 +188,28 @@ operations.enumResources = function(params, callback) {
         { dir: 'ui', pattern: /\.js$/ }
     ];
     
+    var enumDirectory = function(directory, recursive, callback) {
+        var files = [];
+        walker(directory).filterDir(function(dir, stat) {
+            return dir === directory || recursive;
+        }).on('file', function(file, stat) {
+            files.push(file);
+        }).on('error', callback).on('end', function() {
+            callback(null, files);
+        });
+    };
+    
     // Find the resources matching the resource patterns
     async.map(resourcePatterns, function(resourcePattern, callback) {
         var directory = resourcePattern.dir;
         var patternRegExp = resourcePattern.pattern;
-        fs.readdir(path.join(params.appDevDir, directory), function(err, files) {
+        enumDirectory(path.join(params.appDevResourcesDir, directory), resourcePattern.recursive, function(err, files) {
             // Determine which files match the pattern
             // The pattern can be set to true to automatically match all files
             var filteredResources = patternRegExp ? files.filter(patternRegExp.test, patternRegExp) : files;
-            // Resolve the relative paths
+            // Strip off the appDevResourcesDir portion of the filenames, making them relative
             var resources = filteredResources.map(function(file) {
-                return path.join(directory, file);
+                return file.slice(params.appDevResourcesDir.length);
             });
             callback(err, resources);
         });
@@ -218,8 +230,8 @@ operations.enumResources = function(params, callback) {
             return {
                 // The relative resource path
                 resource: resource,
-                // The absolute path resource in the AppDev directory
-                appDevPath: path.join(params.appDevDir, resource),
+                // The absolute path resource in the AppDev resources directory
+                appDevPath: path.join(params.appDevResourcesDir, resource),
                 // The absolute path resource in the project's resources directory
                 projectPath: path.join(params.projectResourcesDir, resource)
             };
