@@ -179,11 +179,12 @@ var setup = function(params, callback) {
 // Fill the params "resources" array property with an entry for each AppDev resource file
 operations.enumResources = function(params, callback) {
     // These are resource directories
-    var resourceDirs = ['appdev'];
+    var resourceDirs = [path.join('Resources', 'appdev')];
     // These patterns match resource files in the specified directory
     var resourcePatterns = [
         { dir: '.', pattern: /\.js$/ },
         { dir: 'images', pattern: /\.png$/ },
+        { dir: '../i18n', pattern: /strings\.xml$/, recursive: true },
         { dir: 'models', pattern: /\.js$/ },
         { dir: 'ui', pattern: /\.js$/ }
     ];
@@ -203,13 +204,13 @@ operations.enumResources = function(params, callback) {
     async.map(resourcePatterns, function(resourcePattern, callback) {
         var directory = resourcePattern.dir;
         var patternRegExp = resourcePattern.pattern;
-        enumDirectory(path.join(params.appDevResourcesDir, directory), resourcePattern.recursive, function(err, files) {
+        enumDirectory(path.resolve(params.appDevResourcesDir, directory), resourcePattern.recursive, function(err, files) {
             // Determine which files match the pattern
             // The pattern can be set to true to automatically match all files
             var filteredResources = patternRegExp ? files.filter(patternRegExp.test, patternRegExp) : files;
-            // Strip off the appDevResourcesDir portion of the filenames, making them relative
+            // Strip off the appDevDir portion of the filenames, making them relative
             var resources = filteredResources.map(function(file) {
-                return file.slice(params.appDevResourcesDir.length);
+                return file.slice(params.appDevDir.length);
             });
             callback(err, resources);
         });
@@ -230,10 +231,10 @@ operations.enumResources = function(params, callback) {
             return {
                 // The relative resource path
                 resource: resource,
-                // The absolute path resource in the AppDev resources directory
-                appDevPath: path.join(params.appDevResourcesDir, resource),
-                // The absolute path resource in the project's resources directory
-                projectPath: path.join(params.projectResourcesDir, resource)
+                // The absolute path resource in the AppDev root directory
+                appDevPath: path.join(params.appDevDir, resource),
+                // The absolute path resource in the project's root directory
+                projectPath: path.join(params.projectDir, resource)
             };
         });
         callback(err);
