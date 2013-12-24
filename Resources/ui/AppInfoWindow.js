@@ -144,6 +144,7 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {
             textAlign: 'center',
             text: $.formatString('aboutVersion', AD.Defaults.version)
         }));
+        var _this = this;
         var feedbackButton = $contentView.add(Ti.UI.createButton({
             top: AD.UI.padding * 2,
             center: {x: AD.UI.screenWidth / 2},
@@ -153,7 +154,7 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {
         }));
         feedbackButton.addEventListener('click', function(templateData) {
             // Display the feedback window
-            var winFeedback = new FeedbackWindow();
+            _this.createWindow('FeedbackWindow');
         });
         $contentView.add(Ti.UI.createLabel({
             left: AD.UI.padding,

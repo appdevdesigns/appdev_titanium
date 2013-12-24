@@ -16,13 +16,6 @@ var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
     defaults: {
         minDate: null,
         maxDate: null
-    },
-    
-    // Quick function to display the date picker window in a single function call
-    // Return a deferred that will resolve to the chosen date
-    datePicker: function(options) {
-        var $winDatePicker = new DatePickerWindow(options);
-        return $winDatePicker.getDeferred();
     }
 }, {
     init: function(options) {

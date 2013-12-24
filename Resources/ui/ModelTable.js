@@ -15,7 +15,7 @@ var AD = require('AppDev');
  *     onSelect:      The OPTIONAL callback function that will be called when a model row is selected
  * 
  * The following options are allowed for the constructor parameters: (all are optional unless specified otherwise)
- *     $window:       The $.Window instance that this table is a child of; only REQUIRED if 'editable' is set to true
+ *     $window:       The $.Window instance that this table is a child of; helpful for retaining access to the parent window in callbacks
  *     Model:         The REQUIRED model class associated with this table
  *     selectable:    Set to true to enable selection of model rows
  *     editable:      Set to true to enable rows to be edited (deleted) in iOS
@@ -71,6 +71,8 @@ $.View('jQuery.ModelTable', {
         
         // The table is the view's view
         this._super({view: this.table});
+        
+        this.$window = this.options.$window;
         
         this.smartBind(this.options.Model, '*', function(event, model) {
             var row = this.rowFromModel(model);

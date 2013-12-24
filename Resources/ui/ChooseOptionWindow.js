@@ -167,7 +167,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     
     // Display the AddOptionWindow
     addOption: function() {
-        var $winAddOption = new AddOptionWindow({
+        var $winAddOption = this.createWindow('ChooseOptionWindow.AddOptionWindow', {
             groupName: this.options.groupName
         });
         var Model = this.Model;

@@ -227,6 +227,20 @@ $.View('jQuery.Window', {
         }
     },
     
+    // Shortcut for creating a window of the specified type
+    // The primary advantage is that it automatically specifies the parent of the new window
+    // This:
+    //     var $window = this.createWindow('WindowName', { param: value });
+    // Is equivalent to this:
+    //     var $window = new AD.UI.WindowName({ parent: this, param: value });
+    createWindow: function(type, params) {
+        var Constructor = $.isFunction(type) ? type : $.String.getObject(type, AD.UI);
+        var $window = new Constructor($.extend({
+            parent: this
+        }, params));
+        return $window;
+    },
+    
     isWindow: true, // is a member of the $.Window class
     
     // Enable/disable the view
