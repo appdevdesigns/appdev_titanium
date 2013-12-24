@@ -229,6 +229,14 @@ $.View('jQuery.Window', {
     
     isWindow: true, // is a member of the $.Window class
     
+    // Enable/disable the view
+    // Override the default $.View functionality which sets the "opacity"
+    // property. This would create a window that uses a translucent
+    // theme. A disabled window does not really make sense anyway.
+    setEnabled: function(enabled) {
+        this.enabled = enabled;
+    },
+    
     // Return the deferred object representing the window's operation
     getDeferred: function() {
         return this.dfd;
