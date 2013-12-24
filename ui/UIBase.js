@@ -8,8 +8,15 @@ var AD = require('AppDev');
 var $ = require('jquery');
 
 var UI = module.exports = {
-    screenWidth: Ti.Platform.displayCaps.platformWidth,
-    screenHeight: Ti.Platform.displayCaps.platformHeight,
+    get screenWidth() {
+        return Ti.Platform.displayCaps.platformWidth;
+    },
+    get screenHeight() {
+        return Ti.Platform.displayCaps.platformHeight;
+    },
+    get useableScreenWidth() {
+        return UI.screenWidth - UI.padding * 2;
+    },
     
     buttonHeight: 40,
     textFieldHeight: 40,
@@ -47,7 +54,6 @@ if (AD.Platform.isAndroid) {
     UI.screenWidth /= Ti.Platform.displayCaps.logicalDensityFactor;
     UI.screenHeight /= Ti.Platform.displayCaps.logicalDensityFactor;
 }
-UI.useableScreenWidth = UI.screenWidth - UI.padding * 2;
 
 // Log display info for debugging purposes
 console.log('Display info:');
