@@ -144,6 +144,41 @@ var boot = function(options) {
     });
     console.log('Finshed loading models');
     
+    // Generate a model dictionary indexed by the model table name
+    var indexedModels = {};
+    $.each(AD.Models, function(name, Model) {
+        if (Model.type === 'single') {
+            indexedModels[Model.dbTable] = Model;
+        }
+        else if (Model.type === 'multilingual') {
+            indexedModels[Model.tables.data] = indexedModels[Model.tables.trans] = Model;
+        }
+    });
+    
+    // Detect when a model that another model references
+    // is destroyed and remove those obsolete references
+    $.each(AD.Models, function(name, Model) {
+        if (!Model.lookupLabels) {
+            return;
+        }
+        $.each(Model.lookupLabels, function(field, lookupField) {
+            var referencedModel = indexedModels[lookupField.tableName];
+            referencedModel.bind('destroyed', function(event, model) {
+                // Find all models that referenced the destroyed model
+                var query = {};
+                query[lookupField.foreignKey] = model.attr(lookupField.referencedKey);
+                Model.cache.query(query).forEach(function(model) {
+                    // Stop referencing the deleted model
+                    model.attr(lookupField.foreignKey, null);
+                    model.attr(lookupField.label, null);
+                    // No need to persist changes since the database
+                    // already handles that with its ON DELETE ... clause
+                    //model.save();
+                });
+            });
+        });
+    });
+    
     AD.ServiceJSON = require('appdev/comm/serviceJSON');
     
     // Load the UI module
