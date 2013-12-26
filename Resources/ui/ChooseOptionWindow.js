@@ -32,7 +32,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                 }
                 else {
                     // Use the first (and only) selected option
-                    this.resolve(selected[0]);
+                    this.dfd.resolve(selected[0]);
                 }
             }
         },
@@ -95,7 +95,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             // An option row was clicked
             var row = _this.select(event.row.id);
             if (!_this.options.multiselect) {
-                _this.resolve(row.option);
+                _this.dfd.resolve(row.option);
             }
         });
         this.add('optionsTable', optionsTable);
@@ -152,17 +152,6 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             row.hasCheck = !row.hasCheck;
         }
         return row;
-    },
-
-    // Complete the "choose option" operation with the specified option
-    resolve: function(option) {
-        if (option) {
-            this.dfd.resolve(option);
-        }
-        else {
-            // Nothing has been selected, or the previously selected option has been deleted
-            this.dfd.reject();
-        }
     },
     
     // Display the AddOptionWindow
