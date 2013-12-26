@@ -8,7 +8,9 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         enabled: function() {
             return this.options.editable;
         },
-        rightNavButton: true
+        rightNavButton: true,
+        showAsAction: true,
+        icon: '/images/ic_action_new.png'
     }, {
         callback: function() {
             if (this.dfd.state() === 'pending') {
