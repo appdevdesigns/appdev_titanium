@@ -127,7 +127,11 @@ $.View('jQuery.Window', {
                     actions.forEach(function(action) {
                         // The menuItem property, if not specified, defaults to true
                         if (action.menuItem !== false) {
-                            var menuItem = event.menu.add({ title: AD.Localize(action.title) });
+                            var menuItem = event.menu.add({
+                                title: AD.Localize(action.title),
+                                showAsAction: action.showAsAction ? Ti.Android.SHOW_AS_ACTION_ALWAYS : Ti.Android.SHOW_AS_ACTION_NEVER,
+                                icon: action.icon
+                            });
                             menuItem.addEventListener('click', _this.proxy(action.callback));
                         }
                     });

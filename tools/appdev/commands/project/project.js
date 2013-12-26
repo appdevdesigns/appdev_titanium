@@ -183,6 +183,7 @@ operations.enumResources = function(params, callback) {
     // These patterns match resource files in the specified directory
     var resourcePatterns = [
         { dir: '.', pattern: /\.js$/ },
+        { dir: 'android', pattern: /\.png$/, recursive: true },
         { dir: 'images', pattern: /\.png$/ },
         { dir: '../i18n', pattern: /strings\.xml$/, recursive: true },
         { dir: 'models', pattern: /\.js$/ },
