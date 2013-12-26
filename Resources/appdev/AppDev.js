@@ -301,29 +301,14 @@ var initialize = function(options) {
             AD.UI.$appTabGroup.open();
         };
         
-        // When reinitializing the UI, close the existing tab group, create a new tab group,
-        // and open it. However, on Android, the application is closed when the root tab
-        // group is closed. To work around this, open a heavyweight window just before
-        // closing the old tab group and close it just after opening the new tab group to
-        // ensure that at least one heavyweight window is open at all times.
+        // When reinitializing the UI, create a new tab group, open it, then close the existing
+        // tab group, and open it. On Android, the application is closed when the root tab
+        // group is closed, so the new tab group must be created and opened before the old
+        // tab group is closed to ensure that at least one tab group is open at all times.
         var $oldTabGroup = AD.UI.$appTabGroup;
         if ($oldTabGroup) {
-            var $winHeavyweight = new $.Window({
-                createParams: {
-                    backgroundColor: 'black',
-                    modal: false
-                }
-            });
-            $winHeavyweight.open();
-            
-            $oldTabGroup.close();
             createTabGroup();
-            
-            // Close the old tab group after the new one opens
-            AD.UI.$appTabGroup.getView().addEventListener('open', function() {
-                // Close the temporary heavyweight window after the new tab group opens
-                $winHeavyweight.close();
-            });
+            $oldTabGroup.close();
         }
         else {
             createTabGroup();
