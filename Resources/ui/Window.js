@@ -19,6 +19,7 @@ $.View('jQuery.Window', {
         }
     },
     systemButtons: {
+        add: Ti.UI.iPhone.SystemButton.ADD,
         edit: Ti.UI.iPhone.SystemButton.EDIT,
         cancel: Ti.UI.iPhone.SystemButton.CANCEL,
         done: Ti.UI.iPhone.SystemButton.DONE,
