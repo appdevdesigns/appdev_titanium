@@ -24,9 +24,6 @@ var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
         // Initialize the base $.Window object
         this._super({
             title: 'datePickerTitle',
-            createParams: {
-                backgroundColor: 'black'
-            },
             autoOpen: true
         });
     },
