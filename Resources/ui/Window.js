@@ -41,11 +41,16 @@ $.View('jQuery.Window', {
         // The window is the view's view
         this._super({ view: this.window });
         
+        // This deferred object represents a possible pending task for the window and
+        // will be resolved when the task completes, or rejected if the task is canceled
+        this.dfd = $.Deferred();
+        
         var leftNavButtons = [];
         var rightNavButtons = [];
         
         // Build a menu on Android and create nav buttons on iOS that correspond to each action
-        var hasCloseHandler = false;
+        var closeHandlers = [];
+        var backButtonHandlers = [];
         var actions = $.mergeArrays(this.constructor.actions, this.actions, this.options.actions).filter(function(action) {
             var validPlatform = true;
             if (action.platform) {
@@ -86,21 +91,66 @@ $.View('jQuery.Window', {
             }
             else if (AD.Platform.isAndroid) {
                 if (action.backButton) {
-                    window.addEventListener('android:back', callback);
+                    backButtonHandlers.push(callback);
                 }
             }
             
             if (action.onClose) {
-                if (hasCloseHandler) {
-                    console.warn('Window already has close handler!');
-                }
-                else {
-                    // Call the callback when the window is closed
-                    hasCloseHandler = true;
-                    window.addEventListener('close', callback);
-                }
+                closeHandlers.push(callback);
             }
         }, this);
+        
+        // Close the window by resolving the deferred, but give onClose actions
+        // a chance to prevent the window from closing by returning false
+        var closeWindow = function() {
+            if (!runCloseHandlers()) {
+                _this.dfd.resolve();
+            }
+        };
+        
+        // Call each of the window's close handlers from its actions
+        var runCloseHandlers = function() {
+            var dontClose = false;
+            closeHandlers.forEach(function(callback) {
+                // If the close handler returned false, then do not close the window
+                dontClose = dontClose || (callback() === false);
+            });
+            return dontClose;
+        };
+        
+        window.addEventListener('close', function(e) {
+            if (closeHandlers.length > 0) {
+                // Call each of the onClose action callbacks when the window is
+                // closed BY THE USER. DO NOT run the close handlers if the deferred
+                // is already resolved or rejected, signaling that the window was
+                // closed programmatically rather than by the user.
+                
+                if (_this.dfd.state() === 'pending') {
+                    // At this point it is too late the prevent the window
+                    // from closing, even if runCloseHandlers returned true
+                    runCloseHandlers();
+                }
+            }
+            else {
+                // The default close handler resolves the deferred
+                _this.dfd.resolve();
+            }
+            // Notify the view that the window is being destroyed
+            _this.destroy();
+        });
+        
+        window.addEventListener('android:back', function() {
+            if (backButtonHandlers.length > 0) {
+                // Call each of the backButton action callbacks
+                backButtonHandlers.forEach(function(callback) {
+                    callback();
+                });
+            }
+            else {
+                // The default back button handler closes the window
+                closeWindow();
+            }
+        });
         
         if (AD.Platform.isiOS) {
             this.createNavButtons(rightNavButtons, 'Right');
@@ -142,23 +192,10 @@ $.View('jQuery.Window', {
                 var actionBar = activity.actionBar;
                 if (actionBar && _this.options.parent) {
                     actionBar.displayHomeAsUp = true;
-                    actionBar.onHomeIconItemSelected = function() {
-                        _this.dfd.reject();
-                    };
+                    actionBar.onHomeIconItemSelected = closeWindow;
                 }
             });
         }
-        
-        // This deferred object represents a possible pending task for the window and
-        // will be resolved when the task completes, or rejected if the task is canceled
-        this.dfd = $.Deferred();
-        
-        if (!hasCloseHandler) {
-            // The default close handler rejects the deferred
-            window.addEventListener('close', this.dfd.reject);
-        }
-        // Notify the view that the window is being destroyed
-        window.addEventListener('close', this.proxy('destroy'));
         
         if (this.options.focusedChild) {
             window.addEventListener('open', this.proxy(function() {
