@@ -97,7 +97,7 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {
         platform: 'Android'
     }],
     aboutLicenseText:
-        'Copyright (c) 2013, AppDev Designs\n'+
+        'Copyright (c) 2014, AppDev Designs\n'+
         'All rights reserved.\n'+
         '\n'+
         'Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n'+
