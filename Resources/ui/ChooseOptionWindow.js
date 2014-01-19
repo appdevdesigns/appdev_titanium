@@ -13,29 +13,31 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         icon: '/images/ic_action_new.png'
     }, {
         callback: function() {
-            if (this.dfd.state() === 'pending') {
-                // Fill the array with the titles of all the selected rows
-                var selected = [];
-                this.getRows().forEach(function(row) {
-                    if (row.hasCheck) {
-                        var option = row.option;
-                        if (option && this.Model) {
-                            // Load the true model from the model cache
-                            // Because the option is a property of a Ti.UI.TableViewRow instance, it is
-                            // passed through the Titanium proxy and no longer refers to the original model
-                            option = this.Model.cache.getById(option.getId());
-                        }
-                        selected.push(option);
+            // Fill the array with the titles of all the selected rows
+            var selected = [];
+            this.getRows().forEach(function(row) {
+                if (row.hasCheck) {
+                    var option = row.option;
+                    if (option && this.Model) {
+                        // Load the true model from the model cache
+                        // Because the option is a property of a Ti.UI.TableViewRow instance, it is
+                        // passed through the Titanium proxy and no longer refers to the original model
+                        option = this.Model.cache.getById(option.getId());
                     }
-                }, this);
+                    selected.push(option);
+                }
+            }, this);
 
-                if (this.options.multiselect) {
-                    this.dfd.resolve(selected);
-                }
-                else {
-                    // Use the first (and only) selected option
-                    this.dfd.resolve(selected[0]);
-                }
+            if (this.options.multiselect) {
+                this.dfd.resolve(selected);
+            }
+            else if (selected.length === 0) {
+                // Nothing is selected
+                this.dfd.reject();
+            }
+            else {
+                // Use the first (and only) selected option
+                this.dfd.resolve(selected[0]);
             }
         },
         menuItem: false,

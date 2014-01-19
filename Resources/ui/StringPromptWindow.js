@@ -9,6 +9,10 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
         enabled: function() {
             return this.options.cancelable;
         }
+    }, {
+        callback: 'onSubmit',
+        menuItem: false,
+        onClose: true
     }],
     defaults: {
         title: 'stringPromptDefaultTitle',
@@ -91,6 +95,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
         else {
             throw 'Invalid "valid" field returned by validateCallback: ['+validity.valid+']!';
         }
+        return validity.valid;
     }
 });
 

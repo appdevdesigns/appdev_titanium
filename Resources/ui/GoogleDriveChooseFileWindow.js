@@ -22,15 +22,15 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
                 dfd.resolve(this.folder.id);
             }
         },
-        rightNavButton: true,
-        backButton: true
+        menuItem: false,
+        onClose: true
     }, {
         title: 'back',
-        callback: 'exit',
-        leftNavButton: true
+        callback: 'exit'
     }, {
         title: 'cancel',
-        callback: 'cancel'
+        callback: 'cancel',
+        rightNavButton: true
     }],
     defaults: {
         folder: 'root',
@@ -77,6 +77,11 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
                 event.row.hasCheck = true;
             }
         });
+        itemsTable.addEventListener('swipe', function(event) {
+            if (event.direction === 'left') {
+                _this.exit();
+            }
+        });
     },
 
     // Initialize the child views
@@ -100,8 +105,7 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
     // Exit the current folder
     exit: function() {
         if (this.folders.length <= 1) {
-            // This is the last folder, so close the window
-            this.dfd.reject();
+            // This is the last folder, so do nothing
             return;
         }
 

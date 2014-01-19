@@ -3,15 +3,15 @@ var $ = require('jquery');
 
 var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
     actions: [{
-        title: 'done',
-        callback: 'done',
-        rightNavButton: true,
-        backButton: true,
-        menuItem: false
+        callback: function() {
+            this.dfd.resolve(this.selectedDate);
+        },
+        menuItem: false,
+        onClose: true
     }, {
         title: 'cancel',
         callback: 'cancel', // special pre-defined callback to reject the deferred
-        leftNavButton: true
+        rightNavButton: true
     }],
     defaults: {
         minDate: null,
@@ -41,9 +41,5 @@ var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
         datePicker.addEventListener('change', function(event) {
             _this.selectedDate = event.value;
         });
-    },
-    
-    done: function() {
-        this.dfd.resolve(this.selectedDate);
     }
 });
