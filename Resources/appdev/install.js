@@ -129,8 +129,10 @@ module.exports.install = function(hooks) {
                 // User accepted admin authorization request, so determine whether the device is encrypted
                 var encryptionStatus = encryption.encryptionStatus();
                 var encrypted = encryptionStatus === encryption.ENCRYPTION_STATUS_ACTIVATED;
+                var encryptionSupported = encryptionStatus === encryption.ENCRYPTION_STATUS_INACTIVE;
                 console.log('Encryption status: '+encryption.encryptionStatus());
                 console.log('Encrypted: '+encrypted);
+                console.log('Encryption supported: '+encryptionSupported);
                 
                 // Admin privileges are not needed anymore
                 encryption.deauthorizeAdmin();
@@ -141,7 +143,20 @@ module.exports.install = function(hooks) {
                 }
                 else {
                     // The device is not encrypted, so password protection is required
-                    AD.UI.okAlert($.formatString('passwordProtectRequired', AD.Defaults.application), true).then(protectionDfd.resolve);
+                    var passwordProtect = function() {
+                        protectionDfd.resolve(true);
+                    };
+                    if (encryptionSupported) {
+                        AD.UI.yesNoAlert($.formatString('recommendEncryption', AD.Defaults.application)).then(function() {
+                            // Open a webpage with Android full-device encryption instructions
+                            Ti.Platform.openURL('http://www.howtogeek.com/141953');
+                            // Now close the application
+                            Ti.Android.currentActivity.finish();
+                        }, passwordProtect);
+                    }
+                    else {
+                        AD.UI.okAlert($.formatString('passwordProtectRequired', AD.Defaults.application)).then(passwordProtect);
+                    }
                 }
             });
             encryption.addEventListener('authorizationRejected', function() {

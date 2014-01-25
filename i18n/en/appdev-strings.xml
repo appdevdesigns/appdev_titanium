@@ -46,6 +46,7 @@
     <!-- Password protection labels -->
     <string name="passwordProtectOptional">Your device appears to have full-device encryption enabled.  Would you like to pasword-protect the application anyway?</string>
     <string name="passwordProtectRequired">Your device does not appear to have full-device encryption enabled.  The application will be password-protected.</string>
+    <string name="recommendEncryption">Full-device encryption is supported but not enabled on your device. It is recommended that you enable full-device encryption before continuing to install {0}. If you do not encrypt your device, you will have to enter a 30-character password each time you open {0}. Would you like to quit {0} and view online instructions for enabling full-device encryption?</string>
     
     <!-- Info labels -->
     <string name="infoTitle">Info</string>
