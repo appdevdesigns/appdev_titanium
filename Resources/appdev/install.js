@@ -124,8 +124,13 @@ module.exports.install = function(hooks) {
             var protectionDfd = $.Deferred();
             var encryption = require('net.appdevdesigns.encryption');
             encryption.addEventListener('authorized', function() {
+                console.log('Encryption authorized');
+                
                 // User accepted admin authorization request, so determine whether the device is encrypted
-                var encrypted = encryption.encryptionStatus() === encryption.ENCRYPTION_STATUS_ACTIVATED;
+                var encryptionStatus = encryption.encryptionStatus();
+                var encrypted = encryptionStatus === encryption.ENCRYPTION_STATUS_ACTIVATED;
+                console.log('Encryption status: '+encryption.encryptionStatus());
+                console.log('Encrypted: '+encrypted);
                 
                 // Admin privileges are not needed anymore
                 encryption.deauthorizeAdmin();
@@ -140,13 +145,16 @@ module.exports.install = function(hooks) {
                 }
             });
             encryption.addEventListener('authorizationRejected', function() {
+                console.log('Encryption rejection');
+                
                 // User rejected admin authorization request, so force password protection
                 protectionDfd.resolve(true);
             });
             encryption.authorizeAdmin();
             
             protectionDfd.done(function(passwordProtect) {
-                console.log(passwordProtect);
+                console.log('Password protected: '+passwordProtect);
+                
                 var StringPromptWindow = require('ui/StringPromptWindow');
                 var WindowClass = StringPromptWindow[passwordProtect ? 'LoginPassword' : 'EncryptionKey'];
                 $winStringPrompt = new WindowClass({
