@@ -141,7 +141,7 @@ module.exports.install = function(hooks) {
             });
             encryption.addEventListener('authorizationRejected', function() {
                 // User rejected admin authorization request, so force password protection
-                protectionDfd.resolve(false);
+                protectionDfd.resolve(true);
             });
             encryption.authorizeAdmin();
             
