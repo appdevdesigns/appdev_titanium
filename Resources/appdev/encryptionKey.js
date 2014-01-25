@@ -35,7 +35,7 @@ var EncryptionKey = module.exports = {
         return Ti.Utils.sha256(randomString + Date.now());
     },
     isEncrypted: function() {
-        return AD.Defaults.alwaysEncrypt || Ti.App.deployType !== 'development';
+        return AD.Defaults.alwaysEncrypt || !AD.Defaults.development;
     },
     get: function() {
         return EncryptionKey.password; // will be null if not logged in
@@ -81,7 +81,7 @@ if (!iterations) {
     
     // Calculate the number of PBKDF2 iterations to use so that it will
     // take approximately EncryptionKey.optimalHashTime milliseconds to hash
-    iterations = EncryptionKey.iterations = Ti.App.deployType === 'development' ? 1 : Math.max(Math.floor(EncryptionKey.optimalHashTime * testIterations / timeElapsed), EncryptionKey.minIterations);
+    iterations = EncryptionKey.iterations = AD.Defaults.development ? 1 : Math.max(Math.floor(EncryptionKey.optimalHashTime * testIterations / timeElapsed), EncryptionKey.minIterations);
     Ti.App.Properties.setInt('iterations', iterations);
     console.log('Using '+iterations+' PBKDF2 iterations');
 }
