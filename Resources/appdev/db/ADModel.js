@@ -181,6 +181,13 @@ var ADModel = module.exports = {
             return Ti.Platform.id;
         },
         getGuid: function() {
+            // First try to access the guid properly directly
+            var id = this[this.constructor.id];
+            if (id) {
+                return id;
+            }
+
+            // The id has not been set yet, so generate it
             var autoincrement = this.attr(this.constructor.autoIncrementKey);
             var deviceId = this.attr('device_id');
             return autoincrement ? (autoincrement+'.'+deviceId) : null;
