@@ -18,6 +18,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
         title: 'stringPromptDefaultTitle',
         message: 'stringPromptDefaultMessage',
         initial: '',
+        doneText: 'done',
         cancelable: true,
         modal: true,
         // Called when validating string input
@@ -69,7 +70,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
             center: {x: AD.UI.screenWidth / 2},
             width: 80,
             height: AD.UI.buttonHeight,
-            titleid: 'done'
+            titleid: this.options.doneText
         }));
         var onSubmit = this.proxy('onSubmit'); // avoid creating two proxies of the same function
         doneButton.addEventListener('click', onSubmit);

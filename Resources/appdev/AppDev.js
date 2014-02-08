@@ -227,6 +227,7 @@ var login = function(options) {
         var $winPasswordPrompt = new PasswordPromptWindow({
             title: 'passwordPromptLoginTitle',
             message: 'passwordPromptLoginMessage',
+            doneText: 'login',
             cancelable: false,
             verifyCallback: function(guess) {
                 this.getChild('status').text = AD.Localize('verifying')+'...';
