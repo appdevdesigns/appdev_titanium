@@ -256,9 +256,18 @@ $.View('jQuery.Window', {
     open: function() {
         this.isOpen = true;
         if (this.options.modal) {
-            this.window.open({
-                fullscreen: true
-            });
+            if (AD.Platform.isiOS) {
+                // On iOS, open modal windows within a navigation window
+                var navWindow = Ti.UI.iOS.createNavigationWindow({
+                    window: this.window
+                });
+                navWindow.open();
+            }
+            else {
+                this.window.open({
+                    fullscreen: true
+                });
+            }
         }
         else if (this.tab) {
             this.tab.open(this.window);
