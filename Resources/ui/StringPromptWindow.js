@@ -85,7 +85,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
     
     onSubmit: function() {
         var value = this.getChild('string').value;
-        var validity = this.options.validateCallback(value);
+        var validity = this.options.validateCallback.call(this, value);
         if (validity.valid === true) {
             this.dfd.resolve(value);
         }

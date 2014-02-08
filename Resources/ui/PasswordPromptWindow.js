@@ -1,77 +1,38 @@
 var AD = require('AppDev');
 var $ = require('jquery');
 
-module.exports = $.Window('AppDev.UI.PasswordPrompt', {
+require('ui/StringPromptWindow');
+
+module.exports = AD.UI.StringPromptWindow('AppDev.UI.PasswordPromptWindow', {
     defaults: {
         title: 'passwordPromptDefaultTitle',
         message: 'passwordPromptDefaultMessage',
         password: null,
-        verifyCallback: null
+        verifyCallback: null,
+        validateCallback: function(inputPassword) {
+            var correct = false;
+            if (this.options.password !== null) {
+                // If the correct password was supplied, simply compare the input password to the correct password
+                correct = inputPassword === this.options.password;
+            }
+            else if (this.options.verifyCallback) {
+                // Run verifyCallback to determine whether or not the input password was correct
+                correct = this.options.verifyCallback.apply(this, arguments);
+            }
+            else {
+                throw 'No password or verifyCallback passed to PasswordPromptWindow to verify input passwords!'
+            }
+            
+            return {
+                valid: correct,
+                reason: AD.Localize(correct ? 'correct' : 'incorrect')+'!'
+            };
+        }
     }
 }, {
-    init: function(options) {
-        // Initialize the base $.Window object
-        this._super({
-            createParams: {
-                layout: 'vertical'
-            },
-            title: AD.Localize(this.options.title),
-            focusedChild: 'password',
-            autoOpen: true,
-            modal: true
-        });
-        this.status = this.getChild('status');
-    },
-    
-    // Create child views
-    create: function() {
-        this.add('messageLabel', Ti.UI.createLabel({
-            left: AD.UI.padding,
-            top: AD.UI.padding,
-            width: AD.UI.useableScreenWidth,
-            height: Ti.UI.SIZE,
-            font: AD.UI.Fonts.small,
-            text: AD.Localize(this.options.message)
-        }));
-        var password = this.add('password', Ti.UI.createTextField({
-            left: AD.UI.padding,
-            top: AD.UI.padding,
-            width: AD.UI.useableScreenWidth,
-            height: AD.UI.textFieldHeight,
-            font: AD.UI.Fonts.small,
-            passwordMask: true,
-            autocorrect: false,
-            autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
-            borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
-        }));
-        var doneButton = this.add('done', Ti.UI.createButton({
-            top: AD.UI.padding,
-            center: {x: AD.UI.screenWidth / 2},
-            width: 80,
-            height: AD.UI.buttonHeight,
-            titleid: 'done'
-        }));
-        var onSubmit = this.proxy('onSubmit'); // avoid creating two proxies of the same function
-        doneButton.addEventListener('click', onSubmit);
-        password.addEventListener('return', onSubmit);
-        this.add('status', Ti.UI.createLabel({
-            left: AD.UI.padding,
-            top: AD.UI.padding * 2,
-            width: AD.UI.useableScreenWidth,
-            height: Ti.UI.SIZE,
-            font: AD.UI.Fonts.small,
-            text: null
-        }));
-    },
-    
-    // Callback to handle password submission
-    onSubmit: function() {
-        this.status.text = AD.Localize('verifying')+'...';
-        var guess = this.getChild('password').value;
-        var correct = this.options.password ? (guess === this.options.password) : this.options.verifyCallback(guess);
-        this.status.text = AD.Localize(correct ? 'correct' : 'incorrect')+'!';
-        if (correct) {
-            this.dfd.resolve(guess);
-        }
+    // Initialize the child views
+    initialize: function() {
+        // Give the input string field a password mask
+        this.getChild('string').passwordMask = true;
     }
 });

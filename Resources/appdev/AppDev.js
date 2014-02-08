@@ -229,6 +229,7 @@ var login = function(options) {
             message: 'passwordPromptLoginMessage',
             cancelable: false,
             verifyCallback: function(guess) {
+                this.getChild('status').text = AD.Localize('verifying')+'...';
                 return AD.EncryptionKey.hash(guess) === AD.EncryptionKey.passwordHash;
             }
         });
