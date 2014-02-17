@@ -258,10 +258,10 @@ $.View('jQuery.Window', {
         if (this.options.modal) {
             if (AD.Platform.isiOS) {
                 // On iOS, open modal windows within a navigation window
-                var navWindow = Ti.UI.iOS.createNavigationWindow({
+                this.navWindow = Ti.UI.iOS.createNavigationWindow({
                     window: this.window
                 });
-                navWindow.open();
+                this.navWindow.open();
             }
             else {
                 this.window.open({
@@ -278,7 +278,10 @@ $.View('jQuery.Window', {
     },
     close: function() {
         this.isOpen = false;
-        if (this.tab && !AD.Platform.isAndroid) {
+        if (this.navWindow) {
+            this.navWindow.close();
+        }
+        else if (this.tab && !AD.Platform.isAndroid) {
             this.tab.close(this.window, { animated: true });
         }
         else {
