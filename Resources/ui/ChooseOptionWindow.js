@@ -242,13 +242,21 @@ var AddOptionWindow = AD.UI.StringPromptWindow('AppDev.UI.ChooseOptionWindow.Add
         // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
         $.extend(true, this.options, options);
         
+        this.groupName = AD.Localize(this.options.groupName);
+        this.lowercasedGroupName = this.groupName.toLowerCase();
+        
         // Initialize the base AD.UI.StringPromptWindow object
         this._super({
-            title: $.formatString('addOptionTitle', AD.Localize(this.options.groupName)),
-            message: $.formatString('newOptionTitle', AD.Localize(this.options.groupName).toLowerCase()),
-            modal: false
+            title: $.formatString('addOptionTitle', this.groupName),
+            message: $.formatString('newOptionTitle', this.lowercasedGroupName),
+            modal: false,
+            validateCallback: function(newOption) {
+                // Option must not be empty
+                return { valid: newOption !== '', reason: $.formatString('newOptionEmpty', this.lowercasedGroupName) };
+            }
         });
-    }
+    },
+    
 });
 
 // Create a specialized ChooseOptionsWindow class that allows multiple options to be selected

@@ -26,6 +26,7 @@
     <string name="chooseOptionTitle">选择{0}</string>
     <string name="addOptionTitle">添加{0}</string>
     <string name="newOptionTitle">输入新的{0}名字。</string>
+    <string name="newOptionEmpty">请输入新的{0}名字。</string>
     
     <!-- Button labels used throughout the app -->
     <string name="yes">是</string>
