@@ -7,7 +7,7 @@
     <string name="stringPromptEncryptionMessage">Please enter at least 30 random characters.  You are NOT required to remember the sequence; it is used internally to increase the security of your information.</string>
     <string name="stringPromptEncryptionLengthConstraint">Input must be at least 30 characters long!</string>
     <string name="stringPromptPasswordTitle">Login Password</string>
-    <string name="stringPromptPasswordMessage">Please choose a secure login password to prevent unathorized access.</string>
+    <string name="stringPromptPasswordMessage">Please choose a secure login password at least 30 characters long to prevent unathorized access.</string>
     <string name="stringPromptPasswordLengthConstraint">Login password must be at least 30 characters long!</string>
     <string name="stringPromptInvalidInput">Invalid input!</string>
     

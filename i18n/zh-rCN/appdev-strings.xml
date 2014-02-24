@@ -7,7 +7,7 @@
     <string name="stringPromptEncryptionMessage">请随意填入至少30个字符。你无须记住这些字符的具体顺序，它们只是用来提高你信息的安全性。</string>
     <string name="stringPromptEncryptionLengthConstraint">填入至少30个字符!</string>
     <string name="stringPromptPasswordTitle">登录密码</string>
-    <string name="stringPromptPasswordMessage">为避免未经授权的访问，请选择安全的登录密码。</string>
+    <string name="stringPromptPasswordMessage">为避免未经授权的访问，请选择安全的登录密码至少长达30个字符。</string>
     <string name="stringPromptPasswordLengthConstraint">登录密码至少长达30个字符!</string>
     <string name="stringPromptInvalidInput">输入无效!</string>
     
