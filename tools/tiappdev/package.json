@@ -1,5 +1,5 @@
 {
-  "name": "appdev",
+  "name": "tiappdev",
   "description": "AppDev Titanium command line tool.",
   "version": "0.0.1",
   "main": "app.js",
@@ -17,8 +17,8 @@
     "underscore": "~1.4.4"
   },
   "bin": {
-    "appdev": "app.js",
-    "ad": "app.js"
+    "tiappdev": "app.js",
+    "tiad": "app.js"
   },
   "preferGlobal": true
 }
