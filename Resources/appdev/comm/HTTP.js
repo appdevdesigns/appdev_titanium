@@ -103,35 +103,6 @@ var HTTP = {
             query: {}
         });
         
-        options.HTTP = {
-            onComplete: function(xhr) {
-                // Call complete AFTER the success or failure callback
-                if ($.isFunction(options.complete)) {
-                    // Call the complete callback if it was provided
-                    options.complete(xhr);
-                }
-            },
-            onSuccess: function(response) {
-                if ($.isFunction(options.success)) {
-                    // Execute the optional success callback
-                    options.success(response, xhr);
-                }
-                options.HTTP.onComplete(xhr);
-            },
-            onFailure: function(response) {
-                if (options.retry) {
-                    // Retry the request until the it succeeds
-                    console.log('Request to ['+options.url+'] failed!  Retrying later.');
-                    HTTP.addRetryingRequest(options);
-                }
-                // Execute the optional failure callback
-                if ($.isFunction(options.failure)) {
-                    options.failure(response, xhr);
-                }
-                options.HTTP.onComplete(xhr);
-            }
-        };
-
         var url = HTTP.makeURL(options.url, options.query);
         if (!/^https?:\/\//.test(options.url)) {
             var serverBaseURL = AD.Defaults.serverBaseURL;
@@ -144,28 +115,42 @@ var HTTP = {
             // Add the scheme, domain, and port to this relative URL
             url = serverBaseURL+url;
         }
-
+        
+        // Send the network request
+        var dfd = $.Deferred();
         var xhr = Ti.Network.createHTTPClient();
-        xhr.onload = function() {
-            var response = this.responseText;
-            var contentType = this.getResponseHeader('content-type');
+        var parseResponse = function(xhr) {
+            var response = xhr.responseText;
+            var contentType = xhr.getResponseHeader('content-type');
             if (contentType && contentType.indexOf('application/json') === 0) {
                 // The response is JSON data, so parse it
                 response = JSON.parse(response);
             }
-            options.HTTP.onSuccess(response, this);
+            return response;
+        };
+        xhr.onload = function() {
+            dfd.resolveWith(this, [parseResponse(this)]);
         };
         xhr.onerror = function(err) {
             // Called when the request returns an error (the user is probably offline)
-            options.HTTP.onFailure(this.responseText, this);
-            console.error('HTTP request to "'+url+'" failed!');
+            dfd.rejectWith(this, [parseResponse(this)]);
         };
         xhr.open(options.method, url);
         $.each(options.headers, function(name, value) {
             xhr.setRequestHeader(name, value);
         });
         xhr.send(options.params);
-        return xhr;
+        
+        // Hookup any callbacks supplied in options
+        dfd.always(options.complete).done(options.success).fail(options.failure).fail(function() {
+            console.error('HTTP request to "'+url+'" failed!');
+            if (options.retry) {
+                // Retry the request until the it succeeds
+                console.log('Request to ['+options.url+'] failed!  Retrying later.');
+                HTTP.addRetryingRequest(options);
+            }
+        });
+        return dfd.promise();
     }
 };
 
