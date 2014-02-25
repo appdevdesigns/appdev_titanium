@@ -96,6 +96,13 @@ var HTTP = {
      *    provided.
      */
     request: function(options) {
+        // Set option defaults
+        $.extend(options, {
+            method: 'GET',
+            headers: {},
+            query: {}
+        });
+        
         options.HTTP = {
             onComplete: function(xhr) {
                 // Call complete AFTER the success or failure callback
@@ -125,7 +132,7 @@ var HTTP = {
             }
         };
 
-        var url = HTTP.makeURL(options.url, options.query || {});
+        var url = HTTP.makeURL(options.url, options.query);
         if (!/^https?:\/\//.test(options.url)) {
             var serverBaseURL = AD.Defaults.serverBaseURL;
             // Server URL is not specified yet, so ignore this request
@@ -140,14 +147,20 @@ var HTTP = {
 
         var xhr = Ti.Network.createHTTPClient();
         xhr.onload = function() {
-            options.HTTP.onSuccess(this.responseText, this);
+            var response = this.responseText;
+            var contentType = this.getResponseHeader('content-type');
+            if (contentType && contentType.indexOf('application/json') === 0) {
+                // The response is JSON data, so parse it
+                response = JSON.parse(response);
+            }
+            options.HTTP.onSuccess(response, this);
         };
         xhr.onerror = function(err) {
             // Called when the request returns an error (the user is probably offline)
             options.HTTP.onFailure(this.responseText, this);
             console.error('HTTP request to "'+url+'" failed!');
         };
-        xhr.open(options.method || 'GET', url);
+        xhr.open(options.method, url);
         $.each(options.headers, function(name, value) {
             xhr.setRequestHeader(name, value);
         });
