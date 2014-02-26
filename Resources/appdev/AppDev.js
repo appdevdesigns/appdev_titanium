@@ -89,6 +89,8 @@ var boot = function(options) {
         return models.map(function(model) { return model.getLabel(); });
     };
     
+    AD.Config = require('app/config');
+    
     AD.Deferreds = {
         login: $.Deferred() // dictionary of registered important initialization deferreds
     };
