@@ -142,7 +142,9 @@ module.exports = $.Model('AD.Model.ModelSQL', {
         var autoIncrementKey = this.autoIncrementKey || this.primaryKey;
         
         var returnObj = { };
-        returnObj[autoIncrementKey] = '-1';
+        if (!this.hasUuid) {
+            returnObj[autoIncrementKey] = '-1';
+        }
         
         var _self = this;
         return DataStore.create( curDataMgr, function( err, data) {   
@@ -157,11 +159,12 @@ module.exports = $.Model('AD.Model.ModelSQL', {
             } 
             
             
-            
-            // the mysql obj returns the insertID of the new row.
-            // here we package it in an obj that reflects this object's 
-            // autoIncrementKey field
-            returnObj[autoIncrementKey] = data;
+            if (!_self.hasUuid) {
+                // the mysql obj returns the insertID of the new row.
+                // here we package it in an obj that reflects this object's 
+                // autoIncrementKey field
+                returnObj[autoIncrementKey] = data;
+            }
             
             callback(err, returnObj);
             

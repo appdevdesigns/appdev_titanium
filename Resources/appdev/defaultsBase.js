@@ -10,7 +10,7 @@ var defaults = {
             server: 'server',
             synced: 'synced'
         },
-        defaultConnectionType: 'synced' // may be overridden by applications
+        defaultConnectionType: 'local' // may be overridden by applications
     },
     localStorageEnabled: true, // may be overridden by applications
     get serverStorageEnabled() {

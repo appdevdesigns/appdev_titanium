@@ -61,11 +61,16 @@ var ADModel = module.exports = {
         }
         
         $.extend(instanceMethods, ADModel.prototypeProperties);
-        if (staticProperties.autoIncrementKey && staticProperties.autoIncrementKey !== staticProperties.primaryKey) {
-            // For classes whose autoincremented key is different from the primary key,
-            // create a getter for the class' primaryKey.  This getter will create a
-            // unique key generated from the autoincremented key and the device id.
-            instanceMethods['get'+$.String.classize(staticProperties.primaryKey)] = instanceMethods.getGuid;
+        
+        if (staticProperties.hasUuid) {
+            Object.defineProperty(staticProperties.defaults, staticProperties.primaryKey, {
+                get: function() {
+                    // Generate a new uuid
+                    return AD.Model.generateUuid();
+                },
+                enumerable: true,
+                configurable: true
+            });
         }
         
         var Model = BaseModel.extend(name, staticProperties, instanceMethods);
@@ -90,8 +95,7 @@ var ADModel = module.exports = {
     // All instances derived from AD.Model will have these static properties
     staticProperties: {
         defaults: {
-            device_id: Ti.Platform.id,
-            get viewer_id() {
+            get user_id() {
                 return AD.Viewer ? AD.Viewer.viewer_id : AD.Defaults.viewerId;
             }
         },
@@ -173,24 +177,34 @@ var ADModel = module.exports = {
             return cacheDfd.done(function() {
                 console.log('Built '+name+' cache');
             });
+        },
+        
+        // Override findAll and findOne to track whether or not models have ever been saved
+        findAll: function() {
+            return this._super.apply(this, arguments).done(function(models) {
+                models.forEach(function(model) {
+                    model.isSaved = true;
+                });
+            });
+        },
+        findOne: function() {
+            return this._super.apply(this, arguments).done(function(model) {
+                model.isSaved = true;
+            });
         }
     },
     // All instances derived from AD.Model will have these prototype properties
     prototypeProperties: {
-        getDeviceId: function() {
-            return Ti.Platform.id;
+        isNew: function() {
+            // Models created via findAll or findOne will have an isSaved property set to true, while
+            // models created via "new Model(...)" will not. Thus, to check whether or not this is a
+            // new model that is never been saved, we can check whether or not this property is falsy.
+            return !this.isSaved;
         },
-        getGuid: function() {
-            // First try to access the guid properly directly
-            var id = this[this.constructor.id];
-            if (id) {
-                return id;
-            }
-
-            // The id has not been set yet, so generate it
-            var autoincrement = this.attr(this.constructor.autoIncrementKey);
-            var deviceId = this.attr('device_id');
-            return autoincrement ? (autoincrement+'.'+deviceId) : null;
+        save: function() {
+            return this._super.apply(this, arguments).done(function() {
+                this.isSaved = true;
+            });
         }
     },
 
@@ -216,6 +230,13 @@ var ADModel = module.exports = {
             });
         });
         return dfd.promise();
+    },
+    
+    // Generate and return a universally unique identifier
+    generateUuid: function() {
+        var hash = Ti.Utils.sha1(Ti.Platform.id + Date.now() + Math.random());
+        var uuid = hash.slice(0, 8) + '-' + hash.slice(8, 12) + '-' + '5' + hash.slice(13, 16) + '-' + (parseInt(hash[17], 16) & 0x3 | 0x8).toString(16) + hash.slice(17, 20) + '-' + hash.slice(20, 24) + '-' + hash.slice(24, 32);
+        return uuid;
     }
 };
 

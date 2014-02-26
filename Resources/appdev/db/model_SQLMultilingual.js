@@ -66,7 +66,9 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
         var autoIncrementKey = this.autoIncrementKey || this.primaryKey;
         
         var returnObj = { };
-        returnObj[autoIncrementKey] = '-1';
+        if (!this.hasUuid) {
+            returnObj[autoIncrementKey] = '-1';
+        }
         
         
         // keep track of DataManagerMultilingual obj as 'self'
@@ -77,10 +79,12 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
 
             var autoIncrementKeyValue = data;
             
-            // the mysql obj returns the insertID of the new row.
-            // here we package it in an obj that reflects this object's 
-            // autoIncrementKey field
-            returnObj[autoIncrementKey] = autoIncrementKeyValue;
+            if (!self.hasUuid) {
+                // the mysql obj returns the insertID of the new row.
+                // here we package it in an obj that reflects this object's 
+                // autoIncrementKey field
+                returnObj[autoIncrementKey] = autoIncrementKeyValue;
+            }
 
             // Get the primary key of the new object
             var getPrimaryKeyDfd = $.Deferred();
@@ -112,7 +116,7 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
                         fields[fieldI] = currModel[fieldI];
                     }
                 }
-                fields[primaryKey] = primaryKeyValue;
+                fields[primaryKey] = self.hasUuid ? currModel[primaryKey] : primaryKeyValue;
                 var curDataMgr = self.getCurrentDataMgr(fields, {dbTable:self.tables.trans});
                 listUpdates.push( curDataMgr );
             

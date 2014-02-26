@@ -217,7 +217,7 @@ module.exports.install = function(hooks) {
                         return {
                             dbName: installData.dbName,
                             dbTable: dbTable,
-                            model: $.extend(table.has_guid ? {
+                            model: $.extend(table.has_uuid ? {
                                 viewer_id: AD.Defaults.viewerId,
                                 device_id: Ti.Platform.id
                             } : {}, model),
@@ -231,7 +231,7 @@ module.exports.install = function(hooks) {
                         DataStore.create(getDataMgr(dataTableName)).done(function(primaryKey) {
                             // Get the value of the linked field from the new entry
                             var getLinkedFieldDfd = $.Deferred();
-                            if (table.has_guid) {
+                            if (table.has_uuid) {
                                 DataStore.read(getDataMgr(dataTableName, $.makeObject([{
                                     key: table.primary_key,
                                     value: primaryKey
