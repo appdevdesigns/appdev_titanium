@@ -7,7 +7,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
         this._super({
             title: 'login',
             modal: true,
-            focusedChild: 'user'
+            focusedChild: 'username'
         });
     },
 
@@ -21,7 +21,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             height: Ti.UI.SIZE,
             textid: 'userId'
         }));
-        this.add('user', Ti.UI.createTextField({
+        this.add('username', Ti.UI.createTextField({
             left: 110,
             top: AD.UI.padding,
             width: 180,
@@ -49,7 +49,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             hintText: AD.Localize('password'),
             borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
         }));
-        passwordField.addEventListener('return', this.proxy('onSubmit'));
+        passwordField.addEventListener('return', this.proxy('submit'));
         
         // Create the submit and cancel buttons
         var buttonWidth = AD.UI.useableScreenWidth * 0.4;
@@ -60,7 +60,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             height: AD.UI.buttonHeight,
             titleid: 'submit'
         }));
-        submit.addEventListener('click', this.proxy('onSubmit'));
+        submit.addEventListener('click', this.proxy('submit'));
         var cancel = this.add(Ti.UI.createButton({
             right: AD.UI.padding,
             top: 120,
@@ -69,52 +69,24 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             titleid: 'cancel'
         }));
         cancel.addEventListener('click', this.proxy('close'));
-        
-        // Close the window when it loses focus
-        this.window.addEventListener('blur', this.proxy(function(event) {
-            // Check that the window itself is losing focus, not just one of its children
-            if (event.source === this.window) {
-                this.close();
-            }
-        }));
     },
     
     // Called when the user submits their login credentials
-    onSubmit: function() {
-        // Gather the login data
-        var loginData = {
-            userID: this.getChild('user').value,
-            pWord: Ti.Utils.md5HexDigest(this.getChild('password').value) // MD5 hash the user's password
-        };
-        
-        // Send login request to the server
-        console.log('Attempting to login...');
-        AD.ServiceJSON.post({
-            params: loginData,
-            url: '/service/site/login/authenticate',
-            success: this.proxy(function(data) {
-                console.log('Login succeeded!');
-                
-                this.close();
-                
-                // Call the onLogin callback if it was provided to the "open" call
-                if ($.isFunction(this.onLogin)) {
-                    this.onLogin();
-                }
-            }),
-            failure: function(data) {
-                console.log('Login failed!');
+    submit: function() {
+        var _this = this;
+        var username = this.getChild('username').value;
+        var password = this.getChild('password').value;
+        var validateDfd = this.options.validateCredentials(username, password);
+        validateDfd.done(function(valid) {
+            if (valid) {
+                _this.dfd.resolve({
+                    username: username,
+                    password: password
+                });
+            }
+            else {
+                alert('Invalid credentials');
             }
         });
-    },
-    
-    // Override the default window open function
-    open: function(onLogin) {
-        this.onLogin = onLogin;
-        
-        // Clear out the input fields
-        this.getChild('user').value = '';
-        this.getChild('password').value = '';
-        return this._super.apply(this, arguments);
     }
 });
