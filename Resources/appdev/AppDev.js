@@ -10,7 +10,7 @@ var AD = module.exports = global.AD = global.AppDev = {};
 var $ = require('appdev/jquery/load');
 
 // Load application defaults
-AD.Defaults = $.extend(true, require('appdev/defaultsBase'), require('defaults'));
+AD.Defaults = $.extend(true, require('appdev/defaults'), require('app/defaults'));
 
 AD.init = function(options) {
     var appDevInitCompleteDfd = $.Deferred();
@@ -192,7 +192,7 @@ var boot = function(options) {
 
 var install = function(options) {
     // Install the application if necessary
-    return require(AD.Platform.isiOS ? '/install' : '../install').install();
+    return require('app/install').install();
 };
 
 var login = function(options) {
