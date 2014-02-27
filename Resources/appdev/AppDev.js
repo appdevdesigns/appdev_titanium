@@ -72,6 +72,13 @@ AD.run = function(operation, context, args) {
 
 // Initialize all AppDev resources
 var boot = function(options) {
+    $.Class.prototype.setup = function(options) {
+        if (!this.options) {
+            this.options = {};
+        }
+        // Set this.options to options merged recursively with this.constructor.defaults
+        $.extend(true, this.options, this.constructor.defaults, options);
+    };
     // Return the primary key of this model instance
     $.Model.prototype.getId = function() {
         return this.attr(this.constructor.id);

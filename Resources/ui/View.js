@@ -20,10 +20,6 @@ $.Class('jQuery.View', {
         return new $.View({view: view});
     }
 }, {
-    setup: function(options) {
-        // Set this.options to options merged recursively with this.constructor.defaults
-        this.options = $.extend(true, {}, this.constructor.defaults, options || {});
-    },
     init: function(options) {
         // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
         $.extend(true, this.options, options);
