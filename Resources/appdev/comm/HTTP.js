@@ -99,7 +99,10 @@ var HTTP = {
         // Set option defaults
         $.extend(options, {
             method: 'GET',
-            headers: {},
+            headers: {
+                'content-type': 'application/json',
+                'charset': 'utf-8'
+            },
             query: {}
         });
         
@@ -139,7 +142,7 @@ var HTTP = {
         $.each(options.headers, function(name, value) {
             xhr.setRequestHeader(name, value);
         });
-        xhr.send(options.params);
+        xhr.send(JSON.stringify(options.params));
         
         // Hookup any callbacks supplied in options
         dfd.always(options.complete).done(options.success).fail(options.failure).fail(function() {
