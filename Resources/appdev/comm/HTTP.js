@@ -96,15 +96,15 @@ var HTTP = {
      *    provided.
      */
     request: function(options) {
-        // Set option defaults
-        $.extend(options, {
+        // Merge the request options with the options defaults
+        options = $.extend(true, {
             method: 'GET',
             headers: {
                 'content-type': 'application/json',
                 'charset': 'utf-8'
             },
             query: {}
-        });
+        }, options);
         
         var url = HTTP.makeURL(options.url, options.query);
         if (!/^https?:\/\//.test(options.url)) {
