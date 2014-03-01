@@ -33,6 +33,10 @@ $.View('jQuery.Window', {
         $.extend(true, this.options, options);
         this.options.createParams.title = AD.Localize(this.options.title); // can be either a string or a key in the locale file
         
+        // This deferred object represents a possible pending task for the window and
+        // will be resolved when the task completes, or rejected if the task is canceled
+        this.dfd = $.Deferred();
+        
         this.tab = this.tab || this.options.tab || (AD.UI.$appTabGroup && AD.UI.$appTabGroup.getActiveTab());
         
         // Create the window
@@ -40,10 +44,6 @@ $.View('jQuery.Window', {
         
         // The window is the view's view
         this._super({ view: this.window });
-        
-        // This deferred object represents a possible pending task for the window and
-        // will be resolved when the task completes, or rejected if the task is canceled
-        this.dfd = $.Deferred();
         
         var leftNavButtons = [];
         var rightNavButtons = [];
