@@ -46,6 +46,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     
     defaults: {
         multiselect: false,
+        filter: {},
         initial: null
     },
 
@@ -75,7 +76,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         }
         if (this.Model && this.Model.cache && !this.options.options) {
             // Automatically generate the options from the model instance cache
-            this.options.options = this.Model.cache.getArray();
+            this.options.options = this.Model.cache.query(this.options.filter);
         }
 
         // Initialize the base $.Window object
