@@ -62,7 +62,7 @@ $.Class('jQuery.View', {
         });
     },
     
-    // Create the necessary child views for the view (should be overriden by derived classes)
+    // Create the necessary child views for the view (should be overridden by derived classes)
     // This should create window such that 'create' can be called once to create a single
     // window instance that can be reused by calling 'initialize' to reset its contents.
     create: function() {
@@ -87,7 +87,7 @@ $.Class('jQuery.View', {
         this.children[name] = childView;
         if (justRecord) {
             // If justRecord is set to true, the view is saved in the view's children map, but is NOT actually added to the view
-            // This can be usefull for saving descendents more than one level deep to the children map
+            // This can be useful for saving descendants more than one level deep to the children map
             childView.notAdded = true;
         }
         else {
@@ -98,7 +98,7 @@ $.Class('jQuery.View', {
     },
     
     // Just like 'add' except that the view is saved in the view's children map, but is NOT actually added to the view
-    // This can be usefull for saving descendents more than one level deep to the children map
+    // This can be useful for saving descendants more than one level deep to the children map
     record: function(name, child) {
         return this.add(name, child, true);
     },
@@ -106,7 +106,7 @@ $.Class('jQuery.View', {
     // addTo and recordOn are very similar to add and record except that this view
     // is added to/record on the parent instead of the other way around
     // These methods support chaining and help to mitigate the several nested functions
-    // that are often necessary to acheive the same effect with add and record
+    // that are often necessary to achieve the same effect with add and record
     addTo: function(name, parent) {
         if (typeof name !== 'string') {
             // The name argument was omitted
@@ -142,6 +142,13 @@ $.Class('jQuery.View', {
         else {
             this.view.opacity = this.enabled ? 1 : 0.25;
         }
+    },
+    
+    // Remove all of this view's children
+    removeAllChildren: function() {
+        this.view.children.slice(0).forEach(function(child) { 
+            this.view.remove(child);
+        }, this);        
     },
     
     addEventListener: function(name, callback) {
