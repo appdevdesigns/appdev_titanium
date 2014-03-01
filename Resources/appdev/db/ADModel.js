@@ -95,9 +95,6 @@ var ADModel = module.exports = {
     // All instances derived from AD.Model will have these static properties
     staticProperties: {
         defaults: {
-            get user_id() {
-                return AD.Viewer ? AD.Viewer.viewer_id : AD.Defaults.viewerId;
-            }
         },
         convert: {
             integer: function(raw) {
