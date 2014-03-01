@@ -68,7 +68,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             height: AD.UI.buttonHeight,
             titleid: 'cancel'
         }));
-        cancel.addEventListener('click', this.proxy('close'));
+        cancel.addEventListener('click', this.dfd.reject);
     },
     
     // Called when the user submits their login credentials
