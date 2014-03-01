@@ -124,10 +124,12 @@ var HTTP = {
         var xhr = Ti.Network.createHTTPClient();
         var parseResponse = function(xhr) {
             var response = xhr.responseText;
-            var contentType = xhr.getResponseHeader('content-type');
-            if (contentType && contentType.indexOf('application/json') === 0) {
-                // The response is JSON data, so parse it
-                response = JSON.parse(response);
+            if (xhr.readyState > 1) {
+                var contentType = xhr.getResponseHeader('content-type');
+                if (contentType && contentType.indexOf('application/json') === 0) {
+                    // The response is JSON data, so parse it
+                    response = JSON.parse(response);
+                }
             }
             return response;
         };
