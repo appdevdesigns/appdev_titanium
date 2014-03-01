@@ -88,14 +88,9 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     
     // Create the options table view
     create: function() {
-        // Create rows for each of the options
-        var tableData = this.options.options.map(this.createRow, this);
-        
         // Create the options table
         var _this = this;
-        var optionsTable = Ti.UI.createTableView({
-            data: tableData
-        });
+        var optionsTable = Ti.UI.createTableView();
         optionsTable.addEventListener('click', function(event) {
             // An option row was clicked
             var row = _this.select(event.row.id);
@@ -133,6 +128,13 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                 this.onOptionsUpdate();
             }));
         }
+    },
+    
+    // Initialize the child views
+    initialize: function() {
+        // Create rows for each of the options
+        var tableData = this.options.options.map(this.createRow, this);
+        this.getChild('optionsTable').data = tableData;
     },
     
     // Select the row with the given id
