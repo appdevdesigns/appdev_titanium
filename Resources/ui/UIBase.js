@@ -122,6 +122,30 @@ UI.yesNoAlert = function(message) {
     return dfd.promise();
 };
 
+// Request access to the user's address book if necessary
+// Return a deferred that will be resolved when granted authorization and rejected when denied authorization
+UI.requestContactsAuthorization = function() {
+    var authorizeDfd = $.Deferred();
+    if (Ti.Contacts.contactsAuthorization === Ti.Contacts.AUTHORIZATION_AUTHORIZED) {
+        authorizeDfd.resolve();
+    }
+    else if (Ti.Contacts.contactsAuthorization === Ti.Contacts.AUTHORIZATION_UNKNOWN) {
+        Ti.Contacts.requestAuthorization(function(e) {
+            if (e.success) {
+                authorizeDfd.resolve();
+            }
+            else {
+                authorizeDfd.reject();
+            }
+        });
+    }
+    else {
+        authorizeDfd.reject();
+        alert(L('contactsUnauthorized'));
+    }
+    return authorizeDfd.promise();
+};
+
 // Return the dimensions of image scaled to fit within a box of the specified dimensions, maintaining a constant aspect ratio
 UI.getImageScaledDimensions = function(image, maxDimensions) {
     var scaleX, scaleY;

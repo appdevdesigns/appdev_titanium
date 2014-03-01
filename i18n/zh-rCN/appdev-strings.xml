@@ -79,4 +79,6 @@
     <!-- ErrorWindow labels -->
     <string name="startupErrorTitle">启动错误</string>
     <string name="retry">重试</string>
+    
+    <string name="contactsUnauthorized">不能访问系统地址簿！请访问设置→隐私→通讯录界面授权。谢谢！</string>
 </resources>

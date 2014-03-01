@@ -79,4 +79,6 @@
     <!-- ErrorWindow labels -->
     <string name="startupErrorTitle">Startup Error</string>
     <string name="retry">Retry</string>
+    
+    <string name="contactsUnauthorized">Cannot access the system address book! Please authorize in Settings → Privacy → Contacts.</string>
 </resources>
