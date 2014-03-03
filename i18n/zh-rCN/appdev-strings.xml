@@ -5,11 +5,11 @@
     <string name="stringPromptDefaultMessage">请输入一个字符串。</string>
     <string name="stringPromptEncryptionTitle">数据库加密设置</string>
     <string name="stringPromptEncryptionMessage">请随意填入至少30个字符。你无须记住这些字符的具体顺序，它们只是用来提高你信息的安全性。</string>
-    <string name="stringPromptEncryptionLengthConstraint">填入至少30个字符!</string>
+    <string name="stringPromptEncryptionLengthConstraint">填入至少30个字符！</string>
     <string name="stringPromptPasswordTitle">登录密码</string>
     <string name="stringPromptPasswordMessage">为避免未经授权的访问，请选择安全的登录密码至少长达30个字符。</string>
-    <string name="stringPromptPasswordLengthConstraint">登录密码至少长达30个字符!</string>
-    <string name="stringPromptInvalidInput">输入无效!</string>
+    <string name="stringPromptPasswordLengthConstraint">登录密码至少长达30个字符！</string>
+    <string name="stringPromptInvalidInput">输入无效！</string>
     
     <!-- PasswordPrompt labels -->
     <string name="passwordPromptDefaultTitle">密码</string>
@@ -57,7 +57,7 @@
     <!-- Feedback labels -->
     <string name="feedback">反馈</string>
     <string name="feedbackTitle">{0} 反馈</string>
-    <string name="feedbackText">谢谢花时间告诉我们你的想法 {0}! 非常感激你提供的建议和错误报告，如果可能的话他们会被纳入未来的新版本发布。 你可以直接通过 appdev.feedback@gmail.com这个邮箱地址和我们联系。如果你想提交一个错误报告， 你可以提交自己的 {0} 版本 ({1}) 和你的 OS ({2} {3})。</string>
+    <string name="feedbackText">谢谢花时间告诉我们你的想法 {0}！ 非常感激你提供的建议和错误报告，如果可能的话他们会被纳入未来的新版本发布。 你可以直接通过 appdev.feedback@gmail.com这个邮箱地址和我们联系。如果你想提交一个错误报告， 你可以提交自己的 {0} 版本 ({1}) 和你的 OS ({2} {3})。</string>
     <string name="feedbackWarning">警告: 从这个应用程序中发送出来的反馈会处在不安全的连接发送中，如果你选择用 VPN 来交流，请把你的反馈通过VPN的安全邮箱发送到appdev.feedback@gmail.com这个邮箱中。</string>
     <string name="suggestion">建议</string>
     <string name="bugReport">错误报告</string>
