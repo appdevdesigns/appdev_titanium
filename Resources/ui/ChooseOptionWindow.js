@@ -100,15 +100,6 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         });
         this.add('optionsTable', optionsTable);
         
-        if (this.options.multiselect) {
-            // Select all initially selected options
-            this.options.initial.forEach(this.select, this);
-        }
-        else {
-            // Select the initially selected option
-            this.select(this.options.initial);
-        }
-
         if (this.options.editable) {
             optionsTable.editable = true;
             optionsTable.addEventListener('delete', this.proxy(function(event) {
@@ -135,6 +126,15 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         // Create rows for each of the options
         var tableData = this.options.options.map(this.createRow, this);
         this.getChild('optionsTable').data = tableData;
+        
+        if (this.options.multiselect) {
+            // Select all initially selected options
+            this.options.initial.forEach(this.select, this);
+        }
+        else {
+            // Select the initially selected option
+            this.select(this.options.initial);
+        }
     },
     
     // Select the row with the given id
