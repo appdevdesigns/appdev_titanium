@@ -22,11 +22,11 @@ module.exports = $.View('AppDev.UI.AppTabGroup', {}, {
             var matches = /^App(\w+)Window$/.exec(windowModule);
             var icon = matches ? '/images/'+matches[1].toLowerCase()+'.png' : null;
             
-            // Add the window to the tab and at the tab to the tab group
+            // Add the window to the tab and add the tab to the tab group
             tab.window = window;
             tab.title = window.title;
             tab.icon = icon;
-            this.view.addTab(tab);
+            this.view.addTab(this.record(windowModule, tab));
         }, this);
     },
     
