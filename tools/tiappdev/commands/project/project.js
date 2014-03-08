@@ -179,13 +179,13 @@ var setup = function(params, callback) {
 // Fill the params "resources" array property with an entry for each AppDev resource file
 operations.enumResources = function(params, callback) {
     // These are resource directories
-    var resourceDirs = [path.join('Resources', 'appdev')];
+    var resourceDirs = [path.join('plugins', 'appdev-framework'), path.join('Resources', 'appdev')];
     // These patterns match resource files in the specified directory
     var resourcePatterns = [
         { dir: '.', pattern: /\.js$/ },
         { dir: 'android', pattern: /\.png$/, recursive: true },
         { dir: 'images', pattern: /\.png$/ },
-        { dir: '../i18n', pattern: /strings\.xml$/, recursive: true },
+        { dir: path.join('..', 'i18n'), pattern: /strings\.xml$/, recursive: true },
         { dir: 'models', pattern: /\.js$/ },
         { dir: 'ui', pattern: /\.js$/ }
     ];
