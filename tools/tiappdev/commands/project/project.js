@@ -83,7 +83,7 @@ operations.clean = function(params, callback) {
 // Remove all dead symbolic links from the project
 operations.prune = function(params, callback) {
     var callback = _.once(callback);
-    walker(params.projectResourcesDir).on('symlink', function(file, stat) {
+    walker(params.projectDir).on('symlink', function(file, stat) {
         async.waterfall([
             function(callback) {
                 fs.readlink(file, callback);
@@ -165,10 +165,9 @@ operations.cleanGitIgnore.flag = '!gitignore';
 var setup = function(params, callback) {
     // Calculate the paths of the AppDev, and Titanium, and project directories
     params.appDevDir = path.resolve(__dirname, '..', '..', '..', '..');
-    params.appDevResourcesDir = path.resolve(params.appDevDir, 'Resources');
+    params.appDevFrameworkDir = path.resolve(params.appDevDir, 'framework');
     params.titaniumDir = path.resolve(params.appDevDir, '..');
     params.projectDir = path.resolve(params.titaniumDir, params.project);
-    params.projectResourcesDir = path.resolve(params.projectDir, 'Resources');
     console.log('Titanium directory:'.label, params.titaniumDir);
     console.log('AppDev directory:'.label, params.appDevDir);
     console.log('Project directory:'.label, params.projectDir);
@@ -182,12 +181,12 @@ operations.enumResources = function(params, callback) {
     var resourceDirs = [path.join('plugins', 'appdev-framework'), path.join('Resources', 'appdev')];
     // These patterns match resource files in the specified directory
     var resourcePatterns = [
-        { dir: '.', pattern: /\.js$/ },
-        { dir: 'android', pattern: /\.png$/, recursive: true },
-        { dir: 'images', pattern: /\.png$/ },
-        { dir: path.join('..', 'i18n'), pattern: /strings\.xml$/, recursive: true },
-        { dir: 'models', pattern: /\.js$/ },
-        { dir: 'ui', pattern: /\.js$/ }
+        { dir: 'i18n', pattern: /strings\.xml$/, recursive: true },
+        { dir: 'Resources', pattern: /\.js$/ },
+        { dir: path.join('Resources', 'android'), pattern: /\.png$/, recursive: true },
+        { dir: path.join('Resources', 'images'), pattern: /\.png$/ },
+        { dir: path.join('Resources', 'models'), pattern: /\.js$/ },
+        { dir: path.join('Resources', 'ui'), pattern: /\.js$/ }
     ];
     
     var enumDirectory = function(directory, recursive, callback) {
@@ -205,13 +204,13 @@ operations.enumResources = function(params, callback) {
     async.map(resourcePatterns, function(resourcePattern, callback) {
         var directory = resourcePattern.dir;
         var patternRegExp = resourcePattern.pattern;
-        enumDirectory(path.resolve(params.appDevResourcesDir, directory), resourcePattern.recursive, function(err, files) {
+        enumDirectory(path.resolve(params.appDevFrameworkDir, directory), resourcePattern.recursive, function(err, files) {
             // Determine which files match the pattern
             // The pattern can be set to true to automatically match all files
             var filteredResources = patternRegExp ? files.filter(patternRegExp.test, patternRegExp) : files;
             // Strip off the appDevDir portion of the filenames, making them relative
             var resources = filteredResources.map(function(file) {
-                return file.slice(params.appDevDir.length);
+                return path.relative(params.appDevFrameworkDir, file);
             });
             callback(err, resources);
         });
@@ -233,7 +232,7 @@ operations.enumResources = function(params, callback) {
                 // The relative resource path
                 resource: resource,
                 // The absolute path resource in the AppDev root directory
-                appDevPath: path.join(params.appDevDir, resource),
+                appDevPath: path.join(params.appDevFrameworkDir, resource),
                 // The absolute path resource in the project's root directory
                 projectPath: path.join(params.projectDir, resource)
             };
