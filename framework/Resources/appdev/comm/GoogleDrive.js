@@ -4,21 +4,6 @@ var GoogleAPIs = AD.Comm.GoogleAPIs;
 
 var GoogleDrive = module.exports = {};
 
-// Process the HTTP response as necessary
-var processResponse = function(response, options, xhr) {
-    if (options.raw) {
-        // Do not to parse the response
-        return response;
-    }
-
-    // Attempt to parse the response text as JSON data
-    var data = response;
-    try {
-        data = JSON.parse(data);
-    } catch(e) {}
-    return data;
-};
-
 GoogleDrive.request = function(options) {
     // Determine whether this is a Google APIs request
     var googleAPIsRequest = options.url.indexOf('https://www.googleapis.com/') === 0;
@@ -30,10 +15,10 @@ GoogleDrive.request = function(options) {
         headers: $.extend({
             Authorization: 'Bearer '+GoogleAPIs.access_token
         }, options.headers),
-        params: options.data,
+        form: options.data,
         success: function(response, xhr) {
             if ($.isFunction(options.success)) {
-                options.success(processResponse(response, options, xhr), xhr);
+                options.success(response, xhr);
             }
         },
         failure: function(response, xhr) {
@@ -46,7 +31,7 @@ GoogleDrive.request = function(options) {
                 });
             }
             else if ($.isFunction(options.failure)) {
-                options.failure(processResponse(response, options, xhr), xhr);
+                options.failure(response, xhr);
             }
             console.error('Request to '+options.url+' failed!');
             console.error(response);

@@ -100,9 +100,9 @@ var HTTP = {
         options = $.extend(true, {
             method: 'GET',
             headers: {
-                'content-type': 'application/json',
                 'charset': 'utf-8'
             },
+            form: null,
             query: {}
         }, options);
         
@@ -128,23 +128,36 @@ var HTTP = {
                 var contentType = xhr.getResponseHeader('content-type');
                 if (contentType && contentType.indexOf('application/json') === 0) {
                     // The response is JSON data, so parse it
-                    response = JSON.parse(response);
+                    try {
+                        response = JSON.parse(response);
+                    }
+                    catch(e) {
+                        // Could not parse the response as JSON
+                    }
                 }
             }
             return response;
         };
         xhr.onload = function() {
-            dfd.resolveWith(this, [parseResponse(this)]);
+            dfd.resolveWith(this, [parseResponse(this), this]);
         };
         xhr.onerror = function(err) {
             // Called when the request returns an error (the user is probably offline)
-            dfd.rejectWith(this, [parseResponse(this)]);
+            dfd.rejectWith(this, [parseResponse(this), this]);
         };
+        console.log(options.method + ' ' + url);
         xhr.open(options.method, url);
         $.each(options.headers, function(name, value) {
             xhr.setRequestHeader(name, value);
         });
-        xhr.send(JSON.stringify(options.params));
+        if (options.form) {
+            xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
+            xhr.send(options.form);
+        }
+        else {
+            xhr.setRequestHeader('content-type', 'application/json');
+            xhr.send(JSON.stringify(options.params));
+        }
         
         // Hookup any callbacks supplied in options
         dfd.always(options.complete).done(options.success).fail(options.failure).fail(function() {
