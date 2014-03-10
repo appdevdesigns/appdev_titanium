@@ -77,16 +77,10 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
         var username = this.getChild('username').value;
         var password = this.getChild('password').value;
         var validateDfd = this.options.validateCredentials(username, password);
-        validateDfd.done(function(valid) {
-            if (valid) {
-                _this.dfd.resolve({
-                    username: username,
-                    password: password
-                });
-            }
-            else {
-                alert('Invalid credentials');
-            }
+        validateDfd.then(function() {
+            _this.dfd.resolve({});
+        }, function() {
+            alert("You have entered an invalid username or password! Please try again.");
         });
     }
 });
