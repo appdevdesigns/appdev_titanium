@@ -275,9 +275,10 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             }
         }).fail(dfd.reject);
         
+        this.execute(dbName, 'PRAGMA foreign_keys = ON'); // re-enable foreign key checks
+        
         // This assumes that the "execute" call is blocking, which it is
         dfd.resolve();
-        this.execute(dbName, 'PRAGMA foreign_keys = ON'); // re-enable foreign key checks
         return dfd.promise();
     }
 }, {});
