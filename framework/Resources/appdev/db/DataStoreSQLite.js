@@ -257,22 +257,29 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         var dfd = $.Deferred();
         this.execute(dbName, 'PRAGMA foreign_keys = OFF'); // temporarily disable foreign key checks
         
-        // Empty the table
-        this.execute(dbName, "DELETE FROM ?", [tableName]).done(function() {
-            // Now insert the data back in
-            var rowNames = dump.rows;
-            var dataRows = dump.data;
-            var maxInserts = 250;
-            for (var startRow = 0; startRow < dataRows.length; startRow += maxInserts) {
-                var values = [tableName];
-                var selectSQL = dataRows.slice(startRow, startRow + maxInserts).map(function(row) {
-                    return rowNames.map(function(rowName) {
-                        values.push(row[rowName]);
-                        return '?';
-                    }).join(',');
-                }).join(' UNION ALL SELECT ');
-                self.execute(dbName, "INSERT INTO ? ("+rowNames.join(',')+") SELECT "+selectSQL, values).fail(dfd.reject);
-            }
+        // Get the table schema
+        this.execute(dbName, "PRAGMA table_info(?)", [tableName]).done(function(tableInfoArgs) {
+            // Extract the column names from the table's database schema
+            var columnNames = tableInfoArgs[0].map(function(column) {
+                return column.name;
+            });
+            
+            // Empty the table
+            self.execute(dbName, "DELETE FROM ?", [tableName]).done(function() {
+                // Now insert the data back in
+                var dataRows = dump.data;
+                var maxInserts = 250;
+                for (var startRow = 0; startRow < dataRows.length; startRow += maxInserts) {
+                    var values = [tableName];
+                    var selectSQL = dataRows.slice(startRow, startRow + maxInserts).map(function(row) {
+                        return columnNames.map(function(rowName) {
+                            values.push(row[rowName]);
+                            return '?';
+                        }).join(',');
+                    }).join(' UNION ALL SELECT ');
+                    self.execute(dbName, "INSERT INTO ? ("+columnNames.join(',')+") SELECT "+selectSQL, values).fail(dfd.reject);
+                }
+            }).fail(dfd.reject);
         }).fail(dfd.reject);
         
         this.execute(dbName, 'PRAGMA foreign_keys = ON'); // re-enable foreign key checks
