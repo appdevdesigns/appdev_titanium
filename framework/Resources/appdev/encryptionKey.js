@@ -1,4 +1,5 @@
 var AD = require('AppDev');
+
 var EncryptionKey = module.exports = {
     keySize: 512, // in bits
     saltSize: 256, // in bits
@@ -55,8 +56,14 @@ var EncryptionKey = module.exports = {
         EncryptionKey.passwordHash = EncryptionKey.hash(password);
         Ti.App.Properties.setString('passwordHash', EncryptionKey.passwordHash);
         if (AD.Platform.isiOS) {
-            require('com.0x82.key.chain').setPasswordForService(password, Ti.App.id, 'database_encryption_key');
+            EncryptionKey.writeKeychain(password);
         }
+    },
+    readKeychain: function() {
+        return require('com.0x82.key.chain').getPasswordForService(Ti.App.id, 'database_encryption_key');
+    },
+    writeKeychain: function(password) {
+        require('com.0x82.key.chain').setPasswordForService(password, Ti.App.id, 'database_encryption_key');
     }
 };
 var salt = Ti.App.Properties.getString('passwordSalt');

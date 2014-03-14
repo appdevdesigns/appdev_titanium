@@ -226,7 +226,7 @@ var login = function(options) {
     }
     else if (AD.Platform.isiOS) {
         // On iOS, login using the password from the keychain
-        password = require('com.0x82.key.chain').getPasswordForService(Ti.App.id, 'database_encryption_key');
+        password = AD.EncryptionKey.readKeychain();
         AD.EncryptionKey.login(password);
         loginDfd.resolve(true);
     }
