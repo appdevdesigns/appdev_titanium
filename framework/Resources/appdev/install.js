@@ -25,6 +25,31 @@ var compareVersions = module.exports.compareVersions = function(v1, v2) {
 
 // Create the necessary databases for the application
 var installDatabases = function(installData) {
+    // Backup the database
+    AD.Database.export(installData.dbName).done(function(databaseDump) {
+        databaseDump.version = installData.previousVersion;
+        var executeQuery = installData.query;
+        
+        // Remove all of the tables in the database
+        executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name!='sqlite_sequence'").done(function(tableArgs) {
+            executeQuery('PRAGMA foreign_keys = OFF');
+            tableArgs[0].forEach(function(table) {
+                executeQuery("DROP TABLE ?", [table.name]);
+            });
+            executeQuery('PRAGMA foreign_keys = ON');
+        });
+        
+        // Recreate the database tables
+        var installSQL = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'install.sql').read().text;
+        // Run each individual semicolon-delimited query
+        installSQL.trim().match(/[^;]+/g).forEach(function(query) {
+            executeQuery(query.trim());
+        });
+        
+        // Now import the data back into the database
+        AD.Database.import(installData.dbName, databaseDump);
+    });
+    
     // Turn off iCloud backup for the database file
     var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, AD.Defaults.dbName+'.sql');
     if (file.exists()) {
