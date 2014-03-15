@@ -5,6 +5,16 @@ var dmarieModulePath = 'appdev/db/dmarieDB-'+(Ti.Platform.osname);
 var dmarieDB = require(dmarieModulePath);
 
 var Database = module.exports = {
+    // Return the file on the filesystem that represents the database
+    getFile: function() {
+        var directoryPath = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory).resolve();
+        if (AD.Platform.isiOS && !AD.EncryptionKey.isEncrypted()) {
+            // Unencrypted databases are stored in Library/Private Documents on iOS
+            directoryPath = Ti.Filesystem.getFile(directoryPath, '..', 'Library', 'Private Documents').resolve();
+        }
+        return Ti.Filesystem.getFile(directoryPath, AD.Defaults.dbName+'.sql');
+    },
+    
     open: function(dbName) {
         // Open the encrypted database
         var dbFile = dbName+'.sql';

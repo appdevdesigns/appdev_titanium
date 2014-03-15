@@ -51,9 +51,9 @@ var installDatabases = function(installData) {
     });
     
     // Turn off iCloud backup for the database file
-    var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, AD.Defaults.dbName+'.sql');
-    if (file.exists()) {
-        file.remoteBackup = false;
+    var databaseFile = AD.Database.getFile();
+    if (databaseFile.exists()) {
+        databaseFile.remoteBackup = false;
     }
 };
 
