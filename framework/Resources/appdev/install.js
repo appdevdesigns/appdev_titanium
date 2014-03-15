@@ -293,7 +293,7 @@ module.exports.install = function(hooks) {
             
             if (AD.Defaults.localStorageEnabled) {
                 installDatabases(installData);
-                if (hooks && $.isFunction(hooks.installDatabases)) {
+                if (data.installed && hooks && $.isFunction(hooks.installDatabases)) {
                     hooks.installDatabases(installData);
                 }
             }
