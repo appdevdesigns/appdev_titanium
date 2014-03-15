@@ -18,8 +18,11 @@ var Database = module.exports = {
     // Backup the database to a JSON dump
     export: function(dbName) {
         return Database.DataStore.exportDatabase(dbName).done(function(dump) {
-            // Do not backup the auto-generated android-metadata table
-            delete dump.tables.android_metadata;
+            // Do not backup the these system-generated tables
+            var ignoredTables = ['android_metadata', 'sqlite_sequence'];
+            ignoredTables.forEach(function(tableName) {
+                delete dump.tables[tableName];
+            });
             
             dump.appName = Ti.App.name;
             dump.appId = Ti.App.id;
