@@ -243,16 +243,13 @@ module.exports = $.Class('AD.DataStore.SQLite', {
     exportTable: function(dbName, tableName) {
         var dfd = $.Deferred();
         this.execute(dbName, "SELECT * FROM ?", [tableName]).done(function(rowArgs) {
-            dfd.resolve({
-                rows: rowArgs[1],
-                data: rowArgs[0]
-            });
+            dfd.resolve(rowArgs[0]);
         }).fail(dfd.reject);
         return dfd.promise();
     },
     
     // Import a single database table, represented as a Javascript object
-    importTable: function(dbName, tableName, dump) {
+    importTable: function(dbName, tableName, rows) {
         var self = this;
         var dfd = $.Deferred();
         this.execute(dbName, 'PRAGMA foreign_keys = OFF'); // temporarily disable foreign key checks
@@ -267,11 +264,10 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             // Empty the table
             self.execute(dbName, "DELETE FROM ?", [tableName]).done(function() {
                 // Now insert the data back in
-                var dataRows = dump.data;
                 var maxInserts = 250;
-                for (var startRow = 0; startRow < dataRows.length; startRow += maxInserts) {
+                for (var startRow = 0; startRow < rows.length; startRow += maxInserts) {
                     var values = [tableName];
-                    var selectSQL = dataRows.slice(startRow, startRow + maxInserts).map(function(row) {
+                    var selectSQL = rows.slice(startRow, startRow + maxInserts).map(function(row) {
                         return columnNames.map(function(rowName) {
                             values.push(row[rowName]);
                             return '?';

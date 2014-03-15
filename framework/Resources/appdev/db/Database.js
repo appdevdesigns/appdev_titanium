@@ -61,6 +61,13 @@ var Database = module.exports = {
             return $.Deferred().reject();
         }
         
+        // The "tables" property is now a dictionary of table name, table data pairs
+        $.each(dump.tables, function(tableName, table) {
+            if (!$.isArray(table)) {
+                dump.tables[tableName] = table.data;
+            }
+        });
+        
         var dumpVersion = dump.version;
         var compareVersions = require('appdev/install').compareVersions;
         require('app/install').upgraders.forEach(function(upgrader) {
