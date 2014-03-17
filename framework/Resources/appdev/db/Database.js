@@ -70,12 +70,14 @@ var Database = module.exports = {
         
         var dumpVersion = dump.version;
         var compareVersions = require('appdev/install').compareVersions;
-        require('app/install').upgraders.forEach(function(upgrader) {
-            // if dumpVersion < upgrader.version
-            if (compareVersions(dumpVersion, upgrader.version) < 0) {
-                // Run the upgrader on the database dump
-                dump = upgrader.upgrade(dump);
-            }
+        require('app/install').upgraders.filter(function(upgrader) {
+            // Only include upgraders that upgrade to versions higher than the database dump version
+            return compareVersions(upgrader.version, dumpVersion) > 0;
+        }).sort(function(upgrader1, upgrader2) {
+            return compareVersions(upgrader1.version, upgrader2.version);
+        }).forEach(function(upgrader) {
+            // Run the upgrader on the database dump
+            dump = upgrader.upgrade(dump);
         });
         return Database.DataStore.importDatabase(dbName, dump);
     },
