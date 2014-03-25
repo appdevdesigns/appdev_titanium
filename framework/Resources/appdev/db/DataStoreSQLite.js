@@ -256,6 +256,12 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         
         // Get the table schema
         this.execute(dbName, "PRAGMA table_info(?)", [tableName]).done(function(tableInfoArgs) {
+            // If the "PRAGMA table_info" table returned zero rows the table does not exist.
+            // In this case, simply ignore the table and do not attempt to import the table data.
+            if (!tableInfoArgs[0]) {
+                return;
+            }
+            
             // Extract the column names from the table's database schema
             var columnNames = tableInfoArgs[0].map(function(column) {
                 return column.name;
