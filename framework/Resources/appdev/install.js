@@ -23,8 +23,8 @@ var compareVersions = module.exports.compareVersions = function(v1, v2) {
     return 0;
 };
 
-// Create the necessary databases for the application
-var installDatabases = function(installData) {
+// Upgrade the database between versions
+var upgradeDatabases = function(installData) {
     // Backup the database
     AD.Database.export(installData.dbName).done(function(databaseDump) {
         databaseDump.version = installData.previousVersion;
@@ -40,14 +40,19 @@ var installDatabases = function(installData) {
         });
         
         // Recreate the database tables
-        var installSQL = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'install.sql').read().text;
-        // Run each individual semicolon-delimited query
-        installSQL.trim().match(/[^;]+/g).forEach(function(query) {
-            executeQuery(query.trim());
-        });
+        installDatabases(installData);
         
         // Now import the data back into the database
         AD.Database.import(installData.dbName, databaseDump);
+    });
+};
+
+// Create the necessary databases for the application
+var installDatabases = function(installData) {
+    // Run each individual semicolon-delimited query
+    var installSQL = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'install.sql').read().text;
+    installSQL.trim().match(/[^;]+/g).forEach(function(query) {
+        installData.query(query.trim());
     });
     
     // Turn off iCloud backup for the database file
@@ -292,9 +297,17 @@ module.exports.install = function(hooks) {
             AD.PropertyStore.read();
             
             if (AD.Defaults.localStorageEnabled) {
-                installDatabases(installData);
-                if (data.installed && hooks && $.isFunction(hooks.installDatabases)) {
-                    hooks.installDatabases(installData);
+                if (data.installed) {
+                    installDatabases(installData);
+                    if (hooks && $.isFunction(hooks.installDatabases)) {
+                        hooks.installDatabases(installData);
+                    }
+                }
+                else if (data.updated) {
+                    upgradeDatabases(installData);
+                    if (hooks && $.isFunction(hooks.upgradeDatabases)) {
+                        hooks.upgradeDatabases(installData);
+                    }
                 }
             }
             
