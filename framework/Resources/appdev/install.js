@@ -23,12 +23,42 @@ var compareVersions = module.exports.compareVersions = function(v1, v2) {
     return 0;
 };
 
+// Upgrade the database between versions
+var upgradeDatabases = function(installData) {
+    // Backup the database
+    AD.Database.export(installData.dbName).done(function(databaseDump) {
+        databaseDump.version = installData.previousVersion;
+        var executeQuery = installData.query;
+        
+        // Remove all of the tables in the database
+        executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name!='sqlite_sequence'").done(function(tableArgs) {
+            executeQuery('PRAGMA foreign_keys = OFF');
+            tableArgs[0].forEach(function(table) {
+                executeQuery("DROP TABLE ?", [table.name]);
+            });
+            executeQuery('PRAGMA foreign_keys = ON');
+        });
+        
+        // Recreate the database tables
+        installDatabases(installData);
+        
+        // Now import the data back into the database
+        AD.Database.import(installData.dbName, databaseDump);
+    });
+};
+
 // Create the necessary databases for the application
 var installDatabases = function(installData) {
+    // Run each individual semicolon-delimited query
+    var installSQL = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'install.sql').read().text;
+    installSQL.trim().match(/[^;]+/g).forEach(function(query) {
+        installData.query(query.trim());
+    });
+    
     // Turn off iCloud backup for the database file
-    var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, AD.Defaults.dbName+'.sql');
-    if (file.exists()) {
-        file.remoteBackup = false;
+    var databaseFile = AD.Database.getFile();
+    if (databaseFile.exists()) {
+        databaseFile.remoteBackup = false;
     }
 };
 
@@ -267,9 +297,17 @@ module.exports.install = function(hooks) {
             AD.PropertyStore.read();
             
             if (AD.Defaults.localStorageEnabled) {
-                installDatabases(installData);
-                if (hooks && $.isFunction(hooks.installDatabases)) {
-                    hooks.installDatabases(installData);
+                if (data.installed) {
+                    installDatabases(installData);
+                    if (hooks && $.isFunction(hooks.installDatabases)) {
+                        hooks.installDatabases(installData);
+                    }
+                }
+                else if (data.updated) {
+                    upgradeDatabases(installData);
+                    if (hooks && $.isFunction(hooks.upgradeDatabases)) {
+                        hooks.upgradeDatabases(installData);
+                    }
                 }
             }
             
