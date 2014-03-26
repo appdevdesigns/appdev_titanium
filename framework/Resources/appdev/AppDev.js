@@ -123,6 +123,8 @@ var boot = function(options) {
     AD.FileStore = require('appdev/FileStore');
     AD.PropertyStore = require('appdev/PropertyStore');
     
+    AD.Location = require('appdev/Location');
+    
     AD.Comm = {};
     AD.Comm.HTTP = require('appdev/comm/HTTP');
     AD.Comm.GoogleAPIs = require('appdev/GoogleAPIs');

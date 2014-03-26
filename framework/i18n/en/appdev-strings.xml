@@ -81,4 +81,7 @@
     <string name="retry">Retry</string>
     
     <string name="contactsUnauthorized">Cannot access the system address book! Please authorize in Settings → Privacy → Contacts.</string>
+    <string name="locationDisabled">Cannot access your current location! Please enable location services in Settings → Privacy → Location.</string>
+    <string name="locationUnauthorized">Cannot access your current location! Please authorize in Settings → Privacy → Location.</string>
+    <string name="locationUnknown">Cannot access your current location!</string>
 </resources>

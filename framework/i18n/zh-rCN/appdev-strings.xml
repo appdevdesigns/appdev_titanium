@@ -81,4 +81,7 @@
     <string name="retry">重试</string>
     
     <string name="contactsUnauthorized">不能访问系统地址簿！请访问设置→隐私→通讯录界面授权。谢谢！</string>
+    <string name="locationDisabled">无法连接你目前的位置！请在设置中启用定位服务：设置→隐私→位置。</string>
+    <string name="locationUnauthorized">无法连接你目前的位置！请授权：设置→隐私→位置。</string>
+    <string name="locationUnknown">无法连接你目前的位置！</string>
 </resources>
