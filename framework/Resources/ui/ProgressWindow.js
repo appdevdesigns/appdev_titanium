@@ -16,7 +16,7 @@ module.exports = $.Window('AppDev.UI.ProgressWindow', {}, {
             left: AD.UI.padding,
             width: Ti.UI.SIZE,
             height: Ti.UI.FILL,
-            message: this.options.message,
+            message: AD.Localize(this.options.message),
             style: AD.Platform.isiOS ? Titanium.UI.iPhone.ActivityIndicatorStyle.DARK : Titanium.UI.ActivityIndicatorStyle.DARK
         });
         this.add('progress', activityIndicator);
