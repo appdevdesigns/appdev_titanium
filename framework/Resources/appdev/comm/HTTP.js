@@ -106,19 +106,6 @@ var HTTP = {
             query: {}
         }, options);
         
-        var url = HTTP.makeURL(options.url, options.query);
-        if (!/^https?:\/\//.test(options.url)) {
-            var serverBaseURL = AD.Defaults.serverBaseURL;
-            // Server URL is not specified yet, so ignore this request
-            if (!serverBaseURL) {
-                onFailure(null);
-                return;
-            }
-
-            // Add the scheme, domain, and port to this relative URL
-            url = serverBaseURL+url;
-        }
-        
         // Send the network request
         var dfd = $.Deferred();
         var xhr = Ti.Network.createHTTPClient();
@@ -145,6 +132,7 @@ var HTTP = {
             // Called when the request returns an error (the user is probably offline)
             dfd.rejectWith(this, [parseResponse(this), this]);
         };
+        var url = HTTP.makeURL(options.url, options.query);
         console.log(options.method + ' ' + url);
         xhr.open(options.method, url);
         $.each(options.headers, function(name, value) {
