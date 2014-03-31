@@ -131,6 +131,7 @@ var HTTP = {
         xhr.onerror = function(err) {
             // Called when the request returns an error (the user is probably offline)
             dfd.rejectWith(this, [parseResponse(this), this]);
+            console.error(err);
         };
         var url = HTTP.makeURL(options.url, options.query);
         console.log(options.method + ' ' + url);
