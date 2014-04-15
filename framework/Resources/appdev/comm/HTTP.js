@@ -103,12 +103,10 @@ var HTTP = {
                 'charset': 'utf-8'
             },
             form: null,
-            query: {}
+            query: {},
+            timeout: 5000 // five seconds
         }, options);
         
-        // Send the network request
-        var dfd = $.Deferred();
-        var xhr = Ti.Network.createHTTPClient();
         var parseResponse = function(xhr) {
             var response = xhr.responseText;
             if (xhr.readyState > 1) {
@@ -125,14 +123,20 @@ var HTTP = {
             }
             return response;
         };
-        xhr.onload = function() {
-            dfd.resolveWith(this, [parseResponse(this), this]);
-        };
-        xhr.onerror = function(err) {
-            // Called when the request returns an error (the user is probably offline)
-            dfd.rejectWith(this, [parseResponse(this), this]);
-            console.error(err);
-        };
+        
+        // Send the network request
+        var dfd = $.Deferred();
+        var xhr = Ti.Network.createHTTPClient({
+            onload: function() {
+                dfd.resolveWith(this, [parseResponse(this), this]);
+            },
+            onerror: function(err) {
+                // Called when the request returns an error (the user is probably offline)
+                dfd.rejectWith(this, [parseResponse(this), this]);
+                console.error(err);
+            },
+            timeout: options.timeout
+        });
         var url = HTTP.makeURL(options.url, options.query);
         console.log(options.method + ' ' + url);
         xhr.open(options.method, url);
