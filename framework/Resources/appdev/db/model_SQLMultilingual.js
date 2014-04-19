@@ -116,7 +116,15 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
                         fields[fieldI] = currModel[fieldI];
                     }
                 }
-                fields[primaryKey] = self.hasUuid ? currModel[primaryKey] : primaryKeyValue;
+                if (self.hasUuid) {
+                    // The primary key UUID value is provided with the model
+                    fields[primaryKey] = currModel[primaryKey];
+                    fields.trans_uuid = AD.Model.generateUuid();
+                }
+                else {
+                    // The primary key autoincremented value was returned by the INSERT query
+                    fields[primaryKey] = primaryKeyValue;
+                }
                 var curDataMgr = self.getCurrentDataMgr(fields, {dbTable:self.tables.trans});
                 listUpdates.push( curDataMgr );
             
@@ -140,6 +148,9 @@ module.exports = AD.Model.ModelSQL('AD.Model.ModelSQLMultilingual', {
                         var newFields = {};
                         for(var fieldI in fields) {
                             newFields[fieldI] = fields[fieldI];
+                        }
+                        if (self.hasUuid) {
+                            newFields.trans_uuid = AD.Model.generateUuid();
                         }
                         newFields['language_code'] = curLangCode;
                     
