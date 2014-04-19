@@ -53,7 +53,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
         
         // Create the submit and cancel buttons
         var buttonWidth = AD.UI.useableScreenWidth * 0.4;
-        var submit = this.add(Ti.UI.createButton({
+        var submit = this.add('submit', Ti.UI.createButton({
             left: AD.UI.padding,
             top: 120,
             width: buttonWidth,
@@ -73,11 +73,18 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
     
     // Called when the user submits their login credentials
     submit: function() {
+        // Disable the submit button until the credentials have been validated to prevent the user
+        // from clicking it multiple times when the validation procedure is not instantaneous
+        var submitButton = this.getChild('submit');
+        submitButton.enabled = false;
+        
         var _this = this;
         var username = this.getChild('username').value;
         var password = this.getChild('password').value;
         var validateDfd = this.options.validateCredentials(username, password);
         validateDfd.done(function(valid) {
+            submitButton.enabled = true;
+            
             if (valid) {
                 _this.dfd.resolve({
                     username: username,
