@@ -63,6 +63,7 @@ var ADModel = module.exports = {
         $.extend(instanceMethods, ADModel.prototypeProperties);
         
         if (staticProperties.hasUuid) {
+            // The primary key is an automatically generated UUID field
             Object.defineProperty(staticProperties.defaults, staticProperties.primaryKey, {
                 get: function() {
                     // Generate a new uuid
@@ -89,6 +90,11 @@ var ADModel = module.exports = {
         
         // Store the model in AD.Models
         AD.Models[Model.shortName] = Model;
+        
+        Model.bind('created', function(event, model) {
+            // This model is no longer new because it has now been saved to the database
+            model.isSaved = true;
+        });
         
         return Model;
     },
@@ -197,11 +203,6 @@ var ADModel = module.exports = {
             // models created via "new Model(...)" will not. Thus, to check whether or not this is a
             // new model that is never been saved, we can check whether or not this property is falsy.
             return !this.isSaved;
-        },
-        save: function() {
-            return this._super.apply(this, arguments).done(function() {
-                this.isSaved = true;
-            });
         }
     },
 
