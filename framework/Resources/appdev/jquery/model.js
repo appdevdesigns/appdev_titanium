@@ -1463,8 +1463,12 @@ steal('jquery/class', 'jquery/string', function() {
 			}
 			// as long as we changed values, trigger events
 			if ( old !== val && !this._init ) {
-				!errors && trigger(this, prefix + property, args);
+				if (!errors) {
+					trigger(this, prefix + property, args);
+					trigger(Class, prefix + property, [this].concat(args));
+				}
 				trigger(this,global + "attr", globalArgs);
+				trigger(Class,global + "attr", [this].concat(globalArgs));
 			}
 			callback && callback.apply(this, args);
 
