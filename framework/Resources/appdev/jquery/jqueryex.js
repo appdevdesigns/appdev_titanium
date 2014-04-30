@@ -97,6 +97,25 @@ jQuery.makeObject = function(keyValueArray) {
     return object;
 };
 
+// Prevent the callback from being called more than once in the specified duration of time
+// The "duration" parameter defaults to 0 and forces the callback into the next iteration of the event loop
+// Inspired by Underscore.throttle
+jQuery.throttle = function(callback, duration) {
+    var pending = false;
+    return function() {
+        // Do not call the callback again until the previous call completes
+        if (!pending) {
+            var args = arguments;
+            var context = this;
+            pending = true;
+            setTimeout(function() {
+                callback.apply(context, args);
+                pending = false;
+            }, duration || 0);
+        }
+    };
+};
+
 // Return the string with the first leter capitalized
 jQuery.capitalize = function(string) {
     return string ? (string[0].toUpperCase() + string.slice(1)) : string;

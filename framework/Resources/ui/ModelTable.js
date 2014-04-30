@@ -30,7 +30,9 @@ $.View('jQuery.ModelTable', {
     groupProcessors: {},
     addGroupProcessor: function(name, callback) {
         this.groupProcessors[name] = callback;
-    }}, {
+    },
+    refreshDelay: 0
+}, {
     init: function(options) {
         // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
         $.extend(true, this.options, options);
@@ -76,7 +78,7 @@ $.View('jQuery.ModelTable', {
         
         this.smartBind(this.options.Model, '*', function(event, model) {
             var row = this.rowFromModel(model);
-            if (event.type === 'destroyed' && row.deleted) {
+            if (event.type === 'destroyed' && row && row.deleted) {
                 // Remove the deleted model from the table
                 this.removeRow(row, true);
             }
@@ -88,6 +90,9 @@ $.View('jQuery.ModelTable', {
         
         // Create the table view rows; setSortOrder will call refresh
         this.setSortOrder(this.options.sortOrder);
+        
+        // Use $.throttle to batch expensive UI updates
+        this.refresh = $.throttle(this.refresh, this.constructor.refreshDelay);
     },
     
     // Recreate all the rows in the table
