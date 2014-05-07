@@ -43,13 +43,16 @@ $.View('jQuery.ModelTable', {
         
         // Create the table view
         this.table = Ti.UI.createTableView();
-        this.table.addEventListener('click', this.proxy(function(event) {
-            // A model was selected, so call the callback
-            if ($.isFunction(this.onSelect)) {
+        if ($.isFunction(this.onSelect)) {
+            this.table.addEventListener('click', this.proxy(function(event) {
+                // A model was selected, so call the callback
                 var model = this.lookupModel(event.row.modelId);
                 this.onSelect(model);
-            }
-        }));
+            }));
+        }
+        else {
+            this.table.allowsSelection = false;
+        }
         this.table.addEventListener('delete', this.proxy(function(event) {
              // This row will be removed by the system and does not need to be removed by custom code
             event.row.deleted = true;
