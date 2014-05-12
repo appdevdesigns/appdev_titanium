@@ -51,24 +51,24 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
         }));
         passwordField.addEventListener('return', this.proxy('submit'));
         
-        // Create the submit and cancel buttons
+        // Create the cancel and submit buttons
         var buttonWidth = AD.UI.useableScreenWidth * 0.4;
-        var submit = this.add('submit', Ti.UI.createButton({
-            left: AD.UI.padding,
-            top: 120,
-            width: buttonWidth,
-            height: AD.UI.buttonHeight,
-            titleid: 'submit'
-        }));
-        submit.addEventListener('click', this.proxy('submit'));
         var cancel = this.add(Ti.UI.createButton({
-            right: AD.UI.padding,
+            left: AD.UI.padding,
             top: 120,
             width: buttonWidth,
             height: AD.UI.buttonHeight,
             titleid: 'cancel'
         }));
         cancel.addEventListener('click', this.dfd.reject);
+        var submit = this.add('submit', Ti.UI.createButton({
+            right: AD.UI.padding,
+            top: 120,
+            width: buttonWidth,
+            height: AD.UI.buttonHeight,
+            titleid: 'submit'
+        }));
+        submit.addEventListener('click', this.proxy('submit'));
     },
     
     // Called when the user submits their login credentials
