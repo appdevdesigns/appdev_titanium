@@ -12,6 +12,8 @@ module.exports = $.Window('AppDev.UI.ActivityWindow', {
             title: this.options.title,
             modal: true
         });
+        
+        this.setMessage(this.options.message);
     },
     
     // Create the child views
@@ -19,7 +21,6 @@ module.exports = $.Window('AppDev.UI.ActivityWindow', {
         var activityIndicator = Ti.UI.createActivityIndicator({
             width: Ti.UI.FILL,
             height: Ti.UI.FILL,
-            messageid: this.options.message,
             style: AD.Platform.isiOS ? Titanium.UI.iPhone.ActivityIndicatorStyle.DARK : Titanium.UI.ActivityIndicatorStyle.DARK
         });
         this.add('activityIndicator', activityIndicator);
@@ -50,7 +51,21 @@ module.exports = $.Window('AppDev.UI.ActivityWindow', {
             progressBar.visible = true;
             progressBar.max = total;
             progressBar.value = current;
-            progressBar.message = $.formatString('{0} ({1}%)', AD.Localize(this.options.message), (current / total * 100).toFixed(0));
+            progressBar.fractionCompleted = total === 0 ? 1 : current / total;
+            this.updateMessage();
         }
+    },
+    
+    // Set the activity message
+    setMessage: function(message) {
+        this.message = message;
+        this.updateMessage();
+    },
+    
+    // Refresh the activity message
+    updateMessage: function() {
+        this.getChild('activityIndicator').message = AD.Localize(this.message);
+        var progressBar = this.getChild('progressBar');
+        progressBar.message = $.formatString('{0} ({1}%)', AD.Localize(this.message), (progressBar.fractionCompleted * 100).toFixed(0));
     }
 });
