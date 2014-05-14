@@ -104,7 +104,7 @@ var HTTP = {
             },
             form: null,
             query: {},
-            timeout: 5000 // five seconds
+            timeout: 60000 // one minute
         }, options);
         
         var parseResponse = function(xhr) {
