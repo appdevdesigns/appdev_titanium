@@ -84,6 +84,7 @@ $.View('jQuery.ModelTable', {
             if (event.type === 'destroyed' && row && row.deleted) {
                 // Remove the deleted model from the table
                 this.removeRow(row, true);
+                this.update();
             }
             else {
                 // Otherwise, refresh the table
@@ -115,6 +116,13 @@ $.View('jQuery.ModelTable', {
         }
         
         this.table.setData(tableData);
+        
+        this.update();
+    },
+    
+    // Perform custom update operations
+    update: function() {
+        // By default, this callback does nothing, but it can be overridden in derived classes
     },
     
     // Set the sorting order and resort the rows
