@@ -74,6 +74,26 @@ var ADModel = module.exports = {
             });
         }
         
+        // Add a getter function to the specified model field
+        var addGetter = function(field, getter) {
+            // Add the getter instance method
+            instanceMethods['get'+$.String.classize(field)] = getter;
+            // Mark this field as an attribute
+            staticProperties.attributes[field] = 'default';
+        };
+        
+        // Add getters for lookup label fields
+        if (staticProperties.lookupLabels) {
+            $.each(staticProperties.lookupLabels, function(field, lookupField) {
+                addGetter(lookupField.label, function() {
+                    // Assume that the lookup label is referenced by its foreign key
+                    var ReferencedModel = AD.Model.lookup(lookupField.tableName);
+                    var referencedModel = ReferencedModel.cache.getById(this.attr(lookupField.foreignKey));
+                    return referencedModel && referencedModel.attr(lookupField.label);
+                });
+            });
+        }
+        
         var Model = BaseModel.extend(name, staticProperties, instanceMethods);
         
         // Create the cache only if the model's static 'cache' property equals true
@@ -88,8 +108,14 @@ var ADModel = module.exports = {
             Model.cache = new Cache({ createCache: false });
         }
         
-        // Store the model in AD.Models
+        // Store the model in AD.Models and AD.Model.indexedModels
         AD.Models[Model.shortName] = Model;
+        if (Model.type === 'single') {
+            ADModel.indexedModels[Model.dbTable] = Model;
+        }
+        else if (Model.type === 'multilingual') {
+            ADModel.indexedModels[Model.tables.data] = ADModel.indexedModels[Model.tables.trans] = Model;
+        }
         
         Model.bind('created', function(event, model) {
             // This model is no longer new because it has now been saved to the database
@@ -205,7 +231,12 @@ var ADModel = module.exports = {
             return !this.isSaved;
         }
     },
-
+    
+    indexedModels: {},
+    lookup: function(tableName) {
+        return ADModel.indexedModels[tableName];
+    },
+    
     // Refresh all of the model caches
     refreshCaches: function() {
         var dfd = $.Deferred();

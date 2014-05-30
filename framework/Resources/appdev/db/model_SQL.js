@@ -419,7 +419,7 @@ module.exports = $.Model('AD.Model.ModelSQL', {
 
         // First, do final preparation of the Data Manager.
         curDataMgr.selectedFields = { _empty: true };
-        this.addLookupLabels(req, curDataMgr);
+        //this.addLookupLabels(req, curDataMgr);
         this.prepForRead(req, curDataMgr);
         var selectedFields = (curDataMgr.selectedFields._empty) ? this.modelFields : curDataMgr.selectedFields;
         

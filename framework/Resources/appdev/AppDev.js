@@ -156,17 +156,6 @@ var boot = function(options) {
     });
     console.log('Finshed loading models');
     
-    // Generate a model dictionary indexed by the model table name
-    var indexedModels = {};
-    $.each(AD.Models, function(name, Model) {
-        if (Model.type === 'single') {
-            indexedModels[Model.dbTable] = Model;
-        }
-        else if (Model.type === 'multilingual') {
-            indexedModels[Model.tables.data] = indexedModels[Model.tables.trans] = Model;
-        }
-    });
-    
     // Detect when a model that another model references
     // is destroyed and remove those obsolete references
     $.each(AD.Models, function(name, Model) {
@@ -174,8 +163,8 @@ var boot = function(options) {
             return;
         }
         $.each(Model.lookupLabels, function(field, lookupField) {
-            var referencedModel = indexedModels[lookupField.tableName];
-            referencedModel.bind('destroyed', function(event, model) {
+            var ReferencedModel = AD.Model.lookup(lookupField.tableName);
+            ReferencedModel.bind('destroyed', function(event, model) {
                 // Find all models that referenced the destroyed model
                 var query = {};
                 query[lookupField.foreignKey] = model.attr(lookupField.referencedKey);
