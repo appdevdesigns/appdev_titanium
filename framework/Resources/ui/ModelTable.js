@@ -31,6 +31,11 @@ $.View('jQuery.ModelTable', {
     addGroupProcessor: function(name, callback) {
         this.groupProcessors[name] = callback;
     },
+    init: function() {
+        if (this.sortFields) {
+            this.indexedSortFields = $.indexArray(this.sortFields, 'field');
+        }
+    },
     refreshDelay: 0
 }, {
     init: function(options) {
