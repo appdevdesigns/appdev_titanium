@@ -203,7 +203,16 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         // Pipe the deferred to ensure that the callback option is executed before any attached callbacks are executed
         return dfd.pipe();
     },
-
+    
+    // Disable foreign key checks
+    disableForeignKeys: function(dbName) {
+        this.execute(dbName, 'PRAGMA foreign_keys = OFF');
+    },
+    // Enable foreign key checks
+    enableForeignKeys: function(dbName) {
+        this.execute(dbName, 'PRAGMA foreign_keys = ON');
+    },
+    
     // Export the entire database, represented as a Javascript object
     exportDatabase: function(dbName) {
         var self = this;
@@ -252,7 +261,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
     importTable: function(dbName, tableName, rows) {
         var self = this;
         var dfd = $.Deferred();
-        this.execute(dbName, 'PRAGMA foreign_keys = OFF'); // temporarily disable foreign key checks
+        this.disableForeignKeys(dbName); // temporarily disable foreign key checks
         
         // Get the table schema
         this.execute(dbName, "PRAGMA table_info(?)", [tableName]).done(function(tableInfoArgs) {
@@ -284,7 +293,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             }).fail(dfd.reject);
         }).fail(dfd.reject);
         
-        this.execute(dbName, 'PRAGMA foreign_keys = ON'); // re-enable foreign key checks
+        this.enableForeignKeys(dbName); // re-enable foreign key checks
         
         // This assumes that the "execute" call is blocking, which it is
         dfd.resolve();
