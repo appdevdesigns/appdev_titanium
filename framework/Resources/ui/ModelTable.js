@@ -159,7 +159,7 @@ $.View('jQuery.ModelTable', {
             // The row does not exist, so create a new one
             tableRow = this.createRow(model);
             tableRow.modelId = modelId; // custom property
-            tableRow.hasChild = this.options.selectable;
+            tableRow.hasChild = this.options.selectable === true;
             tableRow.className = this.rowClassName || this.constructor.fullName; // unique row class name that defaults to the name of the derived class
             
             // Now save it
