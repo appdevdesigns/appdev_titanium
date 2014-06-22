@@ -38,9 +38,6 @@ AD.init = function(options) {
         install(options).done(tryInit);
     });
     
-    // Prevent this function from being called again
-    delete AD.init;
-    
     return appDevInitCompleteDfd.promise();
 };
 
