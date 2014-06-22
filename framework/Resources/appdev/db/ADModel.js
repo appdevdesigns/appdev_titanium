@@ -9,20 +9,27 @@ var ADModel = module.exports = {
         var staticProperties = $.extend(true, {
             __adModule: definition._adModule,
             __adModel: definition._adModel,
-            attributes: {}
+            attributes: {},
+            defaults: {}
         }, ADModel.staticProperties, definition);
-        
-        // Augment the attributes object with the remaining model fields, giving them the default type
-        // This is to ensure the $.Model is aware of each of the defined attributes, not just the ones with special types
-        var modelFields = staticProperties.modelFields || (staticProperties.fields && staticProperties.fields.trans);
-        if (modelFields) {
-            var attributes = staticProperties.attributes;
-            $.each(modelFields, function(field) {
-                if (!attributes[field]) {
-                    attributes[field] = 'default';
-                }
-            });
+        if (staticProperties.type === 'multilingual') {
+            staticProperties.defaults.language_code = '';
         }
+        
+        var modelFields = staticProperties.modelFields || ($.extend({}, staticProperties.fields.data, staticProperties.fields.trans));
+        var attributes = staticProperties.attributes;
+        var defaults = staticProperties.defaults;
+        $.each(modelFields, function(field) {
+            // Add all remaining model fields to the attributes dictionary, giving them the default type
+            // This is to ensure the $.Model is aware of each of the defined attributes, not just the ones with special types
+            if (!attributes[field]) {
+                attributes[field] = 'default';
+            }
+            // Set the model field default value to null for all fields without an explicit default value
+            if (typeof defaults[field] === 'undefined') {
+                defaults[field] = null;
+            }
+        });
         
         // Lookup the connection type name in the ConnectionTypes array and assign it the default value if it could not be found
         var connectionTypes = AD.Defaults.Model.ConnectionTypes;
@@ -126,8 +133,6 @@ var ADModel = module.exports = {
     },
     // All instances derived from AD.Model will have these static properties
     staticProperties: {
-        defaults: {
-        },
         convert: {
             integer: function(raw) {
                 return parseInt(raw, 10);
