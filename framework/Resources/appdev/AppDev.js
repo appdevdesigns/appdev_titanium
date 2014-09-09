@@ -104,7 +104,11 @@ var boot = function(options) {
         return L(key) || defaultValue || key;
     };
     
-    AD.CryptoJS = require('appdev/cryptojs');
+    // Load the AES and PBKDF2 crypto-js libraries
+    AD.CryptoJS = null;
+    require('appdev/cryptojs/aes');
+    require('appdev/cryptojs/pbkdf2');
+    
     AD.sjcl = require('appdev/sjcl');
     AD.Base64 = require('appdev/base64');
     
