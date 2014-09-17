@@ -209,15 +209,24 @@ module.exports.install = function(hooks) {
                     if (passwordProtect) {
                         // Use the entered password as the password
                         AD.EncryptionKey.set(password);
+                        
+                        var $winPinPrompt = new StringPromptWindow.PIN({
+                            cancelable: false
+                        });
+                        $winPinPrompt.getDeferred().done(function(pin) {
+                            // Load the property store and set the chosen PIN
+                            AD.PropertyStore.read();
+                            AD.PropertyStore.set('PIN', pin);
+                            dfd.resolve({ installed: true });
+                        });
                     }
                     else {
                         // Use the entered string to generate a random password, which is saved
                         var key = AD.EncryptionKey.generateKey(password);
                         AD.EncryptionKey.set(key);
                         Ti.App.Properties.setString('password', key);
+                        dfd.resolve({ installed: true });
                     }
-                    
-                    dfd.resolve({ installed: true });
                 });
             });
         }

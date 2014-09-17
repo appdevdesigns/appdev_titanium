@@ -18,6 +18,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
         title: 'stringPromptDefaultTitle',
         message: 'stringPromptDefaultMessage',
         initial: '',
+        keyboardType: Ti.UI.KEYBOARD_DEFAULT,
         doneText: 'done',
         cancelable: true,
         modal: true,
@@ -63,6 +64,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
             font: AD.UI.Fonts.small,
             autocorrect: false,
             autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
+            keyboardType: this.options.keyboardType,
             borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
         }));
         var doneButton = this.add('done', Ti.UI.createButton({
@@ -124,6 +126,22 @@ StringPromptWindow.extend('AppDev.UI.StringPromptWindow.LoginPassword', {
         validateCallback: function(input) {
             if (!AD.Defaults.development && input.length < 30) {
                 return { valid: false, reason: 'stringPromptPasswordLengthConstraint' };
+            }
+            else {
+                return { valid: true };
+            }
+        }
+    }
+}, {});
+
+StringPromptWindow.extend('AppDev.UI.StringPromptWindow.PIN', {
+    defaults: {
+        title: 'stringPromptPINTitle',
+        message: 'stringPromptPINMessage',
+        keyboardType: Ti.UI.KEYBOARD_NUMBER_PAD,
+        validateCallback: function(input) {
+            if (!AD.Defaults.development && input.length < 8) {
+                return { valid: false, reason: 'stringPromptPINLengthConstraint' };
             }
             else {
                 return { valid: true };
