@@ -1,4 +1,5 @@
 var AD = require('AppDev');
+var $ = require('jquery');
 
 $.Class('AppDev.Comm.CAS', {}, {
     // Request a new service ticket from CAS and return a deferred that will resolve to that ticket

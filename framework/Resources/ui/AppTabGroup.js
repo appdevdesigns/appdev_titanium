@@ -1,3 +1,4 @@
+var AD = require('AppDev');
 var $ = require('jquery');
 
 module.exports = $.View('AppDev.UI.AppTabGroup', {}, {
