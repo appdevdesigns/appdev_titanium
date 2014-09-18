@@ -3,6 +3,46 @@ var $ = require('jquery');
 
 var Auth = module.exports = {};
 
+// Prompt the user to choose a password
+Auth.chooseEncryptionKey = function() {
+    // Prompt user for random string
+    var StringPromptWindow = require('ui/StringPromptWindow');
+    var $winStringPrompt = new StringPromptWindow.EncryptionKey({
+        cancelable: false
+    });
+    return $winStringPrompt.getDeferred().done(function(randomString) {
+        // Generate a random key from the random string
+        var key = AD.EncryptionKey.generateKey(randomString);
+        AD.EncryptionKey.set(key);
+    });
+};
+
+// Prompt the user to choose a password
+Auth.choosePassword = function() {
+    // Prompt user for random string
+    var StringPromptWindow = require('ui/StringPromptWindow');
+    var $winStringPrompt = new StringPromptWindow.LoginPassword({
+        cancelable: false
+    });
+    return $winStringPrompt.getDeferred().done(function(password) {
+        // Use the entered password as the password
+        AD.EncryptionKey.set(password);
+    });
+};
+
+// Prompt the user to choose a PIN
+Auth.choosePIN = function() {
+    var StringPromptWindow = require('ui/StringPromptWindow');
+    var $winPinPrompt = new StringPromptWindow.PIN({
+        cancelable: false
+    });
+    return $winPinPrompt.getDeferred().done(function(pin) {
+        // Load the property store and set the chosen PIN
+        AD.PropertyStore.read();
+        AD.PropertyStore.set('PIN', pin);
+    });
+};
+
 Auth.login = function() {
     var loginDfd = $.Deferred();
     var password = Ti.App.Properties.getString('password');
