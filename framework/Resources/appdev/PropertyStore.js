@@ -72,7 +72,7 @@ module.exports = PropertyStore = {
         // Import the encrypted property store from Tianium.App.Properties
         var propertyStore = Ti.App.Properties.getString('property_store');
         var text;
-        if (AD.EncryptionKey.isEncrypted()) {
+        if (AD.EncryptionKey.encryptionActivated()) {
             var key = AD.EncryptionKey.get();
             if (!key) {
                 // Encryption key has not been generated yet
@@ -93,7 +93,7 @@ module.exports = PropertyStore = {
         // Export the encrypted property store to Ti.App.Properties
         var propertyStore = JSON.stringify(this.store);
         var text;
-        if (AD.EncryptionKey.isEncrypted()) {
+        if (AD.EncryptionKey.encryptionActivated()) {
             var key = AD.EncryptionKey.get();
             if (!key) {
                 // Encryption key has not been generated yet

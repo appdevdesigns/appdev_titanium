@@ -8,7 +8,7 @@ var Database = module.exports = {
     // Return the file on the filesystem that represents the database
     getFile: function() {
         var directoryPath = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory).resolve();
-        if (AD.Platform.isiOS && !AD.EncryptionKey.isEncrypted()) {
+        if (AD.Platform.isiOS && !AD.EncryptionKey.encryptionActivated()) {
             // Unencrypted databases are stored in Library/Private Documents on iOS
             directoryPath = Ti.Filesystem.getFile(directoryPath, '..', 'Library', 'Private Documents').resolve();
         }
@@ -18,7 +18,7 @@ var Database = module.exports = {
     open: function(dbName) {
         // Open the encrypted database
         var dbFile = dbName+'.sql';
-        var db = AD.EncryptionKey.isEncrypted() ? dmarieDB.openDB(dbFile, AD.EncryptionKey.get()) : Ti.Database.open(AD.Platform.isAndroid ? dbFile : dbName);
+        var db = AD.EncryptionKey.encryptionActivated() ? dmarieDB.openDB(dbFile, AD.EncryptionKey.get()) : Ti.Database.open(AD.Platform.isAndroid ? dbFile : dbName);
         
         // Automatically enable foreign key support, which is disabled by default
         db.execute('PRAGMA foreign_keys = ON');

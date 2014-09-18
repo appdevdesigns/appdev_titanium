@@ -122,7 +122,7 @@ module.exports.install = function(hooks) {
             // The app is already installed, so do not prompt for the random database encryption key
             dfd.resolve({ updated: true });
         }
-        else if (!AD.EncryptionKey.isEncrypted()) {
+        else if (!AD.EncryptionKey.encryptionActivated()) {
             // Encryption is unnecessary
             dfd.resolve({ installed: true });
         }
