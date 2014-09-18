@@ -122,7 +122,7 @@ module.exports.install = function(hooks) {
             // The app is already installed, so do not prompt for the random database encryption key
             dfd.resolve({ updated: true });
         }
-        else if (!AD.EncryptionKey.isEncrypted()) {
+        else if (!AD.EncryptionKey.encryptionActivated()) {
             // Encryption is unnecessary
             dfd.resolve({ installed: true });
         }
@@ -130,16 +130,7 @@ module.exports.install = function(hooks) {
             // Installing on iOS
             
             if (AD.Defaults.localStorageEnabled) {
-                // Prompt user for random string
-                var StringPromptWindow = require('ui/StringPromptWindow');
-                var $winStringPrompt = new StringPromptWindow.EncryptionKey({
-                    cancelable: false
-                });
-                $winStringPrompt.getDeferred().done(function(randomString) {
-                    // Generate a random key from the random string
-                    var key = AD.EncryptionKey.generateKey(randomString);
-                    AD.EncryptionKey.set(key);
-                    
+                AD.Auth.chooseEncryptionKey().done(function() {
                     dfd.resolve({ installed: true });
                 });
             }
@@ -200,34 +191,19 @@ module.exports.install = function(hooks) {
             protectionDfd.done(function(passwordProtect) {
                 console.log('Password protected: '+passwordProtect);
                 
-                var StringPromptWindow = require('ui/StringPromptWindow');
-                var WindowClass = StringPromptWindow[passwordProtect ? 'LoginPassword' : 'EncryptionKey'];
-                $winStringPrompt = new WindowClass({
-                    cancelable: false
-                });
-                $winStringPrompt.getDeferred().done(function(password) {
-                    if (passwordProtect) {
-                        // Use the entered password as the password
-                        AD.EncryptionKey.set(password);
-                        
-                        var $winPinPrompt = new StringPromptWindow.PIN({
-                            cancelable: false
-                        });
-                        $winPinPrompt.getDeferred().done(function(pin) {
-                            // Load the property store and set the chosen PIN
-                            AD.PropertyStore.read();
-                            AD.PropertyStore.set('PIN', pin);
+                if (passwordProtect) {
+                    AD.Auth.choosePassword().done(function() {
+                        AD.Auth.choosePIN().done(function() {
                             dfd.resolve({ installed: true });
                         });
-                    }
-                    else {
-                        // Use the entered string to generate a random password, which is saved
-                        var key = AD.EncryptionKey.generateKey(password);
-                        AD.EncryptionKey.set(key);
-                        Ti.App.Properties.setString('password', key);
+                    });
+                }
+                else {
+                    AD.Auth.chooseEncryptionKey().done(function() {
+                        Ti.App.Properties.setString('password', AD.EncryptionKey.get());
                         dfd.resolve({ installed: true });
-                    }
-                });
+                    });
+                }
             });
         }
     }
