@@ -116,6 +116,15 @@ var boot = function(options) {
     
     AD.EncryptionKey = require('appdev/encryptionKey');
     
+    if (AD.Platform.isAndroid) {
+        // Initialize the Android keepalive service and make sure that it is initially stopped
+        AD.keepaliveIntent = Ti.Android.createServiceIntent({
+            url: 'Keepalive.js'
+        });
+        AD.keepaliveIntent.putExtra('interval', 5000); // run service every 5 seconds
+        Ti.Android.stopService(AD.keepaliveIntent);
+    }
+    
     // Mirror the NodeJS AD.jQuery
     AD.jQuery = AD.$ = $;
     
@@ -198,6 +207,7 @@ var install = function(options) {
 var login = function(options) {
     var loginDfd = AD.Deferreds.login;
     var password = Ti.App.Properties.getString('password');
+    var encryptedPassword = Ti.App.Properties.getString('encryptedPassword');
     AD.EncryptionKey.passwordHash = Ti.App.Properties.getString('passwordHash');
     if (!AD.EncryptionKey.passwordHash) {
         // The password hash has not been set yet, so login is impossible
@@ -208,7 +218,7 @@ var login = function(options) {
         // Local storage is disabled, so there is no reason to force the user to login
         loginDfd.resolve(true);
     }
-    else if (AD.EncryptionKey.password) {
+    else if (AD.EncryptionKey.get()) {
         // User is already logged in
         loginDfd.resolve(true);
     }
@@ -216,6 +226,39 @@ var login = function(options) {
         // Login using the stored password
         AD.EncryptionKey.login(password);
         loginDfd.resolve(true);
+    }
+    else if (encryptedPassword) {
+        // Login using the stored encryption key, which is encrypted using the user's PIN
+        var PasswordPromptWindow = require('ui/PasswordPromptWindow');
+        var decryptedPassword = null;
+        var $winPasswordPrompt = new PasswordPromptWindow({
+            title: 'pinPromptLoginTitle',
+            message: 'pinPromptLoginMessage',
+            doneText: 'login',
+            keyboardType: Ti.UI.KEYBOARD_NUMBER_PAD,
+            cancelable: false,
+            verifyCallback: function(pin) {
+                this.getChild('status').text = AD.Localize('verifying')+'...';
+                try {
+                    // Decrypt the encrypted password using the provided pin
+                    decryptedPassword = AD.sjcl.decrypt(pin, encryptedPassword);
+                }
+                catch(e) {
+                    // Error during decryption, probably because the pin was incorrect
+                    return false;
+                }
+                // Then check whether the hash of the decrypted password matches the stored password hash
+                return AD.EncryptionKey.hash(decryptedPassword) === AD.EncryptionKey.passwordHash;
+            }
+        });
+        $winPasswordPrompt.getDeferred().done(function(pin) {
+            // Erase the stored encrypted password for security reasons
+            Ti.App.Properties.removeProperty('encryptedPassword');
+            
+            // Login using the decrypted password
+            AD.EncryptionKey.login(decryptedPassword);
+            loginDfd.resolve(true);
+        });
     }
     else if (AD.Platform.isiOS) {
         // On iOS, login using the password from the keychain
@@ -337,6 +380,17 @@ var initialize = function(options) {
             AD.UI.$appTabGroup = new AD.UI.AppTabGroup({
                 windows: options.windows
             });
+            if (AD.Platform.isAndroid && AD.Defaults.localStorageEnabled) {
+                AD.UI.$appTabGroup.addEventListener('close', function() {
+                    // Start the Android keepalive service
+                    // It will keep the app running in the background for five minutes, giving the user
+                    // a chance to reopen it with a relatively short PIN rather than a long password
+                    Ti.App.Properties.setInt('killTime', Math.floor(Date.now() / 1000) + 5 * 60);
+                    // Encrypt the encryption key with the user's PIN and store it in the insecure Android storage
+                    Ti.App.Properties.setString('encryptedPassword', AD.sjcl.encrypt(AD.PropertyStore.get('PIN'), AD.EncryptionKey.get()));
+                    Ti.Android.startService(AD.keepaliveIntent);
+                });
+            }
             AD.UI.$appTabGroup.open();
         };
         

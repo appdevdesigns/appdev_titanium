@@ -19,6 +19,8 @@
     <string name="passwordPromptDefaultMessage">Please enter your password</string>
     <string name="passwordPromptLoginTitle">Login</string>
     <string name="passwordPromptLoginMessage">Please enter your login password</string>
+    <string name="pinPromptLoginTitle">Login</string>
+    <string name="pinPromptLoginMessage">Please enter your login PIN</string>
     <string name="verifying">Verifying</string>
     <string name="correct">Correct</string>
     <string name="incorrect">Incorrect</string>
