@@ -69,6 +69,12 @@ AD.run = function(operation, context, args) {
 
 // Initialize all AppDev resources
 var boot = function(options) {
+    // Ensure that the boot sequence is run only once
+    if (AD.booted) {
+        return;
+    }
+    AD.booted = true;
+    
     $.Class.prototype.setup = function(options) {
         if (!this.options) {
             this.options = {};
@@ -142,6 +148,8 @@ var boot = function(options) {
     AD.Comm.GoogleAPIs = require('appdev/GoogleAPIs');
     AD.Comm.GoogleDrive = require('appdev/comm/GoogleDrive');
     AD.Comm.GoogleDriveFileAPI = require('appdev/comm/GoogleDriveFileAPI');
+    
+    AD.Viewer = null;
     
     // Load model dependencies
     console.log('Loading model dependencies...');
@@ -381,8 +389,6 @@ var getViewer = function() {
     // Return a deferred that resolves immediately
     return $.Deferred().resolve().promise();
 };
-
-AD.Viewer = null;
 
 // Set the AppDev viewer model instance
 AD.setViewer = function(viewerData) {
