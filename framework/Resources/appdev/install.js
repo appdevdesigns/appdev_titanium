@@ -129,14 +129,9 @@ module.exports.install = function(hooks) {
         else if (AD.Platform.isiOS) {
             // Installing on iOS
             
-            if (AD.Defaults.localStorageEnabled) {
-                AD.Auth.chooseEncryptionKey().done(function() {
-                    dfd.resolve({ installed: true });
-                });
-            }
-            else {
+            AD.Auth.chooseEncryptionKey().done(function() {
                 dfd.resolve({ installed: true });
-            }
+            });
         }
         else {
             // Installing on Android
