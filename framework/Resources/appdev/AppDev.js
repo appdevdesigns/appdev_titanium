@@ -114,7 +114,7 @@ var boot = function(options) {
     
     AD.Platform = require('appdev/Platform');
     
-    AD.EncryptionKey = require('appdev/encryptionKey');
+    AD.EncryptionKey = require('appdev/EncryptionKey');
     
     if (AD.Platform.isAndroid) {
         // Initialize the Android keepalive service and make sure that it is initially stopped
