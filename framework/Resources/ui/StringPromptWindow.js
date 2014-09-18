@@ -6,6 +6,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
         title: 'cancel',
         callback: 'cancel',
         leftNavButton: true,
+        onClose: true,
         enabled: function() {
             return this.options.cancelable;
         }

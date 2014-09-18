@@ -117,6 +117,7 @@ Auth.loginWithPIN = function() {
         title: 'pinPromptLoginTitle',
         message: 'pinPromptLoginMessage',
         doneText: 'login',
+        cancelable: true,
         keyboardType: Ti.UI.KEYBOARD_NUMBER_PAD,
         verifyCallback: function(pin) {
             this.getChild('status').text = AD.Localize('verifying')+'...';
@@ -139,6 +140,9 @@ Auth.loginWithPIN = function() {
         // Login using the decrypted password
         AD.EncryptionKey.login(decryptedPassword);
         loginDfd.resolve(true);
+    }).fail(function() {
+        // Login with password
+        Auth.loginWithPassword().done(loginDfd.resolve).fail(loginDfd.reject);
     });
     return loginDfd.promise();
 };
