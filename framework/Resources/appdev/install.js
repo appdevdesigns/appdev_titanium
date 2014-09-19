@@ -119,8 +119,16 @@ module.exports.install = function(hooks) {
                 }
             }
             
-            // The app is already installed, so do not prompt for the random database encryption key
-            dfd.resolve({ updated: true });
+            AD.PropertyStore.read();
+            if (AD.Platform.isAndroid && AD.EncryptionKey.encryptionActivated() && !Ti.App.Properties.getString('password') && !AD.PropertyStore.get('password')) {
+                // The app is encrypted, a password is required, and no PIN is created yet, so prompt the user to choose one
+                AD.Auth.choosePIN().done(function() {
+                    dfd.resolve({ updated: true });
+                });
+            }
+            else {
+                dfd.resolve({ updated: true });
+            }
         }
         else if (!AD.EncryptionKey.encryptionActivated()) {
             // Encryption is unnecessary
