@@ -6,7 +6,7 @@ module.exports = $.Class('AD.FileStore', {}, {
         this.file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, options.fileName);
         if (this.file.exists()) {
             var text = this.file.read().text;
-            this.data = JSON.parse(AD.EncryptionKey.isEncrypted() ? AD.sjcl.decrypt(AD.EncryptionKey.get(), text) : text);
+            this.data = JSON.parse(AD.EncryptionKey.encryptionActivated() ? AD.sjcl.decrypt(AD.EncryptionKey.get(), text) : text);
         }
         else {
             this.data = options.defaultData || {};
@@ -22,6 +22,6 @@ module.exports = $.Class('AD.FileStore', {}, {
     
     flush: function() {
         var text = JSON.stringify(this.data);
-        this.file.write(AD.EncryptionKey.isEncrypted() ? AD.sjcl.encrypt(AD.EncryptionKey.get(), text) : text);
+        this.file.write(AD.EncryptionKey.encryptionActivated() ? AD.sjcl.encrypt(AD.EncryptionKey.get(), text) : text);
     }
 });

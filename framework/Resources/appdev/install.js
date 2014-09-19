@@ -119,33 +119,27 @@ module.exports.install = function(hooks) {
                 }
             }
             
-            // The app is already installed, so do not prompt for the random database encryption key
-            dfd.resolve({ updated: true });
+            AD.PropertyStore.read();
+            if (AD.Platform.isAndroid && AD.EncryptionKey.encryptionActivated() && !Ti.App.Properties.getString('password') && !AD.PropertyStore.get('password')) {
+                // The app is encrypted, a password is required, and no PIN is created yet, so prompt the user to choose one
+                AD.Auth.choosePIN().done(function() {
+                    dfd.resolve({ updated: true });
+                });
+            }
+            else {
+                dfd.resolve({ updated: true });
+            }
         }
-        else if (!AD.EncryptionKey.isEncrypted()) {
+        else if (!AD.EncryptionKey.encryptionActivated()) {
             // Encryption is unnecessary
             dfd.resolve({ installed: true });
         }
         else if (AD.Platform.isiOS) {
             // Installing on iOS
             
-            if (AD.Defaults.localStorageEnabled) {
-                // Prompt user for random string
-                var StringPromptWindow = require('ui/StringPromptWindow');
-                var $winStringPrompt = new StringPromptWindow.EncryptionKey({
-                    cancelable: false
-                });
-                $winStringPrompt.getDeferred().done(function(randomString) {
-                    // Generate a random key from the random string
-                    var key = AD.EncryptionKey.generateKey(randomString);
-                    AD.EncryptionKey.set(key);
-                    
-                    dfd.resolve({ installed: true });
-                });
-            }
-            else {
+            AD.Auth.chooseEncryptionKey().done(function() {
                 dfd.resolve({ installed: true });
-            }
+            });
         }
         else {
             // Installing on Android
@@ -200,25 +194,19 @@ module.exports.install = function(hooks) {
             protectionDfd.done(function(passwordProtect) {
                 console.log('Password protected: '+passwordProtect);
                 
-                var StringPromptWindow = require('ui/StringPromptWindow');
-                var WindowClass = StringPromptWindow[passwordProtect ? 'LoginPassword' : 'EncryptionKey'];
-                $winStringPrompt = new WindowClass({
-                    cancelable: false
-                });
-                $winStringPrompt.getDeferred().done(function(password) {
-                    if (passwordProtect) {
-                        // Use the entered password as the password
-                        AD.EncryptionKey.set(password);
-                    }
-                    else {
-                        // Use the entered string to generate a random password, which is saved
-                        var key = AD.EncryptionKey.generateKey(password);
-                        AD.EncryptionKey.set(key);
-                        Ti.App.Properties.setString('password', key);
-                    }
-                    
-                    dfd.resolve({ installed: true });
-                });
+                if (passwordProtect) {
+                    AD.Auth.choosePassword().done(function() {
+                        AD.Auth.choosePIN().done(function() {
+                            dfd.resolve({ installed: true });
+                        });
+                    });
+                }
+                else {
+                    AD.Auth.chooseEncryptionKey().done(function() {
+                        Ti.App.Properties.setString('password', AD.EncryptionKey.get());
+                        dfd.resolve({ installed: true });
+                    });
+                }
             });
         }
     }

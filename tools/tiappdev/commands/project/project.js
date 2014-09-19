@@ -183,7 +183,7 @@ operations.enumResources = function(params, callback) {
     var resourcePatterns = [
         { dir: 'i18n', pattern: /strings\.xml$/, recursive: true },
         { dir: 'Resources', pattern: /\.js$/ },
-        { dir: path.join('Resources', 'android'), pattern: /\.png$/, recursive: true },
+        { dir: path.join('Resources', 'android'), recursive: true },
         { dir: path.join('Resources', 'images'), pattern: /\.png$/ },
         { dir: path.join('Resources', 'models'), pattern: /\.js$/ },
         { dir: path.join('Resources', 'ui'), pattern: /\.js$/ }

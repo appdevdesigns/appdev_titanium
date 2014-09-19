@@ -69,6 +69,12 @@ AD.run = function(operation, context, args) {
 
 // Initialize all AppDev resources
 var boot = function(options) {
+    // Ensure that the boot sequence is run only once
+    if (AD.booted) {
+        return;
+    }
+    AD.booted = true;
+    
     $.Class.prototype.setup = function(options) {
         if (!this.options) {
             this.options = {};
@@ -114,7 +120,17 @@ var boot = function(options) {
     
     AD.Platform = require('appdev/Platform');
     
-    AD.EncryptionKey = require('appdev/encryptionKey');
+    AD.EncryptionKey = require('appdev/EncryptionKey');
+    AD.Auth = require('appdev/Auth');
+    
+    if (AD.Platform.isAndroid) {
+        // Initialize the Android keepalive service and make sure that it is initially stopped
+        AD.keepaliveIntent = Ti.Android.createServiceIntent({
+            url: 'Keepalive.js'
+        });
+        AD.keepaliveIntent.putExtra('interval', 5000); // run service every 5 seconds
+        Ti.Android.stopService(AD.keepaliveIntent);
+    }
     
     // Mirror the NodeJS AD.jQuery
     AD.jQuery = AD.$ = $;
@@ -132,6 +148,8 @@ var boot = function(options) {
     AD.Comm.GoogleAPIs = require('appdev/GoogleAPIs');
     AD.Comm.GoogleDrive = require('appdev/comm/GoogleDrive');
     AD.Comm.GoogleDriveFileAPI = require('appdev/comm/GoogleDriveFileAPI');
+    
+    AD.Viewer = null;
     
     // Load model dependencies
     console.log('Loading model dependencies...');
@@ -197,53 +215,7 @@ var install = function(options) {
 
 var login = function(options) {
     var loginDfd = AD.Deferreds.login;
-    var password = Ti.App.Properties.getString('password');
-    AD.EncryptionKey.passwordHash = Ti.App.Properties.getString('passwordHash');
-    if (!AD.EncryptionKey.passwordHash) {
-        // The password hash has not been set yet, so login is impossible
-        // Either the application has not yet been installed or this is a pre-1.1 version that has yet to be upgraded
-        loginDfd.resolve(true);
-    }
-    else if (!AD.Defaults.localStorageEnabled) {
-        // Local storage is disabled, so there is no reason to force the user to login
-        loginDfd.resolve(true);
-    }
-    else if (AD.EncryptionKey.password) {
-        // User is already logged in
-        loginDfd.resolve(true);
-    }
-    else if (password) {
-        // Login using the stored password
-        AD.EncryptionKey.login(password);
-        loginDfd.resolve(true);
-    }
-    else if (AD.Platform.isiOS) {
-        // On iOS, login using the password from the keychain
-        password = AD.EncryptionKey.readKeychain();
-        AD.EncryptionKey.login(password);
-        loginDfd.resolve(true);
-    }
-    else {
-        // Ask the user for their login password
-        var PasswordPromptWindow = require('ui/PasswordPromptWindow');
-        var $winPasswordPrompt = new PasswordPromptWindow({
-            title: 'passwordPromptLoginTitle',
-            message: 'passwordPromptLoginMessage',
-            doneText: 'login',
-            cancelable: false,
-            verifyCallback: function(guess) {
-                this.getChild('status').text = AD.Localize('verifying')+'...';
-                return AD.EncryptionKey.hash(guess) === AD.EncryptionKey.passwordHash;
-            }
-        });
-        $winPasswordPrompt.getDeferred().done(function(password) {
-            AD.EncryptionKey.login(password);
-            loginDfd.resolve(true);
-        });
-    }
-    loginDfd.done(function(success) {
-        console.log('Logged in successfully!');
-    });
+    AD.Auth.login().done(loginDfd.resolve).fail(loginDfd.reject);
     return loginDfd.promise();
 };
 
@@ -337,6 +309,16 @@ var initialize = function(options) {
             AD.UI.$appTabGroup = new AD.UI.AppTabGroup({
                 windows: options.windows
             });
+            if (AD.Platform.isAndroid) {
+                AD.UI.$appTabGroup.addEventListener('close', function() {
+                    // Start the Android keepalive service
+                    // It will keep the app running in the background for five minutes, giving the user
+                    // a chance to reopen it with a relatively short PIN rather than a long password
+                    Ti.App.Properties.setInt('killTime', Math.floor(Date.now() / 1000) + 5 * 60);
+                    AD.Auth.storeEncryptedPassword();
+                    Ti.Android.startService(AD.keepaliveIntent);
+                });
+            }
             AD.UI.$appTabGroup.open();
         };
         
@@ -407,8 +389,6 @@ var getViewer = function() {
     // Return a deferred that resolves immediately
     return $.Deferred().resolve().promise();
 };
-
-AD.Viewer = null;
 
 // Set the AppDev viewer model instance
 AD.setViewer = function(viewerData) {
