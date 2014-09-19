@@ -32,10 +32,8 @@ var upgradeDatabases = function(installData) {
         
         // Remove all of the tables in the database
         executeQuery('PRAGMA foreign_keys = OFF');
-        executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name!='sqlite_sequence'").done(function(tableArgs) {
-            tableArgs[0].forEach(function(table) {
-                executeQuery("DROP TABLE ?", [table.name]);
-            });
+        $.each(databaseDump.tables, function(tableName, table) {
+            executeQuery("DROP TABLE ?", [tableName]);
         });
         executeQuery('PRAGMA foreign_keys = ON');
         
