@@ -31,13 +31,13 @@ var upgradeDatabases = function(installData) {
         var executeQuery = installData.query;
         
         // Remove all of the tables in the database
+        executeQuery('PRAGMA foreign_keys = OFF');
         executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name!='sqlite_sequence'").done(function(tableArgs) {
-            executeQuery('PRAGMA foreign_keys = OFF');
             tableArgs[0].forEach(function(table) {
                 executeQuery("DROP TABLE ?", [table.name]);
             });
-            executeQuery('PRAGMA foreign_keys = ON');
         });
+        executeQuery('PRAGMA foreign_keys = ON');
         
         // Recreate the database tables
         installDatabases(installData);
