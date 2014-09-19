@@ -137,6 +137,15 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }
     },
     
+    // Execute a raw database query
+    rawExecute: function(dbName, query) {
+        // Use select to query encrypted databases on Android, because otherwise, the SQL Encryption
+        // module may not return a result set, especially when executing PRAGMA queries
+        var command = query.split(' ')[0].toUpperCase();
+        var database = this.openDatabase(dbName);
+        return (AD.Platform.isAndroid && AD.EncryptionKey.encryptionActivated() && (command === 'SELECT' || command === 'PRAGMA')) ? database.select(query) : database.execute(query);
+    },
+    
     // Execute the specified SQLite query
     execute: function(dbName, query, values, callback) {
         if ($.isFunction(values)) {
@@ -146,10 +155,9 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }
 
         // Execute the query
-        var database = this.openDatabase(dbName);
         var expandedQuery = this.expandQuery(query, values);
         console.log(expandedQuery);
-        var result = database.execute(expandedQuery);
+        var result = this.rawExecute(dbName, expandedQuery);
         var dfd = $.Deferred();
         if (result) {
             // Process the result
@@ -179,7 +187,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }
         else if (query.substr(0, 6).toUpperCase() === 'INSERT') {
             // Return the primary key of the row inserted
-            var rowIdResult = database.execute('SELECT last_insert_rowid()');
+            var rowIdResult = this.rawExecute(dbName, 'SELECT last_insert_rowid()');
             var insertId = rowIdResult.fieldByName('last_insert_rowid()');
             rowIdResult.close();
             dfd.resolve(insertId);
@@ -221,7 +229,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             var dump = {
                 tables: {}
             };
-
+            
             var tables = tableArgs[0];
             tables.forEach(function(table) {
                 var tableName = table.name;
