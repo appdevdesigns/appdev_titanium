@@ -5,7 +5,8 @@ var AD = require('AppDev');
 $.View('jQuery.Window', {
     defaults: {
         createParams: {
-            backgroundColor: 'white'
+            backgroundColor: 'white',
+            exitOnClose: false
         }
     },
     actionShortcuts: {
