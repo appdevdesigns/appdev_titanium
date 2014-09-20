@@ -11,7 +11,7 @@ var HTTP = {
             // This request is already retrying, so do not add it again
             return;
         }
-
+        
         var failed = false;
         var request = $.extend({}, requestOptions);
         request.retrying = true;
@@ -49,7 +49,7 @@ var HTTP = {
             HTTP.retryingRequestsStore.flush();
         }
     },
-
+    
     // Retry waiting requests
     retryRequests: function() {
         var requestCount = HTTP.retryingRequests.length;
@@ -63,17 +63,17 @@ var HTTP = {
         console.log('Retrying request to ['+request.url+']...');
         HTTP.post(request);
     },
-
+    
     // Convert a URL and a query object to a url that includes a querystring
     makeURL: function(baseURL, query) {
         var queryParts = [];
-        for (var key in query) {
-            queryParts.push(key+'='+encodeURIComponent(query[key]));
-        }
+        $.each(query, function(key, value) {
+            queryParts.push(key+'='+encodeURIComponent(value));
+        });
         var querystring = queryParts.join('&');
         return baseURL + (querystring ? ('?'+querystring) : '');
     },
-
+    
     /**
      * @class AppDev.Comm.HTTP.request()
      * @parent AD.HTTP
@@ -194,7 +194,7 @@ AD.Deferreds.login.done(function() {
         HTTP.addRetryingRequest(request);
     });
     requestStore.setData(HTTP.retryingRequests);
-
+    
     // Start retrying failed requests
     HTTP.retryRequests();
 });

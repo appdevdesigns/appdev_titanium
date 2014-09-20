@@ -4,7 +4,6 @@ var AD = require('AppDev');
 // Create a model subclass that represents a locally stored database that other models can derive from
 module.exports = $.Class('AD.DataStore.SQLite', {
     create: function(dataMgr, callback) {
-        var _this = this;
         var columns = [];
         var values = [];
         $.each(dataMgr.model, function(key, value) {
@@ -20,7 +19,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         var conditions = [];
         var values = [];
         $.each(dataMgr.model, function(key, value) {
-            conditions.push(key+"=?");
+            conditions.push(key+'=?');
             values.push(value);
         });
         values.push(dataMgr.id);
@@ -32,7 +31,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         var conditions = [];
         var values = [];
         $.each(dataMgr.model, function(key, value) {
-            conditions.push(key+"=?");
+            conditions.push(key+'=?');
             values.push(value);
         });
         var condition = conditions.length ? ' WHERE ' + conditions.join(' AND ') : '';
@@ -46,10 +45,10 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         if (!dataMgr.selectedFields._empty) {
             delete dataMgr.selectedFields._empty;
             var selectFields = [];
-            for (var key in dataMgr.selectedFields) {
+            $.each(dataMgr.selectedFields, function(fieldName, field) {
                 // These fields all have a tref prepended
-                selectFields.push(dataMgr.selectedFields[key].tref+'.'+key);
-            }
+                selectFields.push(field.tref+'.'+fieldName);
+            });
             select = selectFields.join(', ');
         }
         
@@ -76,7 +75,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
                     fieldName = dataMgr.model[fieldName].tref+'.'+fieldName;
                 }
             }
-            conditions.push(fieldName+"=?");
+            conditions.push(fieldName+'=?');
             values.push(value);
         });
         var condition = conditions.length ? ' WHERE ' + conditions.join(' AND ') : '';
@@ -88,7 +87,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         var joinedTableString = '';
         for (var i = 0; i < joinedTables.length; i++ ) {
             var table = joinedTables[i];
-            if (table.joinToTref == joinToTref) {
+            if (table.joinToTref === joinToTref) {
                 // Call recursively to look for other tables joined to this one
                 var lowerTables = this.getJoinedTables(joinedTables, table.tref, values);
                 
@@ -100,7 +99,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
                 joinedTableString += lowerTables+close;
                 joinedTableString += ' ON '+table.joinToTref+'.'+table.foreignKey;
                 joinedTableString += ' = '+table.tref+'.'+ (table.referencedKey || table.foreignKey);
-                if (typeof table.condition != 'undefined') {
+                if (typeof table.condition !== 'undefined') {
                     for (var j = 0; j < table.condition.length; j++ ) {
                         var condition = table.condition[j];
                         joinedTableString += ' AND '+condition.tref+'.'+condition.key+'=?';
@@ -111,7 +110,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }
         return joinedTableString;
     },
-
+    
     // Expand query to include values
     expandQuery: function(query, values) {
         values = values || [];
@@ -120,7 +119,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             var value = values[index++];
             if (typeof value === 'string') {
                 // Single-quote strings and escape single quotation marks
-                value = "'"+value.replace(/'/g, "''")+"'";
+                value = '\''+value.replace(/'/g, '\'\'')+'\'';
             }
             return value;
         });
@@ -133,7 +132,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             return this.openDatabases[dbName];
         }
         else {
-            return this.openDatabases[dbName] = AD.Database.open(dbName);
+            return (this.openDatabases[dbName] = AD.Database.open(dbName));
         }
     },
     
@@ -153,7 +152,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             callback = values;
             values = [];
         }
-
+        
         // Execute the query
         var expandedQuery = this.expandQuery(query, values);
         console.log(expandedQuery);
@@ -172,11 +171,13 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             
             // Populate the rows array
             var rows = [];
+            var row = null;
+            var setValue = function(fieldName) {
+                row[fieldName] = result.fieldByName(fieldName);
+            };
             while (result.isValidRow()) {
-                var row = {};
-                fieldNames.forEach(function(fieldName) {
-                    row[fieldName] = result.fieldByName(fieldName);
-                });
+                row = {};
+                fieldNames.forEach(setValue);
                 rows.push(row);
                 result.next();
             }
@@ -198,7 +199,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }
         
         // Call the callback when the operation finishes (which is immediately because it is synchronous)
-        if ($.isFunction(callback)) { 
+        if ($.isFunction(callback)) {
             dfd.done(function(data) {
                 // The first callback argument, err, will be null, followed by the arguments in the 'data' array
                 var args = $.isArray(data) ? data.slice(0) : [data];
@@ -225,7 +226,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
     exportDatabase: function(dbName) {
         var self = this;
         var dfd = $.Deferred();
-        self.execute(dbName, "SELECT name FROM sqlite_master WHERE type='table'").done(function(tableArgs) {
+        self.execute(dbName, 'SELECT name FROM sqlite_master WHERE type="table"').done(function(tableArgs) {
             var dump = {
                 tables: {}
             };
@@ -242,7 +243,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }).fail(dfd.reject);
         return dfd.promise();
     },
-
+    
     // Import the database, represented as a Javascript object
     importDatabase: function(dbName, dump) {
         var self = this;
@@ -259,7 +260,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
     // Export a single database table, represented as a Javascript object
     exportTable: function(dbName, tableName) {
         var dfd = $.Deferred();
-        this.execute(dbName, "SELECT * FROM ?", [tableName]).done(function(rowArgs) {
+        this.execute(dbName, 'SELECT * FROM ?', [tableName]).done(function(rowArgs) {
             dfd.resolve(rowArgs[0]);
         }).fail(dfd.reject);
         return dfd.promise();
@@ -272,7 +273,7 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         this.disableForeignKeys(dbName); // temporarily disable foreign key checks
         
         // Get the table schema
-        this.execute(dbName, "PRAGMA table_info(?)", [tableName]).done(function(tableInfoArgs) {
+        this.execute(dbName, 'PRAGMA table_info(?)', [tableName]).done(function(tableInfoArgs) {
             // If the "PRAGMA table_info" table returned zero rows the table does not exist.
             // In this case, simply ignore the table and do not attempt to import the table data.
             if (!tableInfoArgs[0]) {
@@ -285,18 +286,20 @@ module.exports = $.Class('AD.DataStore.SQLite', {
             });
             
             // Empty the table
-            self.execute(dbName, "DELETE FROM ?", [tableName]).done(function() {
+            self.execute(dbName, 'DELETE FROM ?', [tableName]).done(function() {
                 // Now insert the data back in
+                var values = null;
+                var rowToValues = function(row) {
+                    return columnNames.map(function(rowName) {
+                        values.push(row[rowName]);
+                        return '?';
+                    }).join(',');
+                };
                 var maxInserts = 250;
                 for (var startRow = 0; startRow < rows.length; startRow += maxInserts) {
-                    var values = [tableName];
-                    var selectSQL = rows.slice(startRow, startRow + maxInserts).map(function(row) {
-                        return columnNames.map(function(rowName) {
-                            values.push(row[rowName]);
-                            return '?';
-                        }).join(',');
-                    }).join(' UNION ALL SELECT ');
-                    self.execute(dbName, "INSERT INTO ? ("+columnNames.join(',')+") SELECT "+selectSQL, values).fail(dfd.reject);
+                    values = [tableName];
+                    var selectSQL = rows.slice(startRow, startRow + maxInserts).map(rowToValues).join(' UNION ALL SELECT ');
+                    self.execute(dbName, 'INSERT INTO ? ('+columnNames.join(',')+') SELECT '+selectSQL, values).fail(dfd.reject);
                 }
             }).fail(dfd.reject);
         }).fail(dfd.reject);

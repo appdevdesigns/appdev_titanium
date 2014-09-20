@@ -1,7 +1,6 @@
-var AD = require('AppDev');
 var $ = require('jquery');
 
-var DatePickerWindow = module.exports = $.Window('AppDev.UI.DatePickerWindow', {
+module.exports = $.Window('AppDev.UI.DatePickerWindow', {
     actions: [{
         callback: function() {
             this.dfd.resolve(this.selectedDate);

@@ -1,7 +1,10 @@
+var AD = require('AppDev');
+var $ = require('jquery');
+
 module.exports = {
     // Return a deferred object that will resolve to the user's current physical location
     getCurrentLocation: function(purpose, accuracy) {
-        Ti.Geolocation.purpose = AD.Localize(purpose);
+        Ti.Geolocation.purpose = AD.localize(purpose);
         Ti.Geolocation.accuracy = accuracy;
         
         var locationDfd = $.Deferred();
@@ -16,14 +19,14 @@ module.exports = {
                     // The app has been denied access to location services
                     locationDfd.reject({
                         locationResults: e,
-                        message: AD.Localize('locationUnauthorized')
+                        message: AD.localize('locationUnauthorized')
                     });
                 }
                 else {
                     // An error occurred that we do not know how to handle
                     locationDfd.reject({
                         locationResults: e,
-                        message: AD.Localize('locationUnknown')
+                        message: AD.localize('locationUnknown')
                     });
                 }
             });
@@ -32,7 +35,7 @@ module.exports = {
             // Location services are disabled on iOS
             locationDfd.reject({
                 locationResults: null,
-                message: AD.Localize('locationDisabled')
+                message: AD.localize('locationDisabled')
             });
         }
         return locationDfd.promise();

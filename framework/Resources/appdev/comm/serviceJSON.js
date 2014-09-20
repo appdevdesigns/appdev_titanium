@@ -53,17 +53,17 @@ var ServiceJSON = {
             }
             catch(err) {
                 console.error('Could not parse response as JSON!');
-                console.log(response); 
+                console.log(response);
             }
             
             // Got a JSON response but was the service action a success?
             if (data && data.success) {
                 options.HTTP.onSuccess(response, xhr);
             }
-            else if (data && data.errorID == 55) {
+            else if (data && data.errorID === 55) {
                 // Authentication failure (i.e. session timeout)
                 ServiceJSON.addWaitingRequest(options);
-
+                
                 // Reauthenticate
                 AD.winLogin.open(function() {
                     // Resend all waiting requests
@@ -78,8 +78,6 @@ var ServiceJSON = {
                 // The request failed
                 options.HTTP.onFailure(response, xhr);
             }
-            
-            return success;
         };
         
         // Automatically fail if the login window is open and the request is not a login request

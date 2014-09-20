@@ -38,7 +38,7 @@ module.exports = $.Window('AppDev.UI.SortOrderWindow', {
         var tableData = this.order.map(function(fieldName) {
             var fieldTitle = this.fields[fieldName].label;
             return {
-                title: AD.Localize(fieldTitle),
+                title: AD.localize(fieldTitle),
                 field: fieldName
             };
         }, this);

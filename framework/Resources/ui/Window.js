@@ -32,7 +32,7 @@ $.View('jQuery.Window', {
         
         // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
         $.extend(true, this.options, options);
-        this.options.createParams.title = AD.Localize(this.options.title); // can be either a string or a key in the locale file
+        this.options.createParams.title = AD.localize(this.options.title); // can be either a string or a key in the locale file
         
         // This deferred object represents a possible pending task for the window and
         // will be resolved when the task completes, or rejected if the task is canceled
@@ -119,7 +119,7 @@ $.View('jQuery.Window', {
             return dontClose;
         };
         
-        window.addEventListener('close', function(e) {
+        window.addEventListener('close', function() {
             if (closeHandlers.length > 0) {
                 // Call each of the onClose action callbacks when the window is
                 // closed BY THE USER. DO NOT run the close handlers if the deferred
@@ -180,7 +180,7 @@ $.View('jQuery.Window', {
                         // The menuItem property, if not specified, defaults to true
                         if (action.menuItem !== false) {
                             var menuItem = event.menu.add({
-                                title: AD.Localize(action.title),
+                                title: AD.localize(action.title),
                                 showAsAction: action.showAsAction ? Ti.Android.SHOW_AS_ACTION_ALWAYS : Ti.Android.SHOW_AS_ACTION_NEVER,
                                 icon: action.icon
                             });
@@ -225,16 +225,17 @@ $.View('jQuery.Window', {
             var navButton = navButtons[0];
             // Guess what system button this button represents based on its title
             var systemButton = this.constructor.systemButtons[navButton.title];
-            var button = navBarView = Ti.UI.createButton({
-                title: AD.Localize(navButton.title),
+            var button = Ti.UI.createButton({
+                title: AD.localize(navButton.title),
                 systemButton: navButton.systemButton || systemButton // will be undefined in some cases
             });
             button.addEventListener('click', navButton.callback);
+            navBarView = button;
         }
         else {
             // Create multiple buttons and add them to a button bar as the nav bar view
-            var labels = navButtons.map(function(button) { return AD.Localize(button.title); });
-            var buttonBar = navBarView = Ti.UI.createButtonBar({
+            var labels = navButtons.map(function(button) { return AD.localize(button.title); });
+            var buttonBar = Ti.UI.createButtonBar({
                 labels: labels,
                 style: Ti.UI.iPhone.SystemButtonStyle.BAR
             });
@@ -246,6 +247,7 @@ $.View('jQuery.Window', {
                     button.callback();
                 }
             });
+            navBarView = buttonBar;
         }
         
         this.window['set'+side+'NavButton'](navBarView);

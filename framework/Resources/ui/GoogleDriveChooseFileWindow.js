@@ -1,6 +1,5 @@
 var AD = require('AppDev');
 var $ = require('jquery');
-var GoogleAPIs = require('appdev/GoogleAPIs');
 
 module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
     actions: [{
@@ -14,7 +13,7 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
                 }
                 else {
                     // No file has been chosen
-                    alert(AD.Localize('chooseFile'));
+                    alert(AD.localize('chooseFile'));
                 }
             }
             else if (this.options.type === 'folder') {
@@ -40,18 +39,18 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
     init: function(options) {
         this.folder = null; // the current folder
         this.folders = []; // the hierarchy of the current folder
-
+        
         // Initialize the base $.Window object
         this._super({
             title: 'googleDrive',
             autoOpen: true
         });
     },
-
+    
     // Create the child views
     create: function() {
         var _this = this;
-
+        
         var itemsTable = this.add('items', Ti.UI.createTableView({
             data: null
         }));
@@ -71,7 +70,7 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
                 rows.forEach(function(row) {
                     row.hasCheck = false;
                 });
-
+                
                 // Select the file
                 _this.folder.fileId = row.id;
                 event.row.hasCheck = true;
@@ -83,22 +82,22 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
             }
         });
     },
-
+    
     // Initialize the child views
     initialize: function() {
         // Enter the root folder
         this.enter({
             id: this.options.folder,
-            title: AD.Localize(this.options.title),
+            title: AD.localize(this.options.title),
             items: null
         });
     },
-
+    
     // Enter the specified folder
     enter: function(folder) {
         // Save the current state
         this.folders.push(this.folder);
-
+        
         this.folder = folder;
         this.update();
     },
@@ -108,13 +107,13 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
             // This is the last folder, so do nothing
             return;
         }
-
+        
         // Restore the previous state
         this.folder = this.folders.pop();
-
+        
         this.update();
     },
-
+    
     // Update the window to represent the current folder
     update: function() {
         var _this = this;

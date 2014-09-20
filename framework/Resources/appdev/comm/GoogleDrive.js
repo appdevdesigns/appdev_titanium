@@ -7,7 +7,7 @@ var GoogleDrive = module.exports = {};
 GoogleDrive.request = function(options) {
     // Determine whether this is a Google APIs request
     var googleAPIsRequest = options.url.indexOf('https://www.googleapis.com/') === 0;
-
+    
     AD.Comm.HTTP.request({
         method: options.method,
         url: options.url,
@@ -56,20 +56,20 @@ GoogleDrive.getAccessToken = function(forceRefresh, callback) {
         callback(GoogleAPIs.access_token);
         return;
     }
-
+    
     var success = function(data) {
         if (data.refresh_token) {
             // Save the refresh_token
             GoogleAPIs.refresh_token = data.refresh_token;
             $.dev.log('refresh_token: '+GoogleAPIs.refresh_token);
         }
-
+        
         // Pass back the access_token
         GoogleAPIs.access_token = data.access_token;
         $.dev.log('access_token: '+GoogleAPIs.access_token);
         callback(GoogleAPIs.access_token);
     };
-
+    
     $.dev.log('refresh_token: '+GoogleAPIs.refresh_token);
     if (GoogleAPIs.refresh_token) {
         // Send an HTTP request to get an access token from the refresh token

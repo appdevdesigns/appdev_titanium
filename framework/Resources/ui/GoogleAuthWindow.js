@@ -10,11 +10,11 @@ module.exports = $.Window('AppDev.UI.GoogleAuthWindow', {}, {
             autoOpen: true
         });
     },
-
+    
     // Create the child views
     create: function() {
         var _this = this;
-
+        
         // Create the WebView that will authenticate the user with Google
         var webview = this.add('webview', Ti.UI.createWebView({
             url: AD.Comm.HTTP.makeURL('https://accounts.google.com/o/oauth2/auth', {
@@ -28,7 +28,7 @@ module.exports = $.Window('AppDev.UI.GoogleAuthWindow', {}, {
             var approvalPageURL = 'https://accounts.google.com/o/oauth2/approval';
             if (webview.evalJS('location.origin+location.pathname') === approvalPageURL) {
                 // This is the approval page, so read the authorization code
-                var code = webview.evalJS("document.getElementById('code').value");
+                var code = webview.evalJS('document.getElementById("code").value');
                 console.log('code: '+code);
                 _this.getDeferred().resolve(code);
             }

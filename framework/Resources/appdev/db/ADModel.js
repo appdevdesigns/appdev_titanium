@@ -171,25 +171,25 @@ var ADModel = module.exports = {
         },
         serialize: {
             date: function(val, type) {
-                return (Object.prototype.toString.call(val) === '[object Date]') ? (val.getFullYear() + "-" + (val.getMonth() + 1) + "-" + val.getDate()) : null;
+                return (Object.prototype.toString.call(val) === '[object Date]') ? (val.getFullYear() + '-' + (val.getMonth() + 1) + '-' + val.getDate()) : null;
             },
             JSON: function(val) {
                 return (typeof val === 'object') ? JSON.stringify(val) : val;
             }
         },
-
+        
         // Refresh the model cache
         refreshCache: function() {
             var Model = this;
             var name = Model.shortName;
-
+            
             // If cache=true in the model definition, Model.cache will be overwritten
             // with the cache object, but it will remain a 'truthy' value
             var cache = Model.cache;
             if (!cache) {
                 return $.Deferred().resolve();
             }
-
+            
             console.log('Building '+name+' cache...');
             // Only load models associated with this viewer
             var filter = { viewer_id: AD.Viewer.viewer_id };
@@ -203,7 +203,7 @@ var ADModel = module.exports = {
                 // If cacheFilter is a deferred, this will be executed after it is resolved
                 // If it is a plain object, this will be executed immediately
                 $.extend(filter, trueCacheFilter);
-
+                
                 // Set the cache filter and build the cache
                 cache.setFilter(filter);
                 cache.refresh().then(cacheDfd.resolve, cacheDfd.reject);

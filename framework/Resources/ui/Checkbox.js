@@ -34,7 +34,7 @@ module.exports = $.View('AppDev.UI.Checkbox', {
             });
         });
     },
-
+    
     // Create the child views
     create: function() {
         // Create the checkbox image
@@ -51,7 +51,7 @@ module.exports = $.View('AppDev.UI.Checkbox', {
             text: this.options.overlayText
         }));
     },
-
+    
     // Initialize the child views
     initialize: function() {
         this.update();

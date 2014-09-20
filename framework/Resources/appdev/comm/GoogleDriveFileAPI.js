@@ -22,7 +22,7 @@ module.exports = {
         var boundary = 'boundary';
         var delimiter = '\r\n--' + boundary + '\r\n';
         var closeDelimiter = '\r\n--' + boundary + '--';
-
+        
         var base64Data = AD.Base64.encode(fileData.content);
         var multipartRequestBody =
             delimiter +

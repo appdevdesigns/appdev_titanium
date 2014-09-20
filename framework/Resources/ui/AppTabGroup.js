@@ -47,7 +47,7 @@ module.exports = $.View('AppDev.UI.AppTabGroup', {}, {
     open: function() {
         this.view.open();
     },
-
+    
     // Close the tab group
     close: function() {
         this.view.close();

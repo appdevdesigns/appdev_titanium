@@ -126,7 +126,7 @@ jQuery.capitalize = function(string) {
 // The format argument can reference a string in the localization file
 jQuery.formatString = function(format) {
     var args = Array.prototype.slice.call(arguments, 1);
-    return (L(format) || format).replace(/{(\d+)}/g, function(match, index) { 
+    return (Ti.Locale.getString(format) || format).replace(/{(\d+)}/g, function(match, index) {
         return typeof args[index] !== 'undefined' ? args[index] : match;
     });
 };

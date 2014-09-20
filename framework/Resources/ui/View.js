@@ -5,7 +5,7 @@ var AD = require('AppDev');
 $.Class('jQuery.View', {
     setup: function() {
         if (this.dependencies) {
-            // When a view extends this base view, load all of its AppDev UI dependencies 
+            // When a view extends this base view, load all of its AppDev UI dependencies
             this.dependencies.forEach(function(dependency) {
                 require('ui/'+dependency);
             });
@@ -146,9 +146,9 @@ $.Class('jQuery.View', {
     
     // Remove all of this view's children
     removeAllChildren: function() {
-        this.view.children.slice(0).forEach(function(child) { 
+        this.view.children.slice(0).forEach(function(child) {
             this.view.remove(child);
-        }, this);        
+        }, this);
     },
     
     addEventListener: function(name, callback) {

@@ -89,8 +89,8 @@ UI.enableTableEditing = function(window, table) {
 UI.alert = function(message, buttons) {
     var dfd = $.Deferred();
     var dlg = Ti.UI.createAlertDialog({
-        message: AD.Localize(message), // allow message to refer to a string in the localization file
-        buttonNames: buttons.map(AD.Localize)
+        message: AD.localize(message), // allow message to refer to a string in the localization file
+        buttonNames: buttons.map(AD.localize)
     });
     dlg.addEventListener('click', function(event) {
         dfd.resolve(event.index);
@@ -141,7 +141,7 @@ UI.requestContactsAuthorization = function() {
     }
     else {
         authorizeDfd.reject();
-        alert(L('contactsUnauthorized'));
+        alert(AD.localize('contactsUnauthorized'));
     }
     return authorizeDfd.promise();
 };

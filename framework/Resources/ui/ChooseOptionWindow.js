@@ -27,7 +27,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
                     selected.push(option);
                 }
             }, this);
-
+            
             if (this.options.multiselect) {
                 this.dfd.resolve(selected);
             }
@@ -49,7 +49,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         filter: {},
         initial: null
     },
-
+    
     // Convert a multivalue object used to store contact information and convert it to an array of options useable by ChooseOptionWindow
     multivalueToOptionsArray: function(multivalue) {
         var options = [];
@@ -68,7 +68,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
     init: function(options) {
         // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
         $.extend(true, this.options, options);
-
+        
         this.Model = this.options.Model;
         if (typeof this.Model === 'string') {
             // "Model" can also be a string representing the name of the model class
@@ -78,10 +78,10 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
             // Automatically generate the options from the model instance cache
             this.options.options = this.Model.cache.query(this.options.filter);
         }
-
+        
         // Initialize the base $.Window object
         this._super({
-            title: $.formatString('chooseOptionTitle', AD.Localize(this.options.groupName+(this.options.multiselect ? 's' : '')).toLowerCase()),
+            title: $.formatString('chooseOptionTitle', AD.localize(this.options.groupName+(this.options.multiselect ? 's' : '')).toLowerCase()),
             autoOpen: true
         });
     },
@@ -230,7 +230,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         row.index = option.index = this.rowCount++;
         return Ti.UI.createTableViewRow(row);
     },
-
+    
     // Return an array of the rows in the table
     getRows: function() {
         var section = this.getChild('optionsTable').data[0];
@@ -240,12 +240,12 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
 
 // This window allows the user to add a new option
 require('ui/StringPromptWindow');
-var AddOptionWindow = AD.UI.StringPromptWindow('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {}, {
+AD.UI.StringPromptWindow('AppDev.UI.ChooseOptionWindow.AddOptionWindow', {}, {
     init: function(options) {
         // If 'init' is called via this._super(...) in a derived class, make sure that the new options are added to this.options
         $.extend(true, this.options, options);
         
-        this.groupName = AD.Localize(this.options.groupName);
+        this.groupName = AD.localize(this.options.groupName);
         this.lowercasedGroupName = this.groupName.toLowerCase();
         
         // Initialize the base AD.UI.StringPromptWindow object
@@ -258,8 +258,7 @@ var AddOptionWindow = AD.UI.StringPromptWindow('AppDev.UI.ChooseOptionWindow.Add
                 return { valid: newOption !== '', reason: $.formatString('newOptionEmpty', this.lowercasedGroupName) };
             }
         });
-    },
-    
+    }
 });
 
 // Create a specialized ChooseOptionsWindow class that allows multiple options to be selected

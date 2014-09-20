@@ -145,7 +145,7 @@ $.View('jQuery.ModelTable', {
         return this.rows.length;
     },
     
-    // Create and return a new row representing the model (should be overridden by the derived class) 
+    // Create and return a new row representing the model (should be overridden by the derived class)
     createRow: function(model) {
         return Ti.UI.createTableViewRow({});
     },
@@ -175,7 +175,6 @@ $.View('jQuery.ModelTable', {
     // Return the row associated with a model
     rowFromModel: function(model) {
         var foundRow = null;
-        var _this = this;
         this.rows.forEach(function(row) {
             if (row.modelId === model.getId()) {
                 foundRow = row;

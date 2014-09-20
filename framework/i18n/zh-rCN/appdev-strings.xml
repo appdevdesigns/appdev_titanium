@@ -70,7 +70,7 @@
     <string name="chooseFileTitle">选择文件</string>
     <string name="chooseFolderTitle">选择文件夹</string>
     <string name="chooseFile">选择一个文件夹</string>
-
+    
     <!-- LoginWindow labels -->
     <string name="login">登陆</string>
     <string name="userId">用户ID</string>

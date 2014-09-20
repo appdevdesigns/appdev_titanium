@@ -1,5 +1,4 @@
 var AD = require('AppDev');
-var $ = require('jquery');
 
 require('ui/StringPromptWindow');
 
@@ -20,12 +19,12 @@ module.exports = AD.UI.StringPromptWindow('AppDev.UI.PasswordPromptWindow', {
                 correct = this.options.verifyCallback.apply(this, arguments);
             }
             else {
-                throw 'No password or verifyCallback passed to PasswordPromptWindow to verify input passwords!'
+                throw 'No password or verifyCallback passed to PasswordPromptWindow to verify input passwords!';
             }
             
             return {
                 valid: correct,
-                reason: AD.Localize(correct ? 'correct' : 'incorrect')+'!'
+                reason: AD.localize(correct ? 'correct' : 'incorrect')+'!'
             };
         }
     }

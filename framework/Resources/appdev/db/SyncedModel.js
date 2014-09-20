@@ -16,8 +16,8 @@ var SyncedModel = module.exports = $.Model('AD.Model.SyncedModel', {
         var ServerModel = AD.Model.ServerModel;
         
         // Give LocalModel priority in the event of conflicts
-        staticProps = $.extend({}, ServerModel, LocalModel, klass);
-        protoProps = $.extend({}, ServerModel.prototype, LocalModel.prototype, proto);
+        var staticProps = $.extend({}, ServerModel, LocalModel, klass);
+        var protoProps = $.extend({}, ServerModel.prototype, LocalModel.prototype, proto);
         
         ['create', 'update', 'destroy'].forEach(function(operation) {
             // Override the operation with a proxy function that delegates the operation
@@ -28,7 +28,7 @@ var SyncedModel = module.exports = $.Model('AD.Model.SyncedModel', {
             });
        }, this);
         
-        // Override the save and destroy model prototype functions 
+        // Override the save and destroy model prototype functions
         ['save', 'destroy'].forEach(function(operation) {
             this.overrideMethod(protoProps, operation, function() {
                 // When a model is saved (created/updated) or destroyed, save the model using first LocalModel, then

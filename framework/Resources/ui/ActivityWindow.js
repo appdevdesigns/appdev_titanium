@@ -64,8 +64,8 @@ module.exports = $.Window('AppDev.UI.ActivityWindow', {
     
     // Refresh the activity message
     updateMessage: function() {
-        this.getChild('activityIndicator').message = AD.Localize(this.message);
+        this.getChild('activityIndicator').message = AD.localize(this.message);
         var progressBar = this.getChild('progressBar');
-        progressBar.message = $.formatString('{0} ({1}%)', AD.Localize(this.message), (progressBar.fractionCompleted * 100).toFixed(0));
+        progressBar.message = $.formatString('{0} ({1}%)', AD.localize(this.message), (progressBar.fractionCompleted * 100).toFixed(0));
     }
 });

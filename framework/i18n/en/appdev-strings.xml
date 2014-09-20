@@ -75,7 +75,7 @@
     <string name="chooseFileTitle">Choose file</string>
     <string name="chooseFolderTitle">Choose folder</string>
     <string name="chooseFile">Please choose a file</string>
-
+    
     <!-- LoginWindow labels -->
     <string name="login">Login</string>
     <string name="userId">User ID</string>

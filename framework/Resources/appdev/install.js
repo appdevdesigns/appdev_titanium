@@ -1,4 +1,5 @@
 var AD = require('AppDev');
+var $ = require('jquery');
 
 // Return the version string as an array of its period delimited parts with the pre-release identifier removed
 var parseVersion = function(version) {
@@ -23,28 +24,6 @@ var compareVersions = module.exports.compareVersions = function(v1, v2) {
     return 0;
 };
 
-// Upgrade the database between versions
-var upgradeDatabases = function(installData) {
-    // Backup the database
-    AD.Database.export(installData.dbName).done(function(databaseDump) {
-        databaseDump.version = installData.previousVersion;
-        var executeQuery = installData.query;
-        
-        // Remove all of the tables in the database
-        executeQuery('PRAGMA foreign_keys = OFF');
-        $.each(databaseDump.tables, function(tableName, table) {
-            executeQuery("DROP TABLE ?", [tableName]);
-        });
-        executeQuery('PRAGMA foreign_keys = ON');
-        
-        // Recreate the database tables
-        installDatabases(installData);
-        
-        // Now import the data back into the database
-        AD.Database.import(installData.dbName, databaseDump);
-    });
-};
-
 // Create the necessary databases for the application
 var installDatabases = function(installData) {
     // Run each individual semicolon-delimited query
@@ -60,14 +39,36 @@ var installDatabases = function(installData) {
     }
 };
 
+// Upgrade the database between versions
+var upgradeDatabases = function(installData) {
+    // Backup the database
+    AD.Database.export(installData.dbName).done(function(databaseDump) {
+        databaseDump.version = installData.previousVersion;
+        var executeQuery = installData.query;
+        
+        // Remove all of the tables in the database
+        executeQuery('PRAGMA foreign_keys = OFF');
+        $.each(databaseDump.tables, function(tableName, table) {
+            executeQuery('DROP TABLE ?', [tableName]);
+        });
+        executeQuery('PRAGMA foreign_keys = ON');
+        
+        // Recreate the database tables
+        installDatabases(installData);
+        
+        // Now import the data back into the database
+        AD.Database.import(installData.dbName, databaseDump);
+    });
+};
+
 module.exports.install = function(hooks) {
-    var $ = require('jquery');
     var dfd = $.Deferred();
     
     var currentVersion = Ti.App.Properties.getString('version');
     
+    var password = null;
     if (AD.Platform.isiOS && !currentVersion) {
-        var password = require('com.0x82.key.chain').getPasswordForService('database_key', 'main');
+        password = require('com.0x82.key.chain').getPasswordForService('database_key', 'main');
         // Only if the password is stored in the 'database_key/main' keychain entry (only pre-1.1) will the PropertyStore be converted from the legacy format
         if (password) {
             // In earlier versions (until 1.1), the application version was stored in the encrypted
@@ -106,7 +107,7 @@ module.exports.install = function(hooks) {
                 // Starting in 1.1, the password hash is stored as an application property, so calculate
                 // this hash for earlier iOS versions where only the password was stored in the system keychain
                 var keychain = require('com.0x82.key.chain');
-                var password = keychain.getPasswordForService('database_key', 'main');
+                password = keychain.getPasswordForService('database_key', 'main');
                 if (password) {
                     // This will update the password hash and store the password under "<app-id>/database_encryption_key",
                     // instead of "database_key/main", to prevent conflict between multiple AppDev applications

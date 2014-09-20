@@ -1,7 +1,7 @@
 var AD = require('AppDev');
 var $ = require('jquery');
 
-var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
+$.Window('AppDev.UI.FeedbackWindow', {}, {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
@@ -12,7 +12,7 @@ var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
             }
         });
     },
-
+    
     // Create the child views
     create: function() {
         var _this = this;
@@ -76,14 +76,14 @@ var FeedbackWindow = $.Window('AppDev.UI.FeedbackWindow', {}, {
     // Display an email dialog to allow the user to give feedback
     feedback: function(templateData) {
         // Localize the title
-        var title = AD.Localize(templateData.titleId);
+        var title = AD.localize(templateData.titleId);
         var formatValues = [AD.Defaults.application];
         if (templateData.formatValues) {
             formatValues = formatValues.concat(templateData.formatValues);
         }
         var emailDialog = Ti.UI.createEmailDialog({
             toRecipients: [AD.Defaults.feedbackAddress],
-            subject: $.formatString('feedbackSubject', AD.Defaults.application, title.toLowerCase()), 
+            subject: $.formatString('feedbackSubject', AD.Defaults.application, title.toLowerCase()),
             messageBody: $.formatString.apply($, [templateData.templateId].concat(formatValues))
         });
         emailDialog.open();
@@ -113,7 +113,7 @@ module.exports = $.Window('AppDev.UI.AppInfoWindow', {
             title: 'infoTitle'
         });
     },
-
+    
     // Create the child views
     create: function() {
         var $contentView = this.add($.View.create(Ti.UI.createScrollView({

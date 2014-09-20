@@ -44,7 +44,7 @@ module.exports = $.Window('AppDev.UI.ErrorWindow', {
         
         var retryCallback = this.options.retry;
         if (retryCallback) {
-            // If a retry callback is specified, create a retry button that will call retryCallback when pressed 
+            // If a retry callback is specified, create a retry button that will call retryCallback when pressed
             var retryButton = this.add('retry', Ti.UI.createButton({
                 top: AD.UI.padding * 4,
                 center: { x: AD.UI.screenWidth / 2 }, // horizontally centered

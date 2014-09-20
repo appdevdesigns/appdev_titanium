@@ -1,7 +1,7 @@
 var AD = require('AppDev');
 var $ = require('jquery');
 
-var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
+module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
@@ -10,7 +10,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             focusedChild: 'username'
         });
     },
-
+    
     // Create the child views
     create: function() {
         // Create the user ID label and text field
@@ -26,7 +26,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             top: AD.UI.padding,
             width: 180,
             height: AD.UI.textFieldHeight,
-            hintText: AD.Localize('userId'),
+            hintText: AD.localize('userId'),
             autocorrect: false,
             autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
             borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
@@ -46,7 +46,7 @@ var LoginWindow = module.exports = $.Window('AppDev.UI.LoginWindow', {}, {
             width: 180,
             height: AD.UI.textFieldHeight,
             passwordMask: true,
-            hintText: AD.Localize('password'),
+            hintText: AD.localize('password'),
             borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED
         }));
         passwordField.addEventListener('return', this.proxy('submit'));

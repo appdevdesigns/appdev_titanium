@@ -54,7 +54,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
             width: AD.UI.useableScreenWidth,
             height: Ti.UI.SIZE,
             font: AD.UI.Fonts.small,
-            text: AD.Localize(this.options.message)
+            text: AD.localize(this.options.message)
         }));
         var string = this.add('string', Ti.UI.createTextField({
             left: AD.UI.padding,
@@ -94,7 +94,7 @@ var StringPromptWindow = module.exports = $.Window('AppDev.UI.StringPromptWindow
             this.dfd.resolve(value);
         }
         else if (validity.valid === false) {
-            this.getChild('status').text = AD.Localize(validity.reason || 'stringPromptInvalidInput');
+            this.getChild('status').text = AD.localize(validity.reason || 'stringPromptInvalidInput');
         }
         else {
             throw 'Invalid "valid" field returned by validateCallback: ['+validity.valid+']!';

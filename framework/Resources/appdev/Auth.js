@@ -96,7 +96,7 @@ Auth.loginWithPassword = function() {
         doneText: 'login',
         cancelable: false,
         verifyCallback: function(guess) {
-            this.getChild('status').text = AD.Localize('verifying')+'...';
+            this.getChild('status').text = AD.localize('verifying')+'...';
             return AD.EncryptionKey.hash(guess) === AD.EncryptionKey.passwordHash;
         }
     });
@@ -120,7 +120,7 @@ Auth.loginWithPIN = function() {
         cancelable: true,
         keyboardType: Ti.UI.KEYBOARD_NUMBER_PAD,
         verifyCallback: function(pin) {
-            this.getChild('status').text = AD.Localize('verifying')+'...';
+            this.getChild('status').text = AD.localize('verifying')+'...';
             try {
                 // Decrypt the encrypted password using the provided pin
                 decryptedPassword = AD.sjcl.decrypt(pin, encryptedPassword);
