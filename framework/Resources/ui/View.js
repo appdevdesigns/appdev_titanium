@@ -137,7 +137,7 @@ $.Class('jQuery.View', {
         
         // Set the enabled property of buttons, and manually adjust the transparency for other views
         if (this.view.toString() === '[object TiUIButton]' || this.view.toString() === '[object Button]') {
-            this.view.enabled = enabled;
+            this.view.touchEnabled = enabled;
         }
         else {
             this.view.opacity = this.enabled ? 1 : 0.25;
