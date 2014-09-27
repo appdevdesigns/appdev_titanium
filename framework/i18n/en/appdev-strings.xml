@@ -4,7 +4,7 @@
     <string name="stringPromptDefaultTitle">String Prompt</string>
     <string name="stringPromptDefaultMessage">Please enter a string.</string>
     <string name="stringPromptEncryptionTitle">Database Encryption Setup</string>
-    <string name="stringPromptEncryptionMessage">Please enter at least 30 random characters.  You are NOT required to remember the sequence; it is used internally to increase the security of your information.</string>
+    <string name="stringPromptEncryptionMessage">Please enter at least 30 random characters. You are NOT required to remember the sequence; it is used internally to increase the security of your information.</string>
     <string name="stringPromptEncryptionLengthConstraint">Input must be at least 30 characters long!</string>
     <string name="stringPromptPasswordTitle">Login Password</string>
     <string name="stringPromptPasswordMessage">Please choose a secure login password at least 30 characters long to prevent unathorized access.</string>
@@ -50,8 +50,8 @@
     <string name="choose">Choose</string>
     
     <!-- Password protection labels -->
-    <string name="passwordProtectOptional">Your device appears to have full-device encryption enabled.  Would you like to pasword-protect the application anyway?</string>
-    <string name="passwordProtectRequired">Your device does not appear to have full-device encryption enabled.  The application will be password-protected.</string>
+    <string name="passwordProtectOptional">Your device appears to have full-device encryption enabled. Would you like to pasword-protect the application anyway?</string>
+    <string name="passwordProtectRequired">Your device does not appear to have full-device encryption enabled. The application will be password-protected.</string>
     <string name="recommendEncryption">Full-device encryption is supported but not enabled on your device. It is recommended that you enable full-device encryption before continuing to install {0}. If you do not encrypt your device, you will have to enter a 30-character password each time you open {0}. Would you like to quit {0} and view online instructions for enabling full-device encryption?</string>
     
     <!-- Info labels -->
@@ -62,8 +62,8 @@
     <!-- Feedback labels -->
     <string name="feedback">Feedback</string>
     <string name="feedbackTitle">{0} Feedback</string>
-    <string name="feedbackText">Thank you for taking the time to tell us what you think about {0}!  Your suggestions and bug reports are greatly appreciated and will be incorporated into a future release if possible.  You can also e-mail us directly at appdev.feedback@gmail.com.  If you are submitting a bug report, please mention your {0} version ({1}) and your OS ({2} {3}).</string>
-    <string name="feedbackWarning">WARNING:  Feedback sent from this app will be transmitted over an unsecured connection.  If you would normally use a VPN for your communication, please send your feedback to appdev.feedback@gmail.com using your VPN secured e-mail.</string>
+    <string name="feedbackText">Thank you for taking the time to tell us what you think about {0}! Your suggestions and bug reports are greatly appreciated and will be incorporated into a future release if possible. You can also e-mail us directly at appdev.feedback@gmail.com. If you are submitting a bug report, please mention your {0} version ({1}) and your OS ({2} {3}).</string>
+    <string name="feedbackWarning">WARNING: Feedback sent from this app will be transmitted over an unsecured connection. If you would normally use a VPN for your communication, please send your feedback to appdev.feedback@gmail.com using your VPN secured e-mail.</string>
     <string name="suggestion">Suggestion</string>
     <string name="bugReport">Bug report</string>
     <string name="feedbackSubject">{0} feedback: {1}</string>
