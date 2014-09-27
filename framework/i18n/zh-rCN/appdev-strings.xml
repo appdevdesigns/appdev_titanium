@@ -45,7 +45,7 @@
     <string name="choose">选择</string>
     
     <!-- Password protection labels -->
-    <string name="passwordProtectOptional">你的 设备似乎启用全设备加密。你仍然想用密码来保护应用吗？</string>
+    <string name="passwordProtectOptionalEncrypted">你的 设备似乎启用全设备加密。你仍然想用密码来保护应用吗？</string>
     <string name="passwordProtectRequired">你的 设备似乎没有启用全设备加密。应用将会被密码保护。</string>
     <string name="recommendEncryption">你有全装置加密，但你的装置上未启用。建议你继续安装之前，先启用全装置加密 {0}。你如果不在装置上加密。你每次打开装置必须输入30字母的密码 {0}。你希望现在退出 {0} 并查看网上指示如何启用全装置加密？</string>
     

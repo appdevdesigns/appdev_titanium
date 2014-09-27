@@ -48,9 +48,14 @@ Auth.login = function() {
     var password = Ti.App.Properties.getString('password');
     var encryptedPassword = Ti.App.Properties.getString('encryptedPassword');
     AD.EncryptionKey.passwordHash = Ti.App.Properties.getString('passwordHash');
-    if (!AD.EncryptionKey.passwordHash) {
+    if (!AD.EncryptionKey.encryptionActivated()) {
+        // The device is not encrypted so login is unnecessary
+        loginDfd.resolve(true);
+    }
+    else if (!AD.EncryptionKey.passwordHash) {
         // The password hash has not been set yet, so login is impossible
-        // Either the application has not yet been installed or this is a pre-1.1 version that has yet to be upgraded
+        // Either the application has not yet been installed, this is a pre-1.1 version that has yet
+        // to be upgraded, or this is an unencrypted installation
         loginDfd.resolve(true);
     }
     else if (!AD.Defaults.localStorageEnabled) {
