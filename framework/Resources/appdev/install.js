@@ -26,17 +26,7 @@ var compareVersions = module.exports.compareVersions = function(v1, v2) {
 
 // Create the necessary databases for the application
 var installDatabases = function(installData) {
-    // Run each individual semicolon-delimited query
-    var installSQL = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'install.sql').read().text;
-    installSQL.trim().match(/[^;]+/g).forEach(function(query) {
-        installData.query(query.trim());
-    });
-    
-    // Turn off iCloud backup for the database file
-    var databaseFile = AD.Database.getFile();
-    if (databaseFile.exists()) {
-        databaseFile.remoteBackup = false;
-    }
+    AD.Database.install(installData.dbName);
 };
 
 // Upgrade the database between versions
@@ -129,7 +119,7 @@ module.exports.install = function(hooks) {
                 dfd.resolve({ updated: true });
             }
         }
-        else if (!AD.EncryptionKey.encryptionActivated()) {
+        else if (!AD.EncryptionKey.encryptionNecessary()) {
             // Encryption is unnecessary
             dfd.resolve({ installed: true });
         }
@@ -142,6 +132,27 @@ module.exports.install = function(hooks) {
         }
         else {
             // Installing on Android
+            
+            var promptForEncryption = function() {
+                // Prompt the user regarding application encryption, giving them the opportunity to
+                // opt-out of encryption, if permitted by the application
+                
+                var passwordProtect = function() {
+                    protectionDfd.resolve(true);
+                };
+                
+                if (AD.Defaults.allowUnencrypted) {
+                    // Ask the user if they want to encrypt the application, warning them of the consequences of unencryption
+                    AD.UI.yesNoAlert($.formatString('passwordProtectOptionalUnencrypted', AD.localize('unencryptedConsequences'))).then(passwordProtect, function() {
+                        // Do not encrypt
+                        // Do not resolve protectionDfd, thereby never setting up password encryption
+                        dfd.resolve({ installed: true });
+                    });
+                }
+                else {
+                    AD.UI.okAlert($.formatString('passwordProtectRequired', AD.Defaults.application)).then(passwordProtect);
+                }
+            };
             
             // Determine whether to password-protect the application
             var protectionDfd = $.Deferred();
@@ -162,31 +173,30 @@ module.exports.install = function(hooks) {
                 
                 if (encrypted) {
                     // The device is encrypted, so password protection is optional
-                    AD.UI.yesNoAlert($.formatString('passwordProtectOptional', AD.Defaults.application)).then(protectionDfd.resolve, protectionDfd.resolve);
+                    AD.UI.yesNoAlert($.formatString('passwordProtectOptionalEncrypted', AD.Defaults.application)).then(protectionDfd.resolve, protectionDfd.resolve);
                 }
                 else {
-                    // The device is not encrypted, so password protection is required
-                    var passwordProtect = function() {
-                        protectionDfd.resolve(true);
-                    };
+                    // The device is not encrypted
+                    
                     if (encryptionSupported) {
+                        // Encryption is support to ask the user if they want to encrypt their device first
                         AD.UI.yesNoAlert($.formatString('recommendEncryption', AD.Defaults.application)).then(function() {
                             // Open a webpage with Android full-device encryption instructions
                             Ti.Platform.openURL('http://www.howtogeek.com/141953');
                             // Now close the application
                             Ti.Android.currentActivity.finish();
-                        }, passwordProtect);
+                        }, promptForEncryption);
                     }
                     else {
-                        AD.UI.okAlert($.formatString('passwordProtectRequired', AD.Defaults.application)).then(passwordProtect);
+                        promptForEncryption();
                     }
                 }
             });
             encryption.addEventListener('authorizationRejected', function() {
                 console.log('Encryption rejection');
                 
-                // User rejected admin authorization request, so force password protection
-                protectionDfd.resolve(true);
+                // User rejected admin authorization request
+                promptForEncryption();
             });
             encryption.authorizeAdmin();
             

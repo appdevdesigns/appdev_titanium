@@ -136,6 +136,15 @@ module.exports = $.Class('AD.DataStore.SQLite', {
         }
     },
     
+    // Close the cached database connection to the specified database
+    closeDatabase: function(dbName) {
+        var database = this.openDatabases[dbName];
+        if (database) {
+            database.close();
+            delete this.openDatabases[dbName];
+        }
+    },
+    
     // Execute a raw database query
     rawExecute: function(dbName, query) {
         // Use select to query encrypted databases on Android, because otherwise, the SQL Encryption
