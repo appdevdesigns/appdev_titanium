@@ -82,5 +82,20 @@ var Database = module.exports = {
         return Database.DataStore.importDatabase(dbName, dump);
     },
     
+    // Install the database from the external SQL installation script
+    install: function(dbName) {
+        // Run each individual semicolon-delimited query
+        var installSQL = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'install.sql').read().text;
+        installSQL.trim().match(/[^;]+/g).forEach(function(query) {
+            Database.DataStore.execute(dbName, query.trim());
+        });
+        
+        // Turn off iCloud backup for the database file
+        var databaseFile = Database.getFile();
+        if (databaseFile.exists()) {
+            databaseFile.remoteBackup = false;
+        }
+    },
+    
     DataStore: require('appdev/db/DataStoreSQLite')
 };

@@ -26,17 +26,7 @@ var compareVersions = module.exports.compareVersions = function(v1, v2) {
 
 // Create the necessary databases for the application
 var installDatabases = function(installData) {
-    // Run each individual semicolon-delimited query
-    var installSQL = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'install.sql').read().text;
-    installSQL.trim().match(/[^;]+/g).forEach(function(query) {
-        installData.query(query.trim());
-    });
-    
-    // Turn off iCloud backup for the database file
-    var databaseFile = AD.Database.getFile();
-    if (databaseFile.exists()) {
-        databaseFile.remoteBackup = false;
-    }
+    AD.Database.install(installData.dbName);
 };
 
 // Upgrade the database between versions
