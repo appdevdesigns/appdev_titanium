@@ -7,12 +7,18 @@ module.exports = AD.UI.StringPromptWindow('AppDev.UI.PasswordPromptWindow', {
         title: 'passwordPromptDefaultTitle',
         message: 'passwordPromptDefaultMessage',
         password: null,
+        passwordHash: null,
         verifyCallback: null,
         validateCallback: function(inputPassword) {
             var correct = false;
+            this.getChild('status').text = AD.localize('verifying')+'...';
             if (this.options.password !== null) {
                 // If the correct password was supplied, simply compare the input password to the correct password
                 correct = inputPassword === this.options.password;
+            }
+            if (this.options.passwordHash !== null) {
+                // If the correct password hash was supplied, compare the hashed input password to the correct password hash
+                correct = AD.EncryptionKey.hash(inputPassword) === this.options.passwordHash;
             }
             else if (this.options.verifyCallback) {
                 // Run verifyCallback to determine whether or not the input password was correct
