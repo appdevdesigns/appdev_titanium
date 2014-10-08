@@ -10,7 +10,7 @@
     <string name="stringPromptPasswordMessage">Please choose a secure login password at least 30 characters long to prevent unathorized access.</string>
     <string name="stringPromptPasswordLengthConstraint">Login password must be at least 30 characters long!</string>
     <string name="stringPromptPINTitle">Login PIN</string>
-    <string name="stringPromptPINMessage">Please choose a secure PIN at least 8 digits long to prevent unathorized access.</string>
+    <string name="stringPromptPINMessage">Please choose a secure PIN at least 8 digits long to prevent unauthorized access.</string>
     <string name="stringPromptPINLengthConstraint">Login password must be at least 8 digits long!</string>
     <string name="stringPromptInvalidInput">Invalid input!</string>
     
