@@ -303,7 +303,7 @@ var initialize = function(options) {
             AD.UI.$appTabGroup = new AD.UI.AppTabGroup({
                 windows: options.windows
             });
-            if (AD.Platform.isAndroid) {
+            if (AD.Platform.isAndroid && AD.EncryptionKey.encryptionActivated()) {
                 AD.UI.$appTabGroup.addEventListener('close', function() {
                     // Start the Android keepalive service
                     // It will keep the app running in the background for five minutes, giving the user
