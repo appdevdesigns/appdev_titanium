@@ -37,7 +37,7 @@ var EncryptionKey = module.exports = {
     },
     encryptionNecessary: function() {
         // Encryption is only necessary in production or if enableDevEncryption is set
-        return !AD.Defaults.development || AD.Defaults.enableDevEncryption;
+        return AD.Defaults.enableEncryption && (!AD.Defaults.development || AD.Defaults.enableDevEncryption);
     },
     encryptionActivated: function() {
         // All iOS devices are encrypted
