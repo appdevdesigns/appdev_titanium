@@ -9,6 +9,9 @@
     <string name="stringPromptPasswordTitle">登录密码</string>
     <string name="stringPromptPasswordMessage">为避免未经授权的访问，请选择安全的登录密码至少长达30个字符。</string>
     <string name="stringPromptPasswordLengthConstraint">登录密码至少长达30个字符！</string>
+    <string name="stringPromptPINTitle">登录PIN</string>
+    <string name="stringPromptPINMessage">防止未授权的访问，请选择至少8位数字长的安全PIN码。</string>
+    <string name="stringPromptPINLengthConstraint">登录密码必须至少8位数字长度！</string>
     <string name="stringPromptInvalidInput">输入无效！</string>
     
     <!-- PasswordPrompt labels -->
@@ -16,6 +19,8 @@
     <string name="passwordPromptDefaultMessage">请输入你的登陆密码</string>
     <string name="passwordPromptLoginTitle">登录</string>
     <string name="passwordPromptLoginMessage">请登陆自己的密码</string>
+    <string name="pinPromptLoginTitle">登陆</string>
+    <string name="pinPromptLoginMessage">请输入你的登录PIN</string>
     <string name="verifying">验证中</string>
     <string name="correct">正确</string>
     <string name="incorrect">错误</string>
@@ -46,6 +51,7 @@
     
     <!-- Password protection labels -->
     <string name="passwordProtectOptionalEncrypted">你的 设备似乎启用全设备加密。你仍然想用密码来保护应用吗？</string>
+    <string name="passwordProtectOptionalUnencrypted">你愿意使用密码保护应用程序吗？因为安全的关系，如果应用程序没有加密，{0}。</string>
     <string name="passwordProtectRequired">你的 设备似乎没有启用全设备加密。应用将会被密码保护。</string>
     <string name="recommendEncryption">你有全装置加密，但你的装置上未启用。建议你继续安装之前，先启用全装置加密 {0}。你如果不在装置上加密。你每次打开装置必须输入30字母的密码 {0}。你希望现在退出 {0} 并查看网上指示如何启用全装置加密？</string>
     
