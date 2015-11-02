@@ -39,7 +39,7 @@ var generateImages = function(params, callback) {
         },
         function(resolutions, callback) {
             // Create a PNG file for each resolution
-            async.each(resolutions, function(resolution, callback) {
+            async.eachLimit(resolutions, 5, function(resolution, callback) {
                 var dimensions = {
                     width: resolution.width,
                     height: resolution.height
