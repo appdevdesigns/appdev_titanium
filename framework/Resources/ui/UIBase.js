@@ -9,10 +9,10 @@ var $ = require('jquery');
 
 var UI = module.exports = {
     get screenWidth() {
-        return Ti.Platform.displayCaps.platformWidth;
+        return Ti.Platform.displayCaps.platformWidth / Ti.Platform.displayCaps.logicalDensityFactor;
     },
     get screenHeight() {
-        return Ti.Platform.displayCaps.platformHeight;
+        return Ti.Platform.displayCaps.platformHeight / Ti.Platform.displayCaps.logicalDensityFactor;
     },
     get useableScreenWidth() {
         return UI.screenWidth - UI.padding * 2;
