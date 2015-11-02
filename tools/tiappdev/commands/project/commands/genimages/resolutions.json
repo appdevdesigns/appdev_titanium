@@ -1,97 +1,183 @@
-[{
-    "width": 57,
-    "height": 57,
-    "path": "iphone/appicon.png"
-}, {
-    "width": 114,
-    "height": 114,
-    "path": "iphone/appicon@2x.png"
-}, {
-    "width": 128,
-    "height": 128,
-    "path": "android/appicon.png"
-}, {
-    "width": 72,
-    "height": 72,
-    "path": "android/images/high/ApplicationIcon.png"
-}, {
-    "width": 57,
-    "height": 57,
-    "path": "android/images/medium/ApplicationIcon.png"
-}, {
-    "width": 48,
-    "height": 48,
-    "path": "android/images/low/ApplicationIcon.png"
-}, {
-    "width": 1024,
-    "height": 1024,
-    "path": "iphone/LargeAppIcon.png"
-}, {
-    "width": 768,
-    "height": 1024,
-    "path": "iphone/Default-Portrait.png"
-}, {
-    "width": 1024,
-    "height": 768,
-    "path": "iphone/Default-Landscape.png"
-}, {
-    "width": 320,
-    "height": 480,
-    "path": "iphone/Default.png"
-}, {
+[
+  {
+    "width": 60,
+    "height": 60,
+    "path": "Resources/iphone/appicon-60.png"
+  }, {
+    "width": 120,
+    "height": 120,
+    "path": "Resources/iphone/appicon-60@2x.png"
+  }, {
+    "width": 180,
+    "height": 180,
+    "path": "Resources/iphone/appicon-60@3x.png"
+  }, {
+    "width": 76,
+    "height": 76,
+    "path": "Resources/iphone/appicon-76.png"
+  }, {
+    "width": 152,
+    "height": 152,
+    "path": "Resources/iphone/appicon-76@2x.png"
+  }, {
+    "width": 40,
+    "height": 40,
+    "path": "Resources/iphone/appicon-Small-40.png"
+  }, {
+    "width": 80,
+    "height": 80,
+    "path": "Resources/iphone/appicon-Small-40@2x.png"
+  }, {
+    "width": 120,
+    "height": 120,
+    "path": "Resources/iphone/appicon-Small-40@3x.png"
+  }, {
+    "width": 29,
+    "height": 29,
+    "path": "Resources/iphone/appicon-Small.png"
+  }, {
+    "width": 58,
+    "height": 58,
+    "path": "Resources/iphone/appicon-Small@2x.png"
+  }, {
+    "width": 87,
+    "height": 87,
+    "path": "Resources/iphone/appicon-Small@3x.png"
+  }, {
     "width": 640,
     "height": 960,
-    "path": "iphone/Default@2x.png"
-}, {
+    "path": "Resources/iphone/Default@2x.png"
+  }, {
     "width": 640,
     "height": 1136,
-    "path": "iphone/Default-568h@2x.png"
-}, {
+    "path": "Resources/iphone/Default-568h@2x.png"
+  }, {
+    "width": 750,
+    "height": 1334,
+    "path": "Resources/iphone/Default-667h@2x.png"
+  }, {
+    "width": 2208,
+    "height": 1242,
+    "path": "Resources/iphone/Default-Landscape-736h@3x.png"
+  }, {
+    "width": 1242,
+    "height": 2208,
+    "path": "Resources/iphone/Default-Portrait-736h@3x.png"
+  }, {
+    "width": 1024,
+    "height": 768,
+    "path": "Resources/iphone/Default-Landscape.png"
+  }, {
+    "width": 768,
+    "height": 1024,
+    "path": "Resources/iphone/Default-Portrait.png"
+  }, {
+    "width": 2048,
+    "height": 1536,
+    "path": "Resources/iphone/Default-Landscape@2x.png"
+  }, {
+    "width": 1536,
+    "height": 2048,
+    "path": "Resources/iphone/Default-Portrait@2x.png"
+  }, {
     "width": 512,
     "height": 512,
-    "path": "android/LargeAppIcon.png"
-}, {
+    "path": "Resources/iphone/iTunesArtwork"
+  }, {
+    "width": 1024,
+    "height": 1024,
+    "path": "Resources/iphone/iTunesArtwork@2x"
+  }, {
+    "width": 1024,
+    "height": 1024,
+    "path": "StoreAssets/ios/LargeAppIcon.png"
+  }, {
+    "width": 128,
+    "height": 128,
+    "path": "Resources/android/appicon.png"
+  }, {
+    "width": 36,
+    "height": 36,
+    "path": "platform/android/res/drawable-ldpi/appicon.png"
+  }, {
+    "width": 48,
+    "height": 48,
+    "path": "platform/android/res/drawable-mdpi/appicon.png"
+  }, {
+    "width": 72,
+    "height": 72,
+    "path": "platform/android/res/drawable-hdpi/appicon.png"
+  }, {
+    "width": 96,
+    "height": 96,
+    "path": "platform/android/res/drawable-xhdpi/appicon.png"
+  }, {
+    "width": 144,
+    "height": 144,
+    "path": "platform/android/res/drawable-xxhdpi/appicon.png"
+  }, {
+    "width": 192,
+    "height": 192,
+    "path": "platform/android/res/drawable-xxxhdpi/appicon.png"
+  }, {
     "width": 320,
     "height": 480,
-    "path": "android/default.png"
-}, {
+    "path": "Resources/android/default.png"
+  }, {
     "width": 480,
     "height": 800,
-    "path": "android/images/res-long-port-hdpi/default.png"
-}, {
+    "path": "Resources/android/images/res-long-port-hdpi/default.png"
+  }, {
     "width": 800,
     "height": 400,
-    "path": "android/images/res-long-land-hdpi/default.png"
-}, {
+    "path": "Resources/android/images/res-long-land-hdpi/default.png"
+  }, {
     "width": 480,
     "height": 800,
-    "path": "android/images/res-notlong-port-hdpi/default.png"
-}, {
+    "path": "Resources/android/images/res-notlong-port-hdpi/default.png"
+  }, {
     "width": 800,
     "height": 480,
-    "path": "android/images/res-notlong-land-hdpi/default.png"
-}, {
+    "path": "Resources/android/images/res-notlong-land-hdpi/default.png"
+  }, {
     "width": 320,
     "height": 480,
-    "path": "android/images/res-notlong-port-mdpi/default.png"
-}, {
+    "path": "Resources/android/images/res-notlong-port-mdpi/default.png"
+  }, {
     "width": 480,
     "height": 320,
-    "path": "android/images/res-notlong-land-mdpi/default.png"
-}, {
+    "path": "Resources/android/images/res-notlong-land-mdpi/default.png"
+  }, {
     "width": 240,
     "height": 400,
-    "path": "android/images/res-long-port-ldpi/default.png"
-}, {
+    "path": "Resources/android/images/res-long-port-ldpi/default.png"
+  }, {
     "width": 400,
     "height": 240,
-    "path": "android/images/res-long-land-ldpi/default.png"
-}, {
+    "path": "Resources/android/images/res-long-land-ldpi/default.png"
+  }, {
     "width": 240,
     "height": 320,
-    "path": "android/images/res-notlong-port-ldpi/default.png"
-}, {
+    "path": "Resources/android/images/res-notlong-port-ldpi/default.png"
+  }, {
     "width": 320,
     "height": 240,
-    "path": "android/images/res-notlong-land-ldpi/default.png"
-}]
+    "path": "Resources/android/images/res-notlong-land-ldpi/default.png"
+  }, {
+    "width": 512,
+    "height": 512,
+    "path": "StoreAssets/android/HiResIcon.png"
+  }, {
+    "width": 1024,
+    "height": 500,
+    "path": "StoreAssets/android/FeatureGraphic.png"
+  }, {
+    "width": 180,
+    "height": 120,
+    "path": "StoreAssets/android/PromoGraphic.png"
+  }, {
+    "width": 320,
+    "height": 180,
+    "path": "StoreAssets/android/TVBanner.png"
+  }
+]

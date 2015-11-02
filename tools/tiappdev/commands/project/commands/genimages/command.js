@@ -13,7 +13,7 @@ var generateImages = function(params, callback) {
     var svgPath = path.resolve(params.projectDir, params.svg || (params.project+'.svg'));
     
     // Calculate the output and temporary directory paths
-    var outputDir = params.projectResourcesDir;
+    var outputDir = params.projectDir;
     var tempDir = temp.mkdirSync('genimages');
     console.log('SVG file:'.label, svgPath);
     console.log('Output directory:'.label, outputDir);
@@ -72,7 +72,7 @@ var generateImages = function(params, callback) {
                 var imageRelativePath = path.join.apply(path, resolution.path.split('/'));
                 // Calculate the paths of the temporary SVG and the generated PNG files
                 var imagePathPNG = path.join(outputDir, imageRelativePath);
-                var imagePathSVG = path.join(tempDir, imageRelativePath.replace(/png$/, 'svg'));
+                var imagePathSVG = path.join(tempDir, imageRelativePath.replace(/(\.png)?$/, '.svg'));
                 console.log('generate'.green, resolution.path.info);
                 
                 async.series([
