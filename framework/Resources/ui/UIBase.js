@@ -18,6 +18,7 @@ var UI = module.exports = {
         return UI.screenWidth - UI.padding * 2;
     },
     
+    tableViewRowHeight: 40,
     buttonHeight: 40,
     textFieldHeight: 40,
     

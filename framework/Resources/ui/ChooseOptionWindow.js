@@ -217,6 +217,7 @@ module.exports = $.Window('AppDev.UI.ChooseOptionWindow', {
         }
         var row = {
             option: option,
+            height: AD.UI.tableViewRowHeight,
             hasCheck: false
         };
         if (this.Model) {

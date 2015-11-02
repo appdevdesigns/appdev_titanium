@@ -133,6 +133,7 @@ module.exports = $.Window('AppDev.UI.GoogleDriveChooseFileWindow', {
                 return {
                     title: child.title,
                     id: child.id,
+                    height: AD.UI.tableViewRowHeight,
                     hasChild: child.mimeType === 'application/vnd.google-apps.folder',
                     hasCheck: false
                 };

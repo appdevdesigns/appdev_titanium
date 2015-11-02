@@ -74,7 +74,7 @@ module.exports = $.Window('AppDev.UI.SortOrderWindow', {
             
             tableData = tableData.map(function(data, index) {
                 var row = Ti.UI.createTableViewRow({
-                    height: Ti.UI.SIZE,
+                    height: AD.UI.tableViewRowHeight,
                     field: data.field,
                     index: index
                 });
