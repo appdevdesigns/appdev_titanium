@@ -8,13 +8,13 @@
     "postinstall": "node . install"
   },
   "dependencies": {
-    "async": "^0.2.10",
-    "coa": "^0.4.0",
-    "colors": "^0.6.2",
-    "fs-extra": "^0.8.1",
-    "npm": "^1.4.4",
-    "q": "^1.0.0",
-    "underscore": "^1.6.0"
+    "async": "^1.5.0",
+    "coa": "^1.0.1",
+    "colors": "^1.1.2",
+    "fs-extra": "^0.26.0",
+    "npm": "^3.3.10",
+    "q": "^1.4.1",
+    "underscore": "^1.8.3"
   },
   "bin": {
     "tiappdev": "app.js",

@@ -1,20 +1,11 @@
-var imagemagick = null, $ = null, temp = null, xmldom = null;
-module.exports.load = function() {
-    // Load dependencies
-    imagemagick = require('imagemagick');
-    $ = require('jquery');
-    temp = require('temp');
-    xmldom = require('xmldom');
-};
-
 var generateImages = function(params, callback) {
     var path = require('path');
     // The SVG filename defaults to the project name
     var svgPath = path.resolve(params.projectDir, params.svg || (params.project+'.svg'));
     
     // Calculate the output and temporary directory paths
-    var outputDir = params.projectResourcesDir;
-    var tempDir = temp.mkdirSync('genimages');
+    var outputDir = params.projectDir;
+    var tempDir = require('temp').mkdirSync('genimages');
     console.log('SVG file:'.label, svgPath);
     console.log('Output directory:'.label, outputDir);
     
@@ -22,14 +13,11 @@ var generateImages = function(params, callback) {
     var fs = require('fs-extra');
     var svgData = fs.readFileSync(svgPath, 'utf8');
     
-    // Prepare for XML manipulation
-    var domParser = new xmldom.DOMParser();
-    var xmlSerializer = new xmldom.XMLSerializer();
-    
-    // Load the SVG document into a jQuery environment
-    var svgDoc = domParser.parseFromString(svgData, 'image/svg+xml');
-    var $root = $(svgDoc);
-    var $svg = $root.find('svg');
+    // Load the SVG XML into Cheerio for jQuery-style parsing and manipulation
+    var $root = require('cheerio').load(svgData, {
+        xmlMode: true
+    });
+    var $svg = $root('svg');
     
     // Calculate the original dimensions of the SVG image
     var originalDimensions = {
@@ -51,20 +39,7 @@ var generateImages = function(params, callback) {
         },
         function(resolutions, callback) {
             // Create a PNG file for each resolution
-            async.each(resolutions, function(resolution, callback) {
-                var dimensions = {
-                    width: resolution.width,
-                    height: resolution.height
-                };
-                
-                // Calculate the transform for the foreground element
-                var scaleX = dimensions.width / originalDimensions.width;
-                var scaleY = dimensions.height / originalDimensions.height;
-                var scale = Math.min(scaleX, scaleY);
-                var translate = Math.abs(dimensions.width - dimensions.height) / 2;
-                var translateVector = { x: 0, y: 0 };
-                translateVector[scaleX > scaleY ? 'x' : 'y'] = translate;
-                
+            async.eachLimit(resolutions, 5, function(resolution, callback) {
                 // Split the relative path into the directory components, then feed
                 // that into path.join to get the platform-specific image relative path
                 // On Windows, for example, this will transform
@@ -72,7 +47,7 @@ var generateImages = function(params, callback) {
                 var imageRelativePath = path.join.apply(path, resolution.path.split('/'));
                 // Calculate the paths of the temporary SVG and the generated PNG files
                 var imagePathPNG = path.join(outputDir, imageRelativePath);
-                var imagePathSVG = path.join(tempDir, imageRelativePath.replace(/png$/, 'svg'));
+                var imagePathSVG = path.join(tempDir, imageRelativePath.replace(/(\.png)?$/, '.svg'));
                 console.log('generate'.green, resolution.path.info);
                 
                 async.series([
@@ -83,19 +58,30 @@ var generateImages = function(params, callback) {
                         }, callback);
                     },
                     function(callback) {
-                        // Manipulate the elements as necessary
+                        // Calculate the transform for the foreground element
+                        var scaleX = resolution.width / originalDimensions.width;
+                        var scaleY = resolution.height / originalDimensions.height;
+                        var scale = Math.min(scaleX, scaleY);
+                        var translate = Math.abs(resolution.width - resolution.height) / 2;
+                        var translateVector = { x: 0, y: 0 };
+                        translateVector[scaleX > scaleY ? 'x' : 'y'] = translate;
+                        
+                        // Manipulate the SVG XML elements as necessary
                         var util = require('util');
-                        $svg.attr(dimensions);
+                        $svg.attr({
+                            width: resolution.width,
+                            height: resolution.height
+                        });
                         $svg.find('g[id=background]').attr('transform', util.format('scale(%d,%d)', scaleX, scaleY));
                         $svg.find('g[id=foreground]').attr('transform', util.format('translate(%d,%d)scale(%d,%d)', translateVector.x, translateVector.y, scale, scale));
                         
                         // Write out the modified SVG data
-                        var svgData = xmlSerializer.serializeToString($svg[0]);
-                        fs.writeFile(imagePathSVG, svgData, callback);
+                        var svgContent = $root.xml();
+                        fs.writeFile(imagePathSVG, svgContent, callback);
                     },
                     function(callback) {
-                        // Render the SVG as a PNG file via ImageMagick
-                        imagemagick.convert([imagePathSVG, imagePathPNG], callback);
+                        // Render the SVG as a PNG file via svg2png (which uses PhantomJS)
+                        require('svg2png')(imagePathSVG, imagePathPNG, callback);
                     }
                 ], callback);
             }, callback);
