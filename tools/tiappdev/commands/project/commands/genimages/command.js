@@ -1,10 +1,3 @@
-var imagemagick = null, temp = null;
-module.exports.load = function() {
-    // Load dependencies
-    imagemagick = require('imagemagick');
-    temp = require('temp');
-};
-
 var generateImages = function(params, callback) {
     var path = require('path');
     // The SVG filename defaults to the project name
@@ -12,7 +5,7 @@ var generateImages = function(params, callback) {
     
     // Calculate the output and temporary directory paths
     var outputDir = params.projectDir;
-    var tempDir = temp.mkdirSync('genimages');
+    var tempDir = require('temp').mkdirSync('genimages');
     console.log('SVG file:'.label, svgPath);
     console.log('Output directory:'.label, outputDir);
     
@@ -89,8 +82,8 @@ var generateImages = function(params, callback) {
                         fs.writeFile(imagePathSVG, svgContent, callback);
                     },
                     function(callback) {
-                        // Render the SVG as a PNG file via ImageMagick
-                        imagemagick.convert([imagePathSVG, imagePathPNG], callback);
+                        // Render the SVG as a PNG file via svg2png (which uses PhantomJS)
+                        require('svg2png')(imagePathSVG, imagePathPNG, callback);
                     }
                 ], callback);
             }, callback);
