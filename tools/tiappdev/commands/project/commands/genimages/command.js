@@ -40,19 +40,6 @@ var generateImages = function(params, callback) {
         function(resolutions, callback) {
             // Create a PNG file for each resolution
             async.eachLimit(resolutions, 5, function(resolution, callback) {
-                var dimensions = {
-                    width: resolution.width,
-                    height: resolution.height
-                };
-                
-                // Calculate the transform for the foreground element
-                var scaleX = dimensions.width / originalDimensions.width;
-                var scaleY = dimensions.height / originalDimensions.height;
-                var scale = Math.min(scaleX, scaleY);
-                var translate = Math.abs(dimensions.width - dimensions.height) / 2;
-                var translateVector = { x: 0, y: 0 };
-                translateVector[scaleX > scaleY ? 'x' : 'y'] = translate;
-                
                 // Split the relative path into the directory components, then feed
                 // that into path.join to get the platform-specific image relative path
                 // On Windows, for example, this will transform
@@ -71,9 +58,20 @@ var generateImages = function(params, callback) {
                         }, callback);
                     },
                     function(callback) {
-                        // Manipulate the elements as necessary
+                        // Calculate the transform for the foreground element
+                        var scaleX = resolution.width / originalDimensions.width;
+                        var scaleY = resolution.height / originalDimensions.height;
+                        var scale = Math.min(scaleX, scaleY);
+                        var translate = Math.abs(resolution.width - resolution.height) / 2;
+                        var translateVector = { x: 0, y: 0 };
+                        translateVector[scaleX > scaleY ? 'x' : 'y'] = translate;
+                        
+                        // Manipulate the SVG XML elements as necessary
                         var util = require('util');
-                        $svg.attr(dimensions);
+                        $svg.attr({
+                            width: resolution.width,
+                            height: resolution.height
+                        });
                         $svg.find('g[id=background]').attr('transform', util.format('scale(%d,%d)', scaleX, scaleY));
                         $svg.find('g[id=foreground]').attr('transform', util.format('translate(%d,%d)scale(%d,%d)', translateVector.x, translateVector.y, scale, scale));
                         
