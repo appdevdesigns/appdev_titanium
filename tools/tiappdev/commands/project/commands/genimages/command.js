@@ -1,10 +1,8 @@
-var imagemagick = null, $ = null, temp = null, xmldom = null;
+var imagemagick = null, temp = null;
 module.exports.load = function() {
     // Load dependencies
     imagemagick = require('imagemagick');
-    $ = require('jquery');
     temp = require('temp');
-    xmldom = require('xmldom');
 };
 
 var generateImages = function(params, callback) {
@@ -22,14 +20,11 @@ var generateImages = function(params, callback) {
     var fs = require('fs-extra');
     var svgData = fs.readFileSync(svgPath, 'utf8');
     
-    // Prepare for XML manipulation
-    var domParser = new xmldom.DOMParser();
-    var xmlSerializer = new xmldom.XMLSerializer();
-    
-    // Load the SVG document into a jQuery environment
-    var svgDoc = domParser.parseFromString(svgData, 'image/svg+xml');
-    var $root = $(svgDoc);
-    var $svg = $root.find('svg');
+    // Load the SVG XML into Cheerio for jQuery-style parsing and manipulation
+    var $root = require('cheerio').load(svgData, {
+        xmlMode: true
+    });
+    var $svg = $root('svg');
     
     // Calculate the original dimensions of the SVG image
     var originalDimensions = {
@@ -90,8 +85,8 @@ var generateImages = function(params, callback) {
                         $svg.find('g[id=foreground]').attr('transform', util.format('translate(%d,%d)scale(%d,%d)', translateVector.x, translateVector.y, scale, scale));
                         
                         // Write out the modified SVG data
-                        var svgData = xmlSerializer.serializeToString($svg[0]);
-                        fs.writeFile(imagePathSVG, svgData, callback);
+                        var svgContent = $root.xml();
+                        fs.writeFile(imagePathSVG, svgContent, callback);
                     },
                     function(callback) {
                         // Render the SVG as a PNG file via ImageMagick
