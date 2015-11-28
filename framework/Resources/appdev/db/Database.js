@@ -1,24 +1,24 @@
 var $ = require('jquery');
 var AD = require('AppDev');
 
-var dmarieModulePath = 'appdev/db/dmarieDB-'+(Ti.Platform.osname);
-var dmarieDB = require(dmarieModulePath);
+var EncryptedDatabase = require('appcelerator.encrypteddatabase');
 
 var Database = module.exports = {
     // Return the file on the filesystem that represents the database
     getFile: function() {
-        var directoryPath = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory).resolve();
-        if (AD.Platform.isiOS && !AD.EncryptionKey.encryptionActivated()) {
-            // Unencrypted databases are stored in Library/Private Documents on iOS
-            directoryPath = Ti.Filesystem.getFile(directoryPath, '..', 'Library', 'Private Documents').resolve();
-        }
-        return Ti.Filesystem.getFile(directoryPath, AD.Defaults.dbName+'.sql');
+        return this.open(AD.Defaults.dbName).file;
     },
     
     open: function(dbName) {
-        // Open the encrypted database
-        var dbFile = dbName+'.sql';
-        var db = AD.EncryptionKey.encryptionActivated() ? dmarieDB.openDB(dbFile, AD.EncryptionKey.get()) : Ti.Database.open(AD.Platform.isAndroid ? dbFile : dbName);
+        // Open the database
+        var db = null;
+        if (AD.EncryptionKey.encryptionActivated()) {
+            EncryptedDatabase.password = AD.EncryptionKey.get();
+            db = EncryptedDatabase.open(dbName);
+        }
+        else {
+            db = Ti.Database.open(dbName);
+        }
         
         // Automatically enable foreign key support, which is disabled by default
         db.execute('PRAGMA foreign_keys = ON');

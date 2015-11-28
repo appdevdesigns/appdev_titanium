@@ -147,11 +147,8 @@ module.exports = $.Class('AD.DataStore.SQLite', {
     
     // Execute a raw database query
     rawExecute: function(dbName, query) {
-        // Use select to query encrypted databases on Android, because otherwise, the SQL Encryption
-        // module may not return a result set, especially when executing PRAGMA queries
-        var command = query.split(' ')[0].toUpperCase();
         var database = this.openDatabase(dbName);
-        return (AD.Platform.isAndroid && AD.EncryptionKey.encryptionActivated() && (command === 'SELECT' || command === 'PRAGMA')) ? database.select(query) : database.execute(query);
+        return database.execute(query);
     },
     
     // Execute the specified SQLite query
