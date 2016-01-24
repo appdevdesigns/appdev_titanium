@@ -8,11 +8,12 @@ var AD = require('AppDev');
 var $ = require('jquery');
 
 var UI = module.exports = {
+    // Convert pixels to dips on Android
     get screenWidth() {
-        return Ti.Platform.displayCaps.platformWidth / Ti.Platform.displayCaps.logicalDensityFactor;
+        return Ti.Platform.displayCaps.platformWidth / (AD.Platform.isAndroid ? Ti.Platform.displayCaps.logicalDensityFactor : 1);
     },
     get screenHeight() {
-        return Ti.Platform.displayCaps.platformHeight / Ti.Platform.displayCaps.logicalDensityFactor;
+        return Ti.Platform.displayCaps.platformHeight / (AD.Platform.isAndroid ? Ti.Platform.displayCaps.logicalDensityFactor : 1);
     },
     get useableScreenWidth() {
         return UI.screenWidth - UI.padding * 2;
@@ -49,12 +50,6 @@ var UI = module.exports = {
         });
     }
 };
-
-if (AD.Platform.isAndroid) {
-    // Convert pixels to dips on Android
-    UI.screenWidth /= Ti.Platform.displayCaps.logicalDensityFactor;
-    UI.screenHeight /= Ti.Platform.displayCaps.logicalDensityFactor;
-}
 
 // Log display info for debugging purposes
 console.log('Display info:');
