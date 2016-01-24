@@ -4,11 +4,6 @@ var AD = require('AppDev');
 var EncryptedDatabase = require('appcelerator.encrypteddatabase');
 
 var Database = module.exports = {
-    // Return the file on the filesystem that represents the database
-    getFile: function() {
-        return this.open(AD.Defaults.dbName).file;
-    },
-    
     open: function(dbName) {
         // Open the database
         var db = null;
@@ -91,8 +86,8 @@ var Database = module.exports = {
         });
         
         // Turn off iCloud backup for the database file
-        var databaseFile = Database.getFile();
-        if (databaseFile.exists()) {
+        var databaseFile = Database.open(dbName).file;
+        if (databaseFile && databaseFile.exists()) {
             databaseFile.remoteBackup = false;
         }
     },
