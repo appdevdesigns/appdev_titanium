@@ -22,6 +22,7 @@ module.exports = {
         var boundary = 'boundary';
         var delimiter = '\r\n--' + boundary + '\r\n';
         var closeDelimiter = '\r\n--' + boundary + '--';
+        var contentType = fileData.metadata.mimeType || 'application/octet-stream';
         
         var base64Data = AD.Base64.encode(fileData.content);
         var multipartRequestBody =
@@ -29,7 +30,7 @@ module.exports = {
             'Content-Type: application/json\r\n\r\n' +
             JSON.stringify(fileData.metadata) +
             delimiter +
-            'Content-Type: application/octet-stream\r\n' +
+            'Content-Type: ' + contentType + '\r\n' +
             'Content-Transfer-Encoding: base64\r\n' +
             '\r\n' +
             base64Data +
